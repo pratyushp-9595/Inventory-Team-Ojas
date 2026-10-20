@@ -12,8 +12,8 @@ const SITE_CONFIG = {
   // Usernames are case-insensitive; passwords are case-sensitive.
   users: {
     "admin":   "Admin@123",
-    "ojas":    "Ojas@2024",
-    "Pratyush":    "Pratyush@123",
+    "jacob":    "jacob@2024",
+    "pratyush":    "pratyush@2025",
     // Add more users below:
     // "john":  "John#Pass1",
   },
