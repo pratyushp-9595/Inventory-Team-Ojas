@@ -5,8 +5,8 @@
 // https://supabase.com -> Project Settings -> API
 // ============================================================
 
-const SUPABASE_URL = "https://YOUR_PROJECT_REF.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const SUPABASE_URL = "https://rkrtrtmexldflciincdwi.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Hhz7VOya_tYQ51Bq2fYmGA_YYcMVopB";
 
 let supabaseClient = null;
 let isSupabaseConfigured = false;
