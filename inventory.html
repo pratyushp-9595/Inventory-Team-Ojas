@@ -7,11 +7,9 @@
   <script src="config.js"></script>
   <link rel="stylesheet" href="shared.css" />
 
-  <!-- Firebase SDKs (compat) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-  <script src="firebase-config.js"></script>
+  <!-- Supabase JS SDK (v2) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
 
   <style>
 
@@ -857,7 +855,7 @@
 <div class="page-hero">
   <span class="page-hero-tag">Module 01</span>
   <h2>Inventory</h2>
-  <p>Manage parts, components, and materials — backed by Firebase.</p>
+  <p>Manage parts, components, and materials — backed by Supabase.</p>
   <div id="db-status-banner" style="margin-top:0.8rem; padding:0.5rem 0.9rem; border-radius:6px; font-size:0.75rem; display:inline-flex; align-items:center; gap:0.5rem; background:rgba(160,136,64,0.1); border:1px solid rgba(160,136,64,0.3); color:#c8a84a;">
     <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#c8a84a;"></span>
     <span id="db-status-text">Checking Database connection...</span>
@@ -964,6 +962,12 @@
         </div>
       </label>
       <input type="file" id="f-img-input" accept="image/*" onchange="previewImg(this)" />
+      
+      <!-- Compression Status Badge -->
+      <div class="img-compress-info" id="img-compress-info" style="display:none; font-size:0.7rem; padding:0.45rem 0.65rem; border-radius:7px; background:#0e131d; border:1px solid #1f2738; color:#7dd3fc; line-height:1.4; text-align:center;">
+        <span id="img-compress-text">⚡ Auto-compressed to &lt; 150KB</span>
+      </div>
+
       <button class="img-clear-btn" id="img-clear-btn" type="button" onclick="clearImg()">
         Remove Image
       </button>
@@ -1240,34 +1244,34 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  /* ── Firebase & Local Fallback Handlers ─────────────────── */
+  /* ── Supabase & Local Fallback Handlers ──────────────────── */
   function updateDbBanner() {
     const banner = document.getElementById('db-status-banner');
     const text   = document.getElementById('db-status-text');
     if (!banner || !text) return;
 
-    if (typeof isFirebaseConfigured !== 'undefined' && isFirebaseConfigured && db) {
+    if (typeof isSupabaseConfigured !== 'undefined' && isSupabaseConfigured && supabaseClient) {
       banner.style.background = 'rgba(74,124,89,0.12)';
       banner.style.borderColor = 'rgba(74,124,89,0.35)';
       banner.style.color = '#4a7c59';
       banner.firstElementChild.style.background = '#4a7c59';
-      text.textContent = 'Connected to Firebase Firestore & Storage';
+      text.textContent = 'Connected to Supabase PostgreSQL & Storage';
     } else {
       banner.style.background = 'rgba(160,136,64,0.12)';
       banner.style.borderColor = 'rgba(160,136,64,0.35)';
       banner.style.color = '#c8a84a';
       banner.firstElementChild.style.background = '#c8a84a';
-      text.innerHTML = 'Running in <strong>Local Storage Mode</strong> (Firebase not configured in firebase-config.js). Everything saves locally!';
+      text.innerHTML = 'Running in <strong>Local Storage Mode</strong> (Supabase not configured in supabase-config.js). Everything saves locally!';
     }
   }
 
   /* ── Local Storage Helpers ──────────────────────────────── */
   function loadLocalData() {
     try {
-      cachedItems        = JSON.parse(localStorage.getItem('ojas_fb_items') || '[]');
-      cachedSubsystems   = JSON.parse(localStorage.getItem('ojas_fb_subsystems') || '{}');
-      cachedLocations    = JSON.parse(localStorage.getItem('ojas_fb_locations') || '[]');
-      cachedSublocations = JSON.parse(localStorage.getItem('ojas_fb_sublocations') || '{}');
+      cachedItems        = JSON.parse(localStorage.getItem('ojas_items') || localStorage.getItem('ojas_fb_items') || '[]');
+      cachedSubsystems   = JSON.parse(localStorage.getItem('ojas_subsystems') || localStorage.getItem('ojas_fb_subsystems') || '{}');
+      cachedLocations    = JSON.parse(localStorage.getItem('ojas_locations') || localStorage.getItem('ojas_fb_locations') || '[]');
+      cachedSublocations = JSON.parse(localStorage.getItem('ojas_sublocations') || localStorage.getItem('ojas_fb_sublocations') || '{}');
     } catch(e) {
       console.error(e);
     }
@@ -1281,86 +1285,256 @@
   }
 
   function saveLocalItems() {
-    localStorage.setItem('ojas_fb_items', JSON.stringify(cachedItems));
+    localStorage.setItem('ojas_items', JSON.stringify(cachedItems));
   }
   function saveLocalSubsystems() {
-    localStorage.setItem('ojas_fb_subsystems', JSON.stringify(cachedSubsystems));
+    localStorage.setItem('ojas_subsystems', JSON.stringify(cachedSubsystems));
   }
   function saveLocalLocations() {
-    localStorage.setItem('ojas_fb_locations', JSON.stringify(cachedLocations));
+    localStorage.setItem('ojas_locations', JSON.stringify(cachedLocations));
   }
   function saveLocalSublocations() {
-    localStorage.setItem('ojas_fb_sublocations', JSON.stringify(cachedSublocations));
+    localStorage.setItem('ojas_sublocations', JSON.stringify(cachedSublocations));
   }
 
-  /* ── Start Listeners / Storage Loader ────────────────────── */
+  /* ── Supabase Fetchers ───────────────────────────────────── */
+  async function fetchItems() {
+    if (!isSupabaseConfigured || !supabaseClient) return;
+    try {
+      const { data, error } = await supabaseClient
+        .from('items')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data) {
+        cachedItems = data.map(item => ({
+          ...item,
+          imageUrl: item.image_url || item.imageUrl || '',
+          createdAt: item.created_at || item.createdAt || '',
+          createdBy: item.created_by || item.createdBy || '',
+          updatedAt: item.updated_at || item.updatedAt || ''
+        }));
+        renderInventory();
+      }
+    } catch (err) {
+      console.warn('Supabase fetch items error:', err);
+      toast('Supabase error: ' + err.message, 'err');
+    }
+  }
+
+  async function fetchSubsystems() {
+    if (!isSupabaseConfigured || !supabaseClient) return;
+    try {
+      const { data, error } = await supabaseClient
+        .from('subsystems')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      if (data) {
+        cachedSubsystems = {};
+        data.forEach(d => {
+          if (!cachedSubsystems[d.system]) cachedSubsystems[d.system] = [];
+          cachedSubsystems[d.system].push({ id: d.id, name: d.name });
+        });
+        refreshSubsystemDropdowns();
+        renderSubsystemList();
+      }
+    } catch (err) {
+      console.error('Supabase fetch subsystems error:', err);
+    }
+  }
+
+  async function fetchLocations() {
+    if (!isSupabaseConfigured || !supabaseClient) return;
+    try {
+      const { data, error } = await supabaseClient
+        .from('locations')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      if (data) {
+        cachedLocations = data.map(l => ({ id: l.id, name: l.name }));
+        refreshLocationDropdown();
+        renderLocationList();
+      }
+    } catch (err) {
+      console.error('Supabase fetch locations error:', err);
+    }
+  }
+
+  async function fetchSublocations() {
+    if (!isSupabaseConfigured || !supabaseClient) return;
+    try {
+      const { data, error } = await supabaseClient
+        .from('sublocations')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      if (data) {
+        cachedSublocations = {};
+        data.forEach(sl => {
+          if (!cachedSublocations[sl.location]) cachedSublocations[sl.location] = [];
+          cachedSublocations[sl.location].push({ id: sl.id, name: sl.name });
+        });
+        refreshSublocationDropdowns();
+        renderSublocationList();
+      }
+    } catch (err) {
+      console.error('Supabase fetch sublocations error:', err);
+    }
+  }
+
+  /* ── Start Listeners / Supabase Realtime Loader ──────────── */
+  let supabaseChannel = null;
+
   function startListeners() {
     updateDbBanner();
 
-    if (!isFirebaseConfigured || !db) {
+    if (!isSupabaseConfigured || !supabaseClient) {
       loadLocalData();
       return;
     }
 
+    // Initial load from Supabase
+    fetchItems();
+    fetchSubsystems();
+    fetchLocations();
+    fetchSublocations();
+
+    // Setup Supabase Realtime subscriptions
     try {
-      // Items — ordered newest first
-      db.collection('items').orderBy('createdAt', 'desc')
-        .onSnapshot(snap => {
-          cachedItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          renderInventory();
-        }, err => {
-          console.warn('Firestore items listener error, falling back to local:', err);
-          toast('Firestore error: ' + err.message + ' (using local data)', 'err');
-          loadLocalData();
+      if (supabaseChannel) {
+        supabaseClient.removeChannel(supabaseChannel);
+      }
+      supabaseChannel = supabaseClient.channel('ojas-realtime-channel')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, () => fetchItems())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'subsystems' }, () => fetchSubsystems())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'locations' }, () => fetchLocations())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'sublocations' }, () => fetchSublocations())
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('Supabase Realtime connected successfully.');
+          }
         });
-
-      // Subsystems
-      db.collection('subsystems')
-        .onSnapshot(snap => {
-          cachedSubsystems = {};
-          snap.docs.forEach(d => {
-            const { system, name } = d.data();
-            if (!cachedSubsystems[system]) cachedSubsystems[system] = [];
-            cachedSubsystems[system].push({ id: d.id, name });
-          });
-          refreshSubsystemDropdowns();
-          renderSubsystemList();
-        }, err => console.error('subsystems error:', err));
-
-      // Locations
-      db.collection('locations').orderBy('name')
-        .onSnapshot(snap => {
-          cachedLocations = snap.docs.map(d => ({ id: d.id, name: d.data().name }));
-          refreshLocationDropdown();
-          renderLocationList();
-        }, err => console.error('locations error:', err));
-
-      // Sublocations
-      db.collection('sublocations')
-        .onSnapshot(snap => {
-          cachedSublocations = {};
-          snap.docs.forEach(d => {
-            const { location, name } = d.data();
-            if (!cachedSublocations[location]) cachedSublocations[location] = [];
-            cachedSublocations[location].push({ id: d.id, name });
-          });
-          refreshSublocationDropdowns();
-          renderSublocationList();
-        }, err => console.error('sublocations error:', err));
     } catch (err) {
-      console.error('Firebase setup failed, falling back:', err);
-      loadLocalData();
+      console.warn('Realtime subscription issue:', err);
     }
   }
 
-  /* ── Image upload / preview ────────────────────────────── */
-  function previewImg(input) {
-    pendingImgFile = input.files[0] || null;
+  /* ── JavaScript Image Compressor (< 150KB) ──────────────── */
+  function formatBytes(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  }
+
+  async function compressImageToMax150KB(file) {
+    const MAX_BYTES = 150 * 1024; // 153,600 bytes strictly
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Failed to read image file'));
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('Invalid image format'));
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          const MAX_DIM = 1600;
+
+          // Scale down initial dimensions if giant photo
+          if (width > MAX_DIM || height > MAX_DIM) {
+            if (width > height) {
+              height = Math.round((height * MAX_DIM) / width);
+              width = MAX_DIM;
+            } else {
+              width = Math.round((width * MAX_DIM) / height);
+              height = MAX_DIM;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          let quality = 0.86;
+          let attempts = 0;
+
+          function stepCompress() {
+            attempts++;
+            canvas.width = Math.max(1, Math.round(width));
+            canvas.height = Math.max(1, Math.round(height));
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob((blob) => {
+              if (!blob) {
+                reject(new Error('Canvas compression failed'));
+                return;
+              }
+
+              // Check if under 150KB or reached lower bounds
+              if (blob.size <= MAX_BYTES || (quality <= 0.25 && width <= 320) || attempts > 12) {
+                const cleanName = (file.name || 'item_photo').replace(/\.[^/.]+$/, "") + ".jpg";
+                const compressedFile = new File([blob], cleanName, { type: 'image/jpeg' });
+                resolve({
+                  file: compressedFile,
+                  originalSize: file.size,
+                  compressedSize: blob.size,
+                  dataUrl: canvas.toDataURL('image/jpeg', quality)
+                });
+              } else {
+                if (quality > 0.45) {
+                  quality -= 0.12;
+                } else {
+                  // Step down pixel dimensions by 18% to bring payload under 150KB
+                  width *= 0.82;
+                  height *= 0.82;
+                  quality = 0.55;
+                }
+                stepCompress();
+              }
+            }, 'image/jpeg', quality);
+          }
+
+          stepCompress();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /* ── Image upload / preview with compressor ─────────────── */
+  async function previewImg(input) {
+    const rawFile  = input.files[0] || null;
     const preview  = document.getElementById('img-preview');
     const hint     = document.getElementById('img-hint');
     const clearBtn = document.getElementById('img-clear-btn');
+    const badge    = document.getElementById('img-compress-info');
 
-    if (pendingImgFile) {
+    if (!rawFile) return;
+
+    if (badge) {
+      badge.style.display = 'block';
+      badge.textContent = `Optimizing image under 150KB... (${formatBytes(rawFile.size)})`;
+    }
+
+    try {
+      const result = await compressImageToMax150KB(rawFile);
+      pendingImgFile = result.file;
+
+      preview.src           = result.dataUrl;
+      preview.style.display = 'block';
+      hint.style.display    = 'none';
+      clearBtn.style.display = 'block';
+
+      if (badge) {
+        badge.innerHTML = `&#10003; Resized: <strong>${formatBytes(result.originalSize)}</strong> &rarr; <strong>${formatBytes(result.compressedSize)}</strong> (< 150KB target met)`;
+      }
+    } catch (err) {
+      console.error(err);
+      toast('Compression warning: ' + err.message, 'err');
+      // Fallback to raw file if compression fails
+      pendingImgFile = rawFile;
       const reader = new FileReader();
       reader.onload = e => {
         preview.src           = e.target.result;
@@ -1368,7 +1542,7 @@
         hint.style.display    = 'none';
         clearBtn.style.display = 'block';
       };
-      reader.readAsDataURL(pendingImgFile);
+      reader.readAsDataURL(rawFile);
     }
   }
 
@@ -1377,15 +1551,20 @@
     const preview  = document.getElementById('img-preview');
     const hint     = document.getElementById('img-hint');
     const clearBtn = document.getElementById('img-clear-btn');
+    const badge    = document.getElementById('img-compress-info');
     preview.src           = '';
     preview.style.display = 'none';
     hint.style.display    = 'flex';
     clearBtn.style.display = 'none';
+    if (badge) {
+      badge.style.display = 'none';
+      badge.textContent = '';
+    }
     document.getElementById('f-img-input').value = '';
   }
 
   async function uploadImg(file) {
-    if (!isFirebaseConfigured || !storage) {
+    if (!isSupabaseConfigured || !supabaseClient) {
       // In local mode, return base64 data url directly
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -1394,24 +1573,37 @@
       });
     }
 
-    return new Promise((resolve, reject) => {
-      const overlay = document.getElementById('upload-overlay');
-      const fill    = document.getElementById('upload-fill');
-      overlay.classList.add('on');
+    const overlay = document.getElementById('upload-overlay');
+    const fill    = document.getElementById('upload-fill');
+    overlay.classList.add('on');
+    fill.style.width = '45%';
 
-      const ref  = storage.ref(`item-images/${Date.now()}_${file.name}`);
-      const task = ref.put(file);
+    try {
+      const ext = 'jpg';
+      const cleanName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${ext}`;
+      const filePath  = `parts/${cleanName}`;
 
-      task.on('state_changed',
-        snap => { fill.style.width = (snap.bytesTransferred / snap.totalBytes * 100) + '%'; },
-        err  => { overlay.classList.remove('on'); fill.style.width = '0%'; reject(err); },
-        async () => {
-          overlay.classList.remove('on');
-          fill.style.width = '0%';
-          resolve(await task.snapshot.ref.getDownloadURL());
-        }
-      );
-    });
+      const { data, error } = await supabaseClient.storage
+        .from('item-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: file.type || 'image/jpeg'
+        });
+
+      if (error) throw error;
+
+      fill.style.width = '90%';
+      const { data: publicData } = supabaseClient.storage
+        .from('item-images')
+        .getPublicUrl(filePath);
+
+      fill.style.width = '100%';
+      return publicData.publicUrl;
+    } finally {
+      overlay.classList.remove('on');
+      fill.style.width = '0%';
+    }
   }
 
   /* ── Form: system change → rebuild subsystem select ─────── */
@@ -1456,32 +1648,54 @@
       // Resolve image URL
       let imageUrl = '';
       if (currentEditId) {
-        imageUrl = cachedItems.find(i => i.id === currentEditId)?.imageUrl || '';
+        const existing = cachedItems.find(i => i.id === currentEditId);
+        imageUrl = existing?.imageUrl || existing?.image_url || '';
       }
       if (pendingImgFile) {
         imageUrl = await uploadImg(pendingImgFile);
       }
 
-      const payload = {
-        name, system, subsystem: sub, status,
-        quantity: qty, location: loc, sublocation: subloc,
-        condition: cond, notes, imageUrl,
-        updatedAt: new Date().toISOString()
-      };
+      const nowIso = new Date().toISOString();
 
-      if (isFirebaseConfigured && db) {
-        payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+      if (isSupabaseConfigured && supabaseClient) {
         if (currentEditId) {
-          await db.collection('items').doc(currentEditId).update(payload);
-          toast('Part updated in Firebase.', 'ok');
+          const updatePayload = {
+            name, system, subsystem: sub, status,
+            quantity: qty, location: loc, sublocation: subloc,
+            condition: cond, notes, image_url: imageUrl,
+            updated_at: nowIso
+          };
+          const { error } = await supabaseClient
+            .from('items')
+            .update(updatePayload)
+            .eq('id', currentEditId);
+          if (error) throw error;
+          toast('Part updated in Supabase.', 'ok');
+          await fetchItems();
         } else {
-          payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-          payload.createdBy = loggedUser;
-          await db.collection('items').add(payload);
-          toast('Part added to Firebase inventory.', 'ok');
+          const insertPayload = {
+            name, system, subsystem: sub, status,
+            quantity: qty, location: loc, sublocation: subloc,
+            condition: cond, notes, image_url: imageUrl,
+            created_by: loggedUser,
+            created_at: nowIso,
+            updated_at: nowIso
+          };
+          const { error } = await supabaseClient
+            .from('items')
+            .insert([insertPayload]);
+          if (error) throw error;
+          toast('Part added to Supabase inventory.', 'ok');
+          await fetchItems();
         }
       } else {
         // Fallback: Local Storage
+        const payload = {
+          name, system, subsystem: sub, status,
+          quantity: qty, location: loc, sublocation: subloc,
+          condition: cond, notes, imageUrl, image_url: imageUrl,
+          updatedAt: nowIso, updated_at: nowIso
+        };
         if (currentEditId) {
           const idx = cachedItems.findIndex(i => i.id === currentEditId);
           if (idx !== -1) {
@@ -1490,8 +1704,10 @@
           toast('Part updated locally.', 'ok');
         } else {
           payload.id = 'local_' + Date.now();
-          payload.createdAt = new Date().toISOString();
+          payload.createdAt = nowIso;
+          payload.created_at = nowIso;
           payload.createdBy = loggedUser;
+          payload.created_by = loggedUser;
           cachedItems.unshift(payload);
           toast('Part saved to local inventory.', 'ok');
         }
@@ -1514,9 +1730,14 @@
     if (!currentEditId) return;
     if (!confirm('Permanently delete this part from inventory?')) return;
     try {
-      if (isFirebaseConfigured && db) {
-        await db.collection('items').doc(currentEditId).delete();
-        toast('Part deleted from Firebase.', 'ok');
+      if (isSupabaseConfigured && supabaseClient) {
+        const { error } = await supabaseClient
+          .from('items')
+          .delete()
+          .eq('id', currentEditId);
+        if (error) throw error;
+        toast('Part deleted from Supabase.', 'ok');
+        await fetchItems();
       } else {
         cachedItems = cachedItems.filter(i => i.id !== currentEditId);
         saveLocalItems();
@@ -1572,9 +1793,10 @@
     document.getElementById('f-condition').value = item.condition || '';
     document.getElementById('f-notes').value     = item.notes     || '';
 
-    if (item.imageUrl) {
+    const imgDisplay = item.imageUrl || item.image_url;
+    if (imgDisplay) {
       const preview = document.getElementById('img-preview');
-      preview.src           = item.imageUrl;
+      preview.src           = imgDisplay;
       preview.style.display = 'block';
       document.getElementById('img-hint').style.display = 'none';
       document.getElementById('img-clear-btn').style.display = 'block';
@@ -1644,10 +1866,12 @@
         card.style.animationDelay = `${Math.min(i, 20) * 0.03}s`;
         card.onclick = () => openEdit(item);
 
+        const cardImg = item.imageUrl || item.image_url;
+
         card.innerHTML = `
           <div class="item-img-wrap">
-            ${item.imageUrl
-              ? `<img src="${x(item.imageUrl)}" alt="${x(item.name)}" />`
+            ${cardImg
+              ? `<img src="${x(cardImg)}" alt="${x(item.name)}" />`
               : `<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
                    <rect x="3" y="3" width="18" height="18" rx="2"/>
                    <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -1786,9 +2010,13 @@
     }
 
     try {
-      if (isFirebaseConfigured && db) {
-        await db.collection('subsystems').add({ system: code, name });
-        toast('Subsystem added to Firebase.', 'ok');
+      if (isSupabaseConfigured && supabaseClient) {
+        const { error } = await supabaseClient
+          .from('subsystems')
+          .insert([{ system: code, name }]);
+        if (error) throw error;
+        toast('Subsystem added to Supabase.', 'ok');
+        await fetchSubsystems();
       } else {
         if (!cachedSubsystems[code]) cachedSubsystems[code] = [];
         cachedSubsystems[code].push({ id: 'local_sub_' + Date.now(), name });
@@ -1804,9 +2032,14 @@
   async function deleteSubsystem(id) {
     if (!confirm('Remove this subsystem?')) return;
     try {
-      if (isFirebaseConfigured && db) {
-        await db.collection('subsystems').doc(id).delete();
-        toast('Subsystem removed from Firebase.', 'ok');
+      if (isSupabaseConfigured && supabaseClient) {
+        const { error } = await supabaseClient
+          .from('subsystems')
+          .delete()
+          .eq('id', id);
+        if (error) throw error;
+        toast('Subsystem removed from Supabase.', 'ok');
+        await fetchSubsystems();
       } else {
         const code = document.getElementById('mgmt-sys').value;
         if (code && cachedSubsystems[code]) {
@@ -1850,9 +2083,13 @@
       toast('Location already exists.', 'err'); return;
     }
     try {
-      if (isFirebaseConfigured && db) {
-        await db.collection('locations').add({ name });
-        toast('Location added to Firebase.', 'ok');
+      if (isSupabaseConfigured && supabaseClient) {
+        const { error } = await supabaseClient
+          .from('locations')
+          .insert([{ name }]);
+        if (error) throw error;
+        toast('Location added to Supabase.', 'ok');
+        await fetchLocations();
       } else {
         cachedLocations.push({ id: 'local_loc_' + Date.now(), name });
         saveLocalLocations();
@@ -1867,9 +2104,14 @@
   async function deleteLocation(id) {
     if (!confirm('Remove this location? (Note: sub-locations under it may also need update)')) return;
     try {
-      if (isFirebaseConfigured && db) {
-        await db.collection('locations').doc(id).delete();
-        toast('Location removed from Firebase.', 'ok');
+      if (isSupabaseConfigured && supabaseClient) {
+        const { error } = await supabaseClient
+          .from('locations')
+          .delete()
+          .eq('id', id);
+        if (error) throw error;
+        toast('Location removed from Supabase.', 'ok');
+        await fetchLocations();
       } else {
         cachedLocations = cachedLocations.filter(l => l.id !== id);
         saveLocalLocations();
@@ -1923,9 +2165,13 @@
     }
 
     try {
-      if (isFirebaseConfigured && db) {
-        await db.collection('sublocations').add({ location: loc, name });
-        toast('Sub-location added to Firebase.', 'ok');
+      if (isSupabaseConfigured && supabaseClient) {
+        const { error } = await supabaseClient
+          .from('sublocations')
+          .insert([{ location: loc, name }]);
+        if (error) throw error;
+        toast('Sub-location added to Supabase.', 'ok');
+        await fetchSublocations();
       } else {
         if (!cachedSublocations[loc]) cachedSublocations[loc] = [];
         cachedSublocations[loc].push({ id: 'local_subloc_' + Date.now(), name });
@@ -1941,9 +2187,14 @@
   async function deleteSublocation(id) {
     if (!confirm('Remove this sub-location?')) return;
     try {
-      if (isFirebaseConfigured && db) {
-        await db.collection('sublocations').doc(id).delete();
-        toast('Sub-location removed from Firebase.', 'ok');
+      if (isSupabaseConfigured && supabaseClient) {
+        const { error } = await supabaseClient
+          .from('sublocations')
+          .delete()
+          .eq('id', id);
+        if (error) throw error;
+        toast('Sub-location removed from Supabase.', 'ok');
+        await fetchSublocations();
       } else {
         const loc = document.getElementById('mgmt-loc-sel').value;
         if (loc && cachedSublocations[loc]) {
@@ -2034,13 +2285,13 @@
 
     itemsToExport.forEach(item => {
       let createdStr = '';
-      if (item.createdAt) {
-        if (typeof item.createdAt.toDate === 'function') {
-          createdStr = item.createdAt.toDate().toLocaleString();
-        } else {
-          createdStr = new Date(item.createdAt).toLocaleString();
-        }
+      const rawCreated = item.created_at || item.createdAt;
+      if (rawCreated) {
+        createdStr = new Date(rawCreated).toLocaleString();
       }
+
+      const imgVal = item.image_url || item.imageUrl || '';
+      const byVal  = item.created_by || item.createdBy || '';
 
       const row = [
         csvEscape(item.name || ''),
@@ -2053,8 +2304,8 @@
         csvEscape(item.sublocation || ''),
         csvEscape(item.condition || ''),
         csvEscape(item.notes || ''),
-        csvEscape(item.imageUrl || ''),
-        csvEscape(item.createdBy || ''),
+        csvEscape(imgVal),
+        csvEscape(byVal),
         csvEscape(createdStr)
       ];
       rows.push(row.join(','));
