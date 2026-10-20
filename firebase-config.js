@@ -5,14 +5,21 @@
 // https://console.firebase.google.com -> Project Settings (gear icon) -> Web App (</>)
 // ============================================================
 
-const firebaseConfig = {
-  apiKey:            "YOUR_API_KEY",
-  authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId:         "YOUR_PROJECT_ID",
-  storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId:             "YOUR_APP_ID"
-};
+
+ 
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyBFqinsy4FUMv4vI2XKFowP-JQ2xXxcT_Q",
+    authDomain: "inventory-team-ojas.firebaseapp.com",
+    projectId: "inventory-team-ojas",
+    storageBucket: "inventory-team-ojas.firebasestorage.app",
+    messagingSenderId: "448020336750",
+    appId: "1:448020336750:web:77531a46a864399da6167f",
+    measurementId: "G-99GRGHXRSE"
+  };
+
+ 
 
 let db = null;
 let storage = null;
