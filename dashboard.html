@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Team Ojas Racing</title>
+  <script src="config.js"></script>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+
+    /* ── Hero ───────────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 4vw, 2.5rem) clamp(1.5rem, 3vw, 2.5rem);
+    }
+
+    .hero-tag {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.54rem;
+      font-weight: 700;
+      letter-spacing: 0.30em;
+      color: #555e73;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      font-weight: 300;
+      font-size: clamp(1.2rem, 3.2vw, 1.85rem);
+      color: #6c768c;
+      letter-spacing: 0.02em;
+      line-height: 1.35;
+    }
+
+    .hero h1 strong {
+      display: block;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1rem, 2.8vw, 1.45rem);
+      background: linear-gradient(100deg, #c49d3b 0%, #e2c168 38%, #8aabb8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.04em;
+      margin-top: 0.45rem;
+    }
+
+    .hero-rule {
+      width: 48px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #282f40, transparent);
+      margin: 1.6rem auto 0;
+    }
+
+    /* ── Welcome strip ──────────────────────────────────────── */
+    .welcome-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto 2rem;
+      padding: 0 clamp(1rem, 3.5vw, 1.5rem);
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .welcome-strip .greeting {
+      font-size: clamp(0.82rem, 2vw, 0.9rem);
+      color: #636d85;
+    }
+
+    .welcome-strip .greeting strong {
+      color: #d8b456;
+      font-weight: 600;
+    }
+
+    .meta-pills {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .meta-pill {
+      font-size: 0.72rem;
+      color: #727c94;
+      background: #0b0e15;
+      border: 1px solid #1c2230;
+      border-radius: 6px;
+      padding: 0.32rem 0.75rem;
+      letter-spacing: 0.04em;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .meta-pill .dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #48bb78;
+      box-shadow: 0 0 6px rgba(72, 187, 120, 0.6);
+      margin-right: 0.45rem;
+    }
+
+    /* ── Nav blocks grid ────────────────────────────────────── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 clamp(1rem, 3.5vw, 2.5rem) 4rem;
+      width: 100%;
+    }
+
+    .blocks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+      gap: 1.5rem;
+      max-width: 960px;
+      width: 100%;
+    }
+
+    /* ── Individual block ───────────────────────────────────── */
+    .nav-block {
+      display: flex;
+      flex-direction: column;
+      background: #0b0e15;
+      border: 1px solid #1a202d;
+      border-radius: 14px;
+      overflow: hidden;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: fadeUp 0.4s ease both;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+      min-height: 240px;
+    }
+
+    .nav-block:nth-child(1) { animation-delay: 0.05s; }
+    .nav-block:nth-child(2) { animation-delay: 0.12s; }
+    .nav-block:nth-child(3) { animation-delay: 0.19s; }
+
+    .nav-block:hover {
+      border-color: #3b321c;
+      transform: translateY(-4px);
+      box-shadow:
+        0 14px 40px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(196, 157, 59, 0.18);
+    }
+
+    /* Disabled state for Coming Soon */
+    .nav-block.disabled {
+      cursor: default;
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .block-rule {
+      height: 2px;
+      flex-shrink: 0;
+    }
+
+    .nav-block:nth-child(1) .block-rule {
+      background: linear-gradient(90deg, transparent, #a08840 25%, #d8b456 50%, #a08840 75%, transparent);
+    }
+    .nav-block:nth-child(2) .block-rule {
+      background: linear-gradient(90deg, transparent, #285482 25%, #4282c0 50%, #285482 75%, transparent);
+    }
+    .nav-block:nth-child(3) .block-rule {
+      background: linear-gradient(90deg, transparent, #252a36 25%, #3d465c 50%, #252a36 75%, transparent);
+    }
+
+    .block-inner {
+      padding: clamp(1.4rem, 3vw, 1.8rem);
+      display: flex;
+      flex-direction: column;
+      gap: 0.95rem;
+      flex: 1;
+    }
+
+    .block-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .nav-block:nth-child(1) .block-icon { background: rgba(196, 157, 59, 0.1); border: 1px solid rgba(196, 157, 59, 0.22); }
+    .nav-block:nth-child(2) .block-icon { background: rgba(40, 84, 130, 0.14); border: 1px solid rgba(40, 84, 130, 0.25); }
+    .nav-block:nth-child(3) .block-icon { background: rgba(35, 40, 54, 0.3); border: 1px solid #1c2230; }
+
+    .block-icon svg { opacity: 0.85; }
+    .nav-block:nth-child(1) .block-icon svg { color: #d8b456; }
+    .nav-block:nth-child(2) .block-icon svg { color: #62a3e0; }
+    .nav-block:nth-child(3) .block-icon svg { color: #525a70; }
+
+    .block-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      margin-bottom: 0.15rem;
+    }
+
+    .nav-block:nth-child(1) .block-label { color: #a38234; }
+    .nav-block:nth-child(2) .block-label { color: #3b74aa; }
+    .nav-block:nth-child(3) .block-label { color: #424a5e; }
+
+    .block-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #e5e9f2;
+      letter-spacing: -0.01em;
+    }
+
+    .nav-block:nth-child(3) .block-title { color: #525a70; }
+
+    .block-desc {
+      font-size: 0.82rem;
+      color: #555f75;
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .block-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.95rem clamp(1.4rem, 3vw, 1.8rem);
+      border-top: 1px solid #151822;
+      background: rgba(13, 16, 24, 0.5);
+    }
+
+    .block-cta {
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: gap 0.18s;
+    }
+
+    .nav-block:hover .block-cta { gap: 0.75rem; }
+
+    .nav-block:nth-child(1) .block-cta { color: #d8b456; }
+    .nav-block:nth-child(2) .block-cta { color: #62a3e0; }
+    .nav-block:nth-child(3) .block-cta { color: #424a5e; }
+
+    .block-badge {
+      font-size: 0.58rem;
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.55rem;
+      border-radius: 5px;
+      font-weight: 700;
+    }
+
+    .nav-block:nth-child(1) .block-badge { background: rgba(196, 157, 59, 0.1); color: #c49d3b; border: 1px solid rgba(196, 157, 59, 0.22); }
+    .nav-block:nth-child(2) .block-badge { background: rgba(40, 84, 130, 0.12); color: #5294d4; border: 1px solid rgba(40, 84, 130, 0.22); }
+    .nav-block:nth-child(3) .block-badge { background: rgba(30, 35, 48, 0.5); color: #424a5e; border: 1px solid #1a202d; }
+
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────── -->
+<header>
+  <a class="header-logo" href="dashboard.html">
+    <img src="logo.jpg" alt="Team Ojas Racing" />
+    <div class="logo-text-stack">
+      <span class="eyebrow">Team</span>
+      <span class="wordmark">Ojas Racing</span>
+    </div>
+  </a>
+  <div class="nav-right">
+    <div class="user-pill">
+      <div class="user-pill-dot"></div>
+      <span id="js-nav-user">User</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Sign Out</button>
+  </div>
+</header>
+
+<!-- ── HERO ────────────────────────────────────────────── -->
+<div class="hero">
+  <span class="hero-tag">Dashboard</span>
+  <h1>
+    Welcome to
+    <strong>"Team Ojas Racing - Inventory"</strong>
+  </h1>
+  <div class="hero-rule"></div>
+</div>
+
+<!-- ── WELCOME STRIP ────────────────────────────────────── -->
+<div class="welcome-strip">
+  <div class="greeting">Hello, <strong id="js-welcome-user">User</strong> &mdash; select a module below.</div>
+  <div class="meta-pills">
+    <div class="meta-pill"><span class="dot"></span>Active</div>
+    <div class="meta-pill" id="js-login-time">--:--</div>
+  </div>
+</div>
+
+<!-- ── NAV BLOCKS ───────────────────────────────────────── -->
+<main>
+  <div class="blocks-grid">
+
+    <!-- 1 · Inventory -->
+    <a class="nav-block" href="inventory.html">
+      <div class="block-rule"></div>
+      <div class="block-inner">
+        <div class="block-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="block-label">Module 01</div>
+          <div class="block-title">Inventory</div>
+        </div>
+        <div class="block-desc">Track parts, components, and materials. Manage stock levels and item records for the team.</div>
+      </div>
+      <div class="block-footer">
+        <span class="block-cta">Open &rarr;</span>
+        <span class="block-badge">Active</span>
+      </div>
+    </a>
+
+    <!-- 2 · Team Members -->
+    <a class="nav-block" href="team.html">
+      <div class="block-rule"></div>
+      <div class="block-inner">
+        <div class="block-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div>
+          <div class="block-label">Module 02</div>
+          <div class="block-title">Team Members</div>
+        </div>
+        <div class="block-desc">View and manage team roster. Access member profiles, roles, and assignments within the team.</div>
+      </div>
+      <div class="block-footer">
+        <span class="block-cta">Open &rarr;</span>
+        <span class="block-badge">Active</span>
+      </div>
+    </a>
+
+    <!-- 3 · Coming Soon -->
+    <div class="nav-block disabled">
+      <div class="block-rule"></div>
+      <div class="block-inner">
+        <div class="block-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div>
+          <div class="block-label">Module 03</div>
+          <div class="block-title">Coming Soon</div>
+        </div>
+        <div class="block-desc">This module is currently under development. Check back later for updates.</div>
+      </div>
+      <div class="block-footer">
+        <span class="block-cta">Locked</span>
+        <span class="block-badge">Soon</span>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ── FOOTER ───────────────────────────────────────────── -->
+<footer>
+  <div class="footer-left">&copy; <span id="js-year"></span> Team Ojas Racing &mdash; All rights reserved</div>
+  <div class="footer-right">Inventory v1.0</div>
+</footer>
+
+<script>
+  const loggedUser  = sessionStorage.getItem('logged_in_user');
+  const loginTimeMs = parseInt(sessionStorage.getItem('login_time') || '0', 10);
+
+  if (!loggedUser) { window.location.href = 'index.html'; }
+
+  const timeout = SITE_CONFIG.sessionTimeoutMinutes;
+  if (timeout > 0 && loginTimeMs) {
+    if ((Date.now() - loginTimeMs) / 60000 > timeout) {
+      sessionStorage.clear();
+      window.location.href = 'index.html';
+    }
+  }
+
+  document.getElementById('js-nav-user').textContent     = loggedUser;
+  document.getElementById('js-welcome-user').textContent =
+    loggedUser ? loggedUser.charAt(0).toUpperCase() + loggedUser.slice(1) : '';
+  document.getElementById('js-year').textContent = new Date().getFullYear();
+
+  if (loginTimeMs) {
+    const d = new Date(loginTimeMs);
+    document.getElementById('js-login-time').textContent =
+      d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
+</script>
+
+</body>
+</html>

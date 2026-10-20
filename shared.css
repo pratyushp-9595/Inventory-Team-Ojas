@@ -1,0 +1,310 @@
+/*
+ * shared.css — Common layout, header, footer, typography & responsive system
+ * Imported by every page.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@600;700;800&display=swap');
+
+/* ── Reset & Sizing ─────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-size: 16px;
+  height: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100%;
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #cdd3de;
+  background-color: #07090e;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom sleek scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #090b10;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e2330;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2f364a;
+}
+
+/* Watermark background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: url('logo.jpg') center center / min(450px, 60vw) auto no-repeat;
+  opacity: 0.035;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Vignette shadow */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 35%, #05060a 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+header, .hero, main, footer, .page-hero, .tab-bar, .tab-panel {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Header / Navbar ─────────────────────────────────────────── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(1rem, 4vw, 2.5rem);
+  height: 64px;
+  background: rgba(8, 10, 16, 0.96);
+  border-bottom: 1px solid #1f2430;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  gap: 1rem;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.header-logo img {
+  height: 38px;
+  width: 38px;
+  object-fit: cover;
+  border-radius: 7px;
+  border: 1px solid #2e3445;
+  filter: brightness(0.9) saturate(0.7);
+  flex-shrink: 0;
+}
+
+.logo-text-stack {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.logo-text-stack .eyebrow {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  color: #c49d3b;
+  text-transform: uppercase;
+}
+
+.logo-text-stack .wordmark {
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: #e5e8f0;
+  letter-spacing: 0.02em;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #0f121a;
+  border: 1px solid #222736;
+  border-radius: 7px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #9aa2b3;
+  letter-spacing: 0.03em;
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #48bb78;
+  box-shadow: 0 0 8px rgba(72, 187, 120, 0.6);
+  flex-shrink: 0;
+}
+
+.btn-logout {
+  padding: 0.42rem 0.95rem;
+  background: rgba(185, 28, 28, 0.06);
+  border: 1px solid #3c1e22;
+  border-radius: 7px;
+  color: #d16e6e;
+  font-size: 0.7rem;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+.btn-logout:hover {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: #632328;
+  color: #ff9191;
+}
+
+/* ── Page Hero Header (Sub-pages) ────────────────────────────── */
+.page-hero {
+  padding: clamp(1.8rem, 4vw, 3rem) clamp(1rem, 4vw, 2.5rem) clamp(1.4rem, 3vw, 2.2rem);
+  border-bottom: 1px solid #1a1f2c;
+  background: linear-gradient(180deg, rgba(14, 18, 27, 0.4) 0%, transparent 100%);
+}
+
+.page-hero-tag {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.54rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: #555e73;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.65rem;
+}
+
+.page-hero h2 {
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  font-weight: 600;
+  color: #edf0f7;
+  letter-spacing: -0.01em;
+}
+
+.page-hero p {
+  font-size: clamp(0.8rem, 1.8vw, 0.88rem);
+  color: #5d677d;
+  margin-top: 0.35rem;
+  line-height: 1.55;
+  max-width: 650px;
+}
+
+/* ── Shared Card Foundation ─────────────────────────────────── */
+.card-skin {
+  background: #0d1017;
+  border: 1px solid #1f2533;
+  border-radius: 13px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.03) inset,
+    0 18px 45px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.card-top-rule {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #a08840 25%, #d9b85c 50%, #a08840 75%, transparent);
+}
+
+/* ── Footer ─────────────────────────────────────────────────── */
+footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid #171b26;
+  padding: 1.25rem clamp(1rem, 4vw, 2.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: #06080c;
+}
+
+.footer-left {
+  font-size: 0.72rem;
+  color: #404859;
+  letter-spacing: 0.04em;
+}
+
+.footer-right {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.52rem;
+  letter-spacing: 0.2em;
+  color: #353c4d;
+  text-transform: uppercase;
+}
+
+/* ── Global Keyframes ────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Mobile & Tablet Responsiveness ──────────────────────────── */
+@media (max-width: 600px) {
+  header {
+    height: 58px;
+    padding: 0 1rem;
+  }
+
+  .header-logo img {
+    height: 32px;
+    width: 32px;
+  }
+
+  .logo-text-stack .wordmark {
+    font-size: 0.85rem;
+  }
+
+  .user-pill {
+    padding: 0.32rem 0.65rem;
+    font-size: 0.74rem;
+    max-width: 120px;
+  }
+
+  .btn-logout {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.62rem;
+  }
+
+  footer {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+    padding: 1.2rem 1rem;
+  }
+}

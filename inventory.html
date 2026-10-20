@@ -1,0 +1,2104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory — Team Ojas Racing</title>
+  <script src="config.js"></script>
+  <link rel="stylesheet" href="shared.css" />
+
+  <!-- Firebase SDKs (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+
+    /* ══════════════════════════════════════════
+       TAB BAR
+    ══════════════════════════════════════════ */
+    .tab-bar {
+      display: flex;
+      background: rgba(7, 9, 14, 0.97);
+      border-bottom: 1px solid #1a202c;
+      position: sticky;
+      top: 64px;
+      z-index: 100;
+      padding: 0 clamp(0.75rem, 3vw, 2.5rem);
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      gap: 0.5rem;
+    }
+    .tab-bar::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      padding: 0.9rem 1.4rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: #4e576d;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      margin-bottom: -1px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .tab-btn:hover { color: #8c97ad; }
+    .tab-btn.active {
+      color: #d8b456;
+      border-bottom-color: #c49d3b;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+
+    /* ══════════════════════════════════════════
+       TAB 1 — INVENTORY VIEW
+    ══════════════════════════════════════════ */
+    .inv-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      background: #0a0d14;
+      border: 1px solid #1a202e;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem clamp(1rem, 3.5vw, 2.5rem) 1.2rem;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    .inv-toolbar select,
+    .inv-toolbar input[type="text"] {
+      padding: 0.58rem 0.9rem;
+      background: #080a0f;
+      border: 1px solid #1f2637;
+      border-radius: 8px;
+      color: #d5dae5;
+      font-size: 0.82rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: all 0.18s ease;
+      min-height: 40px;
+    }
+
+    .inv-toolbar select:focus,
+    .inv-toolbar input:focus {
+      border-color: #a08840;
+      box-shadow: 0 0 0 2px rgba(160, 136, 64, 0.15);
+    }
+
+    .inv-toolbar select option { background: #0c0f16; }
+    .inv-toolbar input[type="text"] {
+      min-width: 180px;
+      flex: 1 1 200px;
+    }
+
+    .inv-count {
+      margin-left: auto;
+      font-size: 0.72rem;
+      color: #4b5468;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      font-family: 'Inter', sans-serif;
+      padding: 0.2rem 0.5rem;
+    }
+
+    .inv-count strong {
+      color: #d8b456;
+      font-weight: 700;
+    }
+
+    /* Items grid */
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+      gap: 1.2rem;
+      padding: 0.5rem clamp(1rem, 3.5vw, 2.5rem) 4rem;
+    }
+
+    .item-card {
+      background: #0b0e15;
+      border: 1px solid #1a202d;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: fadeUp 0.3s ease both;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .item-card:hover {
+      border-color: #3b321c;
+      transform: translateY(-3px);
+      box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(196, 157, 59, 0.2);
+    }
+
+    .item-img-wrap {
+      width: 100%;
+      height: 155px;
+      background: #080a0f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-bottom: 1px solid #161a24;
+      position: relative;
+    }
+
+    .item-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    .item-card:hover .item-img-wrap img {
+      transform: scale(1.03);
+    }
+
+    .item-img-wrap svg { opacity: 0.12; color: #7a8499; }
+
+    .item-body {
+      padding: 1rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .item-sys-tag {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.52rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      color: #a38234;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .item-name {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #e5e9f2;
+      margin-bottom: 0.35rem;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .item-sub-label {
+      font-size: 0.73rem;
+      color: #555f75;
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      line-height: 1.4;
+    }
+
+    .item-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.75rem;
+      border-top: 1px solid #151822;
+      margin-top: auto;
+      gap: 0.5rem;
+    }
+
+    .s-badge {
+      font-size: 0.56rem;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.55rem;
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+
+    .s-free   { background: rgba(72, 187, 120, 0.1); color: #52c781; border: 1px solid rgba(72, 187, 120, 0.22); }
+    .s-inuse  { background: rgba(196, 157, 59, 0.1); color: #d8b456; border: 1px solid rgba(196, 157, 59, 0.22); }
+    .s-out    { background: rgba(220, 38, 38, 0.1); color: #e57373; border: 1px solid rgba(220, 38, 38, 0.24); }
+
+    .item-qty {
+      font-size: 0.74rem;
+      color: #555f75;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .inv-empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 5rem 1.5rem;
+      color: #4b5468;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    .inv-empty svg { margin: 0 auto 1.2rem; display: block; opacity: 0.15; }
+
+
+    /* ══════════════════════════════════════════
+       TAB 2 — ADD / EDIT ITEM
+    ══════════════════════════════════════════ */
+    .add-wrap {
+      max-width: 900px;
+      margin: 1.8rem auto 4rem;
+      padding: 0 clamp(1rem, 3.5vw, 2.5rem);
+    }
+
+    .add-panel {
+      background: #0b0e15;
+      border: 1px solid #1a202d;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
+    }
+
+    .add-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.4rem clamp(1.2rem, 3vw, 2rem);
+      border-bottom: 1px solid #161a25;
+      background: rgba(13, 16, 24, 0.6);
+      gap: 1rem;
+    }
+
+    .add-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #e5e8f0;
+      letter-spacing: -0.01em;
+    }
+
+    .edit-pill {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.52rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #d8b456;
+      background: rgba(196, 157, 59, 0.1);
+      border: 1px solid rgba(196, 157, 59, 0.25);
+      border-radius: 5px;
+      padding: 0.25rem 0.65rem;
+      display: none;
+    }
+
+    /* Responsive Two-column layout */
+    .form-layout {
+      display: grid;
+      grid-template-columns: minmax(200px, 250px) 1fr;
+      gap: clamp(1.2rem, 3vw, 2.2rem);
+      align-items: start;
+      padding: clamp(1.2rem, 3vw, 2rem);
+    }
+
+    /* ── Image upload ── */
+    .img-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .img-drop {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #080a0f;
+      border: 1.5px dashed #202738;
+      border-radius: 11px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+      transition: all 0.2s ease;
+      touch-action: manipulation;
+    }
+
+    .img-drop:hover {
+      border-color: #a08840;
+      background: #0d1018;
+    }
+
+    .img-drop img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    .img-hint {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      color: #40495c;
+      pointer-events: none;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .img-hint svg { opacity: 0.45; }
+
+    .img-hint span {
+      font-size: 0.74rem;
+      letter-spacing: 0.04em;
+      line-height: 1.5;
+    }
+
+    #f-img-input { display: none; }
+
+    .img-clear-btn {
+      display: none;
+      width: 100%;
+      padding: 0.55rem;
+      background: rgba(185, 28, 28, 0.08);
+      border: 1px solid #3c1e22;
+      border-radius: 7px;
+      color: #d16e6e;
+      font-size: 0.68rem;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-align: center;
+    }
+
+    .img-clear-btn:hover {
+      border-color: #5a262a;
+      background: rgba(220, 38, 38, 0.15);
+      color: #ff9191;
+    }
+
+    /* ── Fields column ── */
+    .fields-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .fg { display: flex; flex-direction: column; gap: 0.4rem; }
+    .fg.full { grid-column: 1/-1; }
+
+    .fg label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #636d85;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .fg input,
+    .fg select,
+    .fg textarea {
+      padding: 0.72rem 0.95rem;
+      background: #080a0f;
+      border: 1px solid #1c2333;
+      border-radius: 8px;
+      color: #d5dae5;
+      font-size: 0.88rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      width: 100%;
+      min-height: 42px;
+      transition: all 0.18s ease;
+      caret-color: #c49d3b;
+    }
+
+    .fg input:focus,
+    .fg select:focus,
+    .fg textarea:focus {
+      border-color: #a08840;
+      box-shadow: 0 0 0 2px rgba(160, 136, 64, 0.15);
+    }
+
+    .fg select option { background: #0c0f16; }
+    .fg textarea { resize: vertical; min-height: 85px; line-height: 1.5; }
+
+    /* ── Form actions ── */
+    .form-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 1.25rem clamp(1.2rem, 3vw, 2rem);
+      border-top: 1px solid #161a25;
+      background: rgba(13, 16, 24, 0.6);
+      flex-wrap: wrap;
+    }
+
+    .btn-submit {
+      flex: 1 1 200px;
+      min-height: 44px;
+      padding: 0.75rem 1.4rem;
+      background: rgba(196, 157, 59, 0.08);
+      border: 1px solid #a08840;
+      border-radius: 8px;
+      color: #d8b456;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      touch-action: manipulation;
+    }
+
+    .btn-submit:hover {
+      background: rgba(196, 157, 59, 0.18);
+      border-color: #d8b456;
+      box-shadow: 0 0 20px rgba(196, 157, 59, 0.2);
+    }
+    .btn-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-del-part {
+      min-height: 44px;
+      padding: 0.75rem 1.25rem;
+      background: rgba(185, 28, 28, 0.08);
+      border: 1px solid #481f23;
+      border-radius: 8px;
+      color: #d16e6e;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: none;
+      touch-action: manipulation;
+    }
+
+    .btn-del-part:hover {
+      border-color: #632328;
+      background: rgba(220, 38, 38, 0.16);
+      color: #ff9191;
+    }
+
+    .btn-clear-form {
+      min-height: 44px;
+      padding: 0.75rem 1.15rem;
+      background: transparent;
+      border: 1px solid #1c2333;
+      border-radius: 8px;
+      color: #555f75;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      touch-action: manipulation;
+    }
+
+    .btn-clear-form:hover {
+      border-color: #313b52;
+      color: #8c97ad;
+    }
+
+    /* ── Upload overlay ── */
+    .upload-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 7, 12, 0.85);
+      z-index: 600;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .upload-overlay.on { display: flex; }
+
+    .upload-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      color: #9da6b8;
+      text-transform: uppercase;
+    }
+
+    .upload-track {
+      width: min(280px, 80vw);
+      height: 3px;
+      background: #1a202d;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .upload-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #a08840, #d8b456);
+      width: 0%;
+      transition: width 0.2s;
+    }
+
+
+    /* ══════════════════════════════════════════
+       TAB 3 — MANAGE (Subsystems + Locations + Sub-locations)
+    ══════════════════════════════════════════ */
+    .manage-wrap {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 1.8rem auto 4rem;
+      padding: 0 clamp(1rem, 3.5vw, 2.5rem);
+    }
+
+    .mgmt-card {
+      background: #0b0e15;
+      border: 1px solid #1a202d;
+      border-radius: 13px;
+      overflow: hidden;
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mgmt-rule { height: 2px; }
+
+    .mgmt-card.gold .mgmt-rule {
+      background: linear-gradient(90deg, transparent, #a08840 25%, #d8b456 50%, #a08840 75%, transparent);
+    }
+
+    .mgmt-card.blue .mgmt-rule {
+      background: linear-gradient(90deg, transparent, #285482 25%, #4282c0 50%, #285482 75%, transparent);
+    }
+
+    .mgmt-card.purple .mgmt-rule {
+      background: linear-gradient(90deg, transparent, #5b379e 25%, #885fd4 50%, #5b379e 75%, transparent);
+    }
+
+    .mgmt-body {
+      padding: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .mgmt-heading {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: #636d85;
+      margin-bottom: 1.15rem;
+    }
+
+    .mgmt-row {
+      display: flex;
+      gap: 0.55rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .mgmt-row select,
+    .mgmt-row input {
+      flex: 1;
+      padding: 0.62rem 0.85rem;
+      background: #080a0f;
+      border: 1px solid #1c2333;
+      border-radius: 8px;
+      color: #d5dae5;
+      font-size: 0.84rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      min-height: 40px;
+      transition: all 0.18s ease;
+    }
+
+    .mgmt-row select:focus,
+    .mgmt-row input:focus { border-color: #a08840; }
+    .mgmt-row select option { background: #0c0f16; }
+
+    .mgmt-card.blue .mgmt-row select:focus,
+    .mgmt-card.blue .mgmt-row input:focus { border-color: #2b5d8f; }
+
+    .mgmt-card.purple .mgmt-row select:focus,
+    .mgmt-card.purple .mgmt-row input:focus { border-color: #6f47b8; }
+
+    .btn-mgmt {
+      padding: 0.62rem 1.05rem;
+      background: rgba(196, 157, 59, 0.08);
+      border: 1px solid #a08840;
+      border-radius: 8px;
+      color: #d8b456;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap;
+      min-height: 40px;
+      transition: all 0.18s ease;
+      touch-action: manipulation;
+    }
+    .btn-mgmt:hover {
+      background: rgba(196, 157, 59, 0.18);
+      box-shadow: 0 0 12px rgba(196, 157, 59, 0.2);
+    }
+
+    .mgmt-card.blue .btn-mgmt {
+      background: rgba(40, 84, 130, 0.12);
+      border-color: #3b74aa;
+      color: #69a7e0;
+    }
+    .mgmt-card.blue .btn-mgmt:hover {
+      background: rgba(40, 84, 130, 0.25);
+    }
+
+    .mgmt-card.purple .btn-mgmt {
+      background: rgba(91, 55, 158, 0.12);
+      border-color: #784ec2;
+      color: #b592f7;
+    }
+    .mgmt-card.purple .btn-mgmt:hover {
+      background: rgba(91, 55, 158, 0.25);
+    }
+
+    .mgmt-divider {
+      height: 1px;
+      background: #151822;
+      margin: 0.85rem 0;
+    }
+
+    .mgmt-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 0.2rem;
+    }
+
+    .mgmt-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0.85rem;
+      background: #080a0f;
+      border: 1px solid #161a25;
+      border-radius: 7px;
+      font-size: 0.84rem;
+      color: #9da6b8;
+      animation: fadeUp 0.18s ease both;
+    }
+
+    .btn-del-mgmt {
+      background: none;
+      border: none;
+      color: #3c4457;
+      cursor: pointer;
+      padding: 4px 6px;
+      display: flex;
+      align-items: center;
+      transition: color 0.15s;
+    }
+
+    .btn-del-mgmt:hover { color: #e57373; }
+
+    .mgmt-empty {
+      font-size: 0.76rem;
+      color: #3c4457;
+      text-align: center;
+      padding: 1.5rem 0;
+      letter-spacing: 0.04em;
+    }
+
+    .btn-export {
+      padding: 0.58rem 1rem;
+      background: rgba(40, 100, 58, 0.12);
+      border: 1px solid #28633b;
+      border-radius: 8px;
+      color: #5ec781;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+      min-height: 40px;
+      touch-action: manipulation;
+    }
+    .btn-export:hover {
+      background: rgba(40, 100, 58, 0.25);
+      border-color: #3e9159;
+      color: #7eed9f;
+      box-shadow: 0 0 14px rgba(62, 145, 89, 0.2);
+    }
+
+    /* ══════════════════════════════════════════
+       RESPONSIVE MEDIA QUERIES
+    ══════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      .tab-bar { top: 58px; }
+
+      .inv-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.65rem;
+      }
+
+      .inv-toolbar select,
+      .inv-toolbar input[type="text"],
+      .btn-export {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .inv-count {
+        margin-left: 0;
+        text-align: right;
+      }
+
+      .form-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .img-col {
+        max-width: 240px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .field-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       TOAST
+    ══════════════════════════════════════════ */
+    .toast {
+      position: fixed;
+      bottom: 1.8rem;
+      right: 1.8rem;
+      background: #0d1017;
+      border: 1px solid #1f2533;
+      border-radius: 9px;
+      padding: 0.85rem 1.25rem;
+      font-size: 0.84rem;
+      color: #c8cdd6;
+      z-index: 700;
+      transform: translateY(16px);
+      opacity: 0;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      max-width: 340px;
+      line-height: 1.45;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.ok  { border-color: rgba(74,124,89,0.45); color: #5a9c6a; }
+    .toast.err { border-color: rgba(127,29,29,0.45); color: #b45252; }
+
+  </style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════════ -->
+<header>
+  <a class="header-logo" href="dashboard.html">
+    <img src="logo.jpg" alt="Team Ojas Racing" />
+    <div class="logo-text-stack">
+      <span class="eyebrow">Team</span>
+      <span class="wordmark">Ojas Racing</span>
+    </div>
+  </a>
+  <div class="nav-right">
+    <div class="user-pill">
+      <div class="user-pill-dot"></div>
+      <span id="js-nav-user">User</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Sign Out</button>
+  </div>
+</header>
+
+<!-- ══ PAGE HERO ════════════════════════════════════════════ -->
+<div class="page-hero">
+  <span class="page-hero-tag">Module 01</span>
+  <h2>Inventory</h2>
+  <p>Manage parts, components, and materials — backed by Firebase.</p>
+  <div id="db-status-banner" style="margin-top:0.8rem; padding:0.5rem 0.9rem; border-radius:6px; font-size:0.75rem; display:inline-flex; align-items:center; gap:0.5rem; background:rgba(160,136,64,0.1); border:1px solid rgba(160,136,64,0.3); color:#c8a84a;">
+    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#c8a84a;"></span>
+    <span id="db-status-text">Checking Database connection...</span>
+  </div>
+</div>
+
+<!-- ══ TAB BAR ═════════════════════════════════════════════ -->
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="view">View Inventory</button>
+  <button class="tab-btn" data-tab="add">Add / Edit Item</button>
+  <button class="tab-btn" data-tab="manage">Manage</button>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 1 — VIEW INVENTORY
+══════════════════════════════════════════════════════════ -->
+<div id="tab-view" class="tab-panel active">
+
+  <div class="inv-toolbar">
+    <!-- System filter -->
+    <select id="filter-system" onchange="onFilterSystemChange()">
+      <option value="">All Systems</option>
+    </select>
+
+    <!-- Subsystem filter (shown when system selected) -->
+    <select id="filter-subsystem" onchange="renderInventory()">
+      <option value="">All Subsystems</option>
+    </select>
+
+    <!-- Location filter -->
+    <select id="filter-location" onchange="onFilterLocationChange()">
+      <option value="">All Locations</option>
+    </select>
+
+    <!-- Sub-location filter (shown when location selected) -->
+    <select id="filter-sublocation" onchange="renderInventory()" style="display:none;">
+      <option value="">All Sub-locations</option>
+    </select>
+
+    <!-- Status filter -->
+    <select id="filter-status" onchange="renderInventory()">
+      <option value="">All Statuses</option>
+      <option value="free">Free to Use</option>
+      <option value="in-use">In Use</option>
+      <option value="out">Out of Stock</option>
+    </select>
+
+    <!-- Search -->
+    <input type="text" id="filter-q" placeholder="Search parts…" oninput="renderInventory()" />
+
+    <!-- Export Button -->
+    <button class="btn-export" onclick="exportInventoryToCSV()" title="Export current inventory list as a CSV file compatible with Google Sheets & Excel">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Export CSV / Sheets
+    </button>
+
+    <div class="inv-count"><strong id="inv-count">0</strong> items</div>
+  </div>
+
+  <div class="items-grid" id="items-grid">
+    <div class="inv-empty" id="inv-empty" style="display:none">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+        <line x1="12" y1="22.08" x2="12" y2="12"/>
+      </svg>
+      No items match your filters. Switch to <strong>Add / Edit Item</strong> to add parts.
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 2 — ADD / EDIT ITEM
+══════════════════════════════════════════════════════════ -->
+<div id="tab-add" class="tab-panel">
+<div class="add-wrap">
+  <div class="add-panel">
+    <!-- Header -->
+    <div class="add-header">
+      <div class="add-title" id="form-title">Add New Part</div>
+      <div class="edit-pill" id="edit-pill">Editing</div>
+    </div>
+
+    <div class="form-layout">
+
+    <!-- ── LEFT: Image upload ── -->
+    <div class="img-col">
+      <label class="img-drop" id="img-drop" for="f-img-input" title="Click to upload image">
+        <img id="img-preview" alt="Part preview" />
+        <div class="img-hint" id="img-hint">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+          <span>Click to upload<br/>part image</span>
+        </div>
+      </label>
+      <input type="file" id="f-img-input" accept="image/*" onchange="previewImg(this)" />
+      <button class="img-clear-btn" id="img-clear-btn" type="button" onclick="clearImg()">
+        Remove Image
+      </button>
+    </div>
+
+    <!-- ── RIGHT: Fields ── -->
+    <div class="fields-col">
+
+      <!-- Part Name — full width -->
+      <div class="fg full">
+        <label>Part Name *</label>
+        <input type="text" id="f-name" placeholder="e.g. Front Upper Wishbone" />
+      </div>
+
+      <!-- System + Subsystem -->
+      <div class="field-row">
+        <div class="fg">
+          <label>System *</label>
+          <select id="f-system" onchange="onFormSystemChange()">
+            <option value="">Select System</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Subsystem</label>
+          <select id="f-subsystem">
+            <option value="">Select Subsystem</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Status + Quantity -->
+      <div class="field-row">
+        <div class="fg">
+          <label>Status *</label>
+          <select id="f-status">
+            <option value="free">Free to Use</option>
+            <option value="in-use">In Use</option>
+            <option value="out">Out of Stock</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Quantity</label>
+          <select id="f-qty">
+            <!-- 1–100 via JS -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Location + Sub-location -->
+      <div class="field-row">
+        <div class="fg">
+          <label>Location</label>
+          <select id="f-location" onchange="onFormLocationChange()">
+            <option value="">Select Location</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Sub-location</label>
+          <select id="f-sublocation">
+            <option value="">Select Sub-location</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Condition + Notes -->
+      <div class="field-row">
+        <div class="fg full">
+          <label>Condition</label>
+          <input type="text" id="f-condition" placeholder="e.g. New, Used, Serviced, Damaged…" />
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="fg full">
+        <label>Notes</label>
+        <textarea id="f-notes" placeholder="Additional notes, observations, references…"></textarea>
+      </div>
+
+    </div>
+  </div><!-- /form-layout -->
+
+  <!-- Actions -->
+  <div class="form-actions">
+    <button class="btn-submit" id="btn-submit" onclick="submitForm()">Add to Inventory</button>
+    <button class="btn-del-part" id="btn-del-part" onclick="deleteItem()">Delete Part</button>
+    <button class="btn-clear-form" onclick="clearForm()">Clear</button>
+  </div>
+  </div><!-- /add-panel -->
+
+</div>
+</div><!-- /tab-add -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 3 — MANAGE (Subsystems + Locations)
+══════════════════════════════════════════════════════════ -->
+<div id="tab-manage" class="tab-panel">
+<div class="manage-wrap">
+
+  <!-- ── Subsystems card ── -->
+  <div class="mgmt-card gold">
+    <div class="mgmt-rule"></div>
+    <div class="mgmt-body">
+      <div class="mgmt-heading">Manage Subsystems</div>
+
+      <!-- Pick system -->
+      <div class="mgmt-row">
+        <select id="mgmt-sys" onchange="renderSubsystemList()">
+          <option value="">Select a System</option>
+        </select>
+      </div>
+
+      <!-- Add subsystem -->
+      <div class="mgmt-row">
+        <input type="text" id="mgmt-sub-input" placeholder="New subsystem name…"
+          onkeydown="if(event.key==='Enter') addSubsystem()" />
+        <button class="btn-mgmt" onclick="addSubsystem()">Add</button>
+      </div>
+
+      <div class="mgmt-divider"></div>
+
+      <div class="mgmt-list" id="sub-list">
+        <div class="mgmt-empty">Select a system above to see its subsystems</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Locations card ── -->
+  <div class="mgmt-card blue">
+    <div class="mgmt-rule"></div>
+    <div class="mgmt-body">
+      <div class="mgmt-heading">Manage Locations</div>
+
+      <!-- Add location -->
+      <div class="mgmt-row">
+        <input type="text" id="mgmt-loc-input" placeholder="New location name…"
+          onkeydown="if(event.key==='Enter') addLocation()" />
+        <button class="btn-mgmt" onclick="addLocation()">Add</button>
+      </div>
+
+      <div class="mgmt-divider"></div>
+
+      <div class="mgmt-list" id="loc-list">
+        <div class="mgmt-empty">No locations added yet</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Sub-locations card ── -->
+  <div class="mgmt-card purple">
+    <div class="mgmt-rule"></div>
+    <div class="mgmt-body">
+      <div class="mgmt-heading">Manage Sub-locations</div>
+
+      <!-- Pick location -->
+      <div class="mgmt-row">
+        <select id="mgmt-loc-sel" onchange="renderSublocationList()">
+          <option value="">Select a Location</option>
+        </select>
+      </div>
+
+      <!-- Add sub-location -->
+      <div class="mgmt-row">
+        <input type="text" id="mgmt-subloc-input" placeholder="New sub-location name…"
+          onkeydown="if(event.key==='Enter') addSublocation()" />
+        <button class="btn-mgmt" onclick="addSublocation()">Add</button>
+      </div>
+
+      <div class="mgmt-divider"></div>
+
+      <div class="mgmt-list" id="subloc-list">
+        <div class="mgmt-empty">Select a location above to see its sub-locations</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /tab-manage -->
+
+
+<!-- ══ UPLOAD OVERLAY ══════════════════════════════════════ -->
+<div class="upload-overlay" id="upload-overlay">
+  <div class="upload-label">Uploading Image…</div>
+  <div class="upload-track">
+    <div class="upload-fill" id="upload-fill"></div>
+  </div>
+</div>
+
+<!-- ══ TOAST ════════════════════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ══ FOOTER ══════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-left">&copy; <span id="js-year"></span> Team Ojas Racing &mdash; All rights reserved</div>
+  <div class="footer-right">Inventory v2.0</div>
+</footer>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SCRIPT
+══════════════════════════════════════════════════════════ -->
+<script>
+
+  /* ── Auth guard ───────────────────────────────────────── */
+  const loggedUser = sessionStorage.getItem('logged_in_user');
+  if (!loggedUser) window.location.href = 'index.html';
+  document.getElementById('js-nav-user').textContent = loggedUser;
+  document.getElementById('js-year').textContent     = new Date().getFullYear();
+  function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
+
+  /* ── Systems master list ──────────────────────────────── */
+  const SYSTEMS = [
+    { code: 'AT', name: 'Autonomous System' },
+    { code: 'BR', name: 'Brake System' },
+    { code: 'DT', name: 'Drivetrain' },
+    { code: 'ET', name: 'Engine and Tractive System' },
+    { code: 'FR', name: 'Chassis and Body' },
+    { code: 'LV', name: 'Grounded Low Voltage System' },
+    { code: 'MS', name: 'Miscellaneous Fit and Finish' },
+    { code: 'ST', name: 'Steering System' },
+    { code: 'SU', name: 'Suspension System' },
+    { code: 'WT', name: 'Wheels, Wheel Bearings and Tires' },
+  ];
+
+  /* ── App state ────────────────────────────────────────── */
+  let cachedItems        = [];
+  let cachedSubsystems   = {};   // { 'AT': [{id, name}, …], … }
+  let cachedLocations    = [];   // [{id, name}, …]
+  let cachedSublocations = {};   // { 'Workshop Bay A': [{id, name}, …], … }
+  let currentEditId      = null;
+  let pendingImgFile     = null;
+
+  /* ── Populate static dropdowns ────────────────────────── */
+  function buildStaticDropdowns() {
+    const targets = ['f-system', 'filter-system', 'mgmt-sys'];
+    targets.forEach(id => {
+      const sel = document.getElementById(id);
+      // Keep first placeholder option
+      const ph = sel.options[0];
+      sel.innerHTML = '';
+      sel.appendChild(ph);
+      SYSTEMS.forEach(s => {
+        const o = document.createElement('option');
+        o.value = s.code;
+        o.textContent = `${s.code} — ${s.name}`;
+        sel.appendChild(o);
+      });
+    });
+
+    // Quantity 1-100
+    const qSel = document.getElementById('f-qty');
+    for (let i = 1; i <= 100; i++) {
+      const o = document.createElement('option');
+      o.value = i; o.textContent = i;
+      qSel.appendChild(o);
+    }
+  }
+
+  /* ── Tab switching ────────────────────────────────────── */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  function goTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`[data-tab="${name}"]`).classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ── Firebase & Local Fallback Handlers ─────────────────── */
+  function updateDbBanner() {
+    const banner = document.getElementById('db-status-banner');
+    const text   = document.getElementById('db-status-text');
+    if (!banner || !text) return;
+
+    if (typeof isFirebaseConfigured !== 'undefined' && isFirebaseConfigured && db) {
+      banner.style.background = 'rgba(74,124,89,0.12)';
+      banner.style.borderColor = 'rgba(74,124,89,0.35)';
+      banner.style.color = '#4a7c59';
+      banner.firstElementChild.style.background = '#4a7c59';
+      text.textContent = 'Connected to Firebase Firestore & Storage';
+    } else {
+      banner.style.background = 'rgba(160,136,64,0.12)';
+      banner.style.borderColor = 'rgba(160,136,64,0.35)';
+      banner.style.color = '#c8a84a';
+      banner.firstElementChild.style.background = '#c8a84a';
+      text.innerHTML = 'Running in <strong>Local Storage Mode</strong> (Firebase not configured in firebase-config.js). Everything saves locally!';
+    }
+  }
+
+  /* ── Local Storage Helpers ──────────────────────────────── */
+  function loadLocalData() {
+    try {
+      cachedItems        = JSON.parse(localStorage.getItem('ojas_fb_items') || '[]');
+      cachedSubsystems   = JSON.parse(localStorage.getItem('ojas_fb_subsystems') || '{}');
+      cachedLocations    = JSON.parse(localStorage.getItem('ojas_fb_locations') || '[]');
+      cachedSublocations = JSON.parse(localStorage.getItem('ojas_fb_sublocations') || '{}');
+    } catch(e) {
+      console.error(e);
+    }
+    renderInventory();
+    refreshSubsystemDropdowns();
+    renderSubsystemList();
+    refreshLocationDropdown();
+    renderLocationList();
+    refreshSublocationDropdowns();
+    renderSublocationList();
+  }
+
+  function saveLocalItems() {
+    localStorage.setItem('ojas_fb_items', JSON.stringify(cachedItems));
+  }
+  function saveLocalSubsystems() {
+    localStorage.setItem('ojas_fb_subsystems', JSON.stringify(cachedSubsystems));
+  }
+  function saveLocalLocations() {
+    localStorage.setItem('ojas_fb_locations', JSON.stringify(cachedLocations));
+  }
+  function saveLocalSublocations() {
+    localStorage.setItem('ojas_fb_sublocations', JSON.stringify(cachedSublocations));
+  }
+
+  /* ── Start Listeners / Storage Loader ────────────────────── */
+  function startListeners() {
+    updateDbBanner();
+
+    if (!isFirebaseConfigured || !db) {
+      loadLocalData();
+      return;
+    }
+
+    try {
+      // Items — ordered newest first
+      db.collection('items').orderBy('createdAt', 'desc')
+        .onSnapshot(snap => {
+          cachedItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          renderInventory();
+        }, err => {
+          console.warn('Firestore items listener error, falling back to local:', err);
+          toast('Firestore error: ' + err.message + ' (using local data)', 'err');
+          loadLocalData();
+        });
+
+      // Subsystems
+      db.collection('subsystems')
+        .onSnapshot(snap => {
+          cachedSubsystems = {};
+          snap.docs.forEach(d => {
+            const { system, name } = d.data();
+            if (!cachedSubsystems[system]) cachedSubsystems[system] = [];
+            cachedSubsystems[system].push({ id: d.id, name });
+          });
+          refreshSubsystemDropdowns();
+          renderSubsystemList();
+        }, err => console.error('subsystems error:', err));
+
+      // Locations
+      db.collection('locations').orderBy('name')
+        .onSnapshot(snap => {
+          cachedLocations = snap.docs.map(d => ({ id: d.id, name: d.data().name }));
+          refreshLocationDropdown();
+          renderLocationList();
+        }, err => console.error('locations error:', err));
+
+      // Sublocations
+      db.collection('sublocations')
+        .onSnapshot(snap => {
+          cachedSublocations = {};
+          snap.docs.forEach(d => {
+            const { location, name } = d.data();
+            if (!cachedSublocations[location]) cachedSublocations[location] = [];
+            cachedSublocations[location].push({ id: d.id, name });
+          });
+          refreshSublocationDropdowns();
+          renderSublocationList();
+        }, err => console.error('sublocations error:', err));
+    } catch (err) {
+      console.error('Firebase setup failed, falling back:', err);
+      loadLocalData();
+    }
+  }
+
+  /* ── Image upload / preview ────────────────────────────── */
+  function previewImg(input) {
+    pendingImgFile = input.files[0] || null;
+    const preview  = document.getElementById('img-preview');
+    const hint     = document.getElementById('img-hint');
+    const clearBtn = document.getElementById('img-clear-btn');
+
+    if (pendingImgFile) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        preview.src           = e.target.result;
+        preview.style.display = 'block';
+        hint.style.display    = 'none';
+        clearBtn.style.display = 'block';
+      };
+      reader.readAsDataURL(pendingImgFile);
+    }
+  }
+
+  function clearImg() {
+    pendingImgFile = null;
+    const preview  = document.getElementById('img-preview');
+    const hint     = document.getElementById('img-hint');
+    const clearBtn = document.getElementById('img-clear-btn');
+    preview.src           = '';
+    preview.style.display = 'none';
+    hint.style.display    = 'flex';
+    clearBtn.style.display = 'none';
+    document.getElementById('f-img-input').value = '';
+  }
+
+  async function uploadImg(file) {
+    if (!isFirebaseConfigured || !storage) {
+      // In local mode, return base64 data url directly
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    return new Promise((resolve, reject) => {
+      const overlay = document.getElementById('upload-overlay');
+      const fill    = document.getElementById('upload-fill');
+      overlay.classList.add('on');
+
+      const ref  = storage.ref(`item-images/${Date.now()}_${file.name}`);
+      const task = ref.put(file);
+
+      task.on('state_changed',
+        snap => { fill.style.width = (snap.bytesTransferred / snap.totalBytes * 100) + '%'; },
+        err  => { overlay.classList.remove('on'); fill.style.width = '0%'; reject(err); },
+        async () => {
+          overlay.classList.remove('on');
+          fill.style.width = '0%';
+          resolve(await task.snapshot.ref.getDownloadURL());
+        }
+      );
+    });
+  }
+
+  /* ── Form: system change → rebuild subsystem select ─────── */
+  function onFormSystemChange() {
+    const code = document.getElementById('f-system').value;
+    const sel  = document.getElementById('f-subsystem');
+    sel.innerHTML = '<option value="">Select Subsystem</option>';
+    if (code && cachedSubsystems[code]) {
+      cachedSubsystems[code].forEach(s => {
+        const o = document.createElement('option');
+        o.value = s.name; o.textContent = s.name;
+        sel.appendChild(o);
+      });
+    }
+  }
+
+  function refreshSubsystemDropdowns() {
+    onFormSystemChange();
+    onFilterSystemChange(false);
+  }
+
+  /* ── Submit form ───────────────────────────────────────── */
+  async function submitForm() {
+    const name    = document.getElementById('f-name').value.trim();
+    const system  = document.getElementById('f-system').value;
+    const sub     = document.getElementById('f-subsystem').value;
+    const status  = document.getElementById('f-status').value;
+    const qty     = parseInt(document.getElementById('f-qty').value) || 1;
+    const loc     = document.getElementById('f-location').value;
+    const subloc  = document.getElementById('f-sublocation').value;
+    const cond    = document.getElementById('f-condition').value.trim();
+    const notes   = document.getElementById('f-notes').value.trim();
+
+    if (!name)   { toast('Part name is required.', 'err'); document.getElementById('f-name').focus(); return; }
+    if (!system) { toast('Please select a system.', 'err'); document.getElementById('f-system').focus(); return; }
+
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true;
+    btn.textContent = currentEditId ? 'Updating…' : 'Saving…';
+
+    try {
+      // Resolve image URL
+      let imageUrl = '';
+      if (currentEditId) {
+        imageUrl = cachedItems.find(i => i.id === currentEditId)?.imageUrl || '';
+      }
+      if (pendingImgFile) {
+        imageUrl = await uploadImg(pendingImgFile);
+      }
+
+      const payload = {
+        name, system, subsystem: sub, status,
+        quantity: qty, location: loc, sublocation: subloc,
+        condition: cond, notes, imageUrl,
+        updatedAt: new Date().toISOString()
+      };
+
+      if (isFirebaseConfigured && db) {
+        payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+        if (currentEditId) {
+          await db.collection('items').doc(currentEditId).update(payload);
+          toast('Part updated in Firebase.', 'ok');
+        } else {
+          payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          payload.createdBy = loggedUser;
+          await db.collection('items').add(payload);
+          toast('Part added to Firebase inventory.', 'ok');
+        }
+      } else {
+        // Fallback: Local Storage
+        if (currentEditId) {
+          const idx = cachedItems.findIndex(i => i.id === currentEditId);
+          if (idx !== -1) {
+            cachedItems[idx] = { ...cachedItems[idx], ...payload };
+          }
+          toast('Part updated locally.', 'ok');
+        } else {
+          payload.id = 'local_' + Date.now();
+          payload.createdAt = new Date().toISOString();
+          payload.createdBy = loggedUser;
+          cachedItems.unshift(payload);
+          toast('Part saved to local inventory.', 'ok');
+        }
+        saveLocalItems();
+        renderInventory();
+      }
+
+      clearForm();
+      goTab('view');
+    } catch (err) {
+      toast('Error: ' + err.message, 'err');
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = currentEditId ? 'Update Part' : 'Add to Inventory';
+    }
+  }
+
+  /* ── Delete item ───────────────────────────────────────── */
+  async function deleteItem() {
+    if (!currentEditId) return;
+    if (!confirm('Permanently delete this part from inventory?')) return;
+    try {
+      if (isFirebaseConfigured && db) {
+        await db.collection('items').doc(currentEditId).delete();
+        toast('Part deleted from Firebase.', 'ok');
+      } else {
+        cachedItems = cachedItems.filter(i => i.id !== currentEditId);
+        saveLocalItems();
+        renderInventory();
+        toast('Part deleted locally.', 'ok');
+      }
+      clearForm();
+      goTab('view');
+    } catch (err) {
+      toast('Delete failed: ' + err.message, 'err');
+    }
+  }
+
+  /* ── Clear form ────────────────────────────────────────── */
+  function clearForm() {
+    currentEditId = null;
+    pendingImgFile = null;
+    ['f-name','f-condition','f-notes'].forEach(id => document.getElementById(id).value = '');
+    ['f-system','f-subsystem','f-location','f-sublocation'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.selectedIndex = 0;
+    });
+    document.getElementById('f-status').value = 'free';
+    document.getElementById('f-qty').selectedIndex = 0;
+    clearImg();
+    document.getElementById('form-title').textContent    = 'Add New Part';
+    document.getElementById('edit-pill').style.display   = 'none';
+    document.getElementById('btn-submit').textContent    = 'Add to Inventory';
+    document.getElementById('btn-del-part').style.display = 'none';
+    onFormSystemChange();
+    onFormLocationChange();
+  }
+
+  /* ── Open item for editing ─────────────────────────────── */
+  function openEdit(item) {
+    currentEditId = item.id;
+    document.getElementById('f-name').value      = item.name      || '';
+    document.getElementById('f-system').value    = item.system    || '';
+    onFormSystemChange();
+    // Slight delay so subsystem options are built first
+    setTimeout(() => {
+      document.getElementById('f-subsystem').value = item.subsystem || '';
+    }, 60);
+
+    document.getElementById('f-status').value    = item.status    || 'free';
+    document.getElementById('f-qty').value       = item.quantity  || 1;
+    document.getElementById('f-location').value  = item.location  || '';
+    onFormLocationChange();
+    setTimeout(() => {
+      document.getElementById('f-sublocation').value = item.sublocation || '';
+    }, 60);
+
+    document.getElementById('f-condition').value = item.condition || '';
+    document.getElementById('f-notes').value     = item.notes     || '';
+
+    if (item.imageUrl) {
+      const preview = document.getElementById('img-preview');
+      preview.src           = item.imageUrl;
+      preview.style.display = 'block';
+      document.getElementById('img-hint').style.display = 'none';
+      document.getElementById('img-clear-btn').style.display = 'block';
+    } else {
+      clearImg();
+    }
+
+    document.getElementById('form-title').textContent    = 'Edit Part';
+    document.getElementById('edit-pill').style.display   = 'inline-block';
+    document.getElementById('btn-submit').textContent    = 'Update Part';
+    document.getElementById('btn-del-part').style.display = 'inline-block';
+
+    goTab('add');
+  }
+
+  /* ── Render inventory cards ────────────────────────────── */
+  function renderInventory() {
+    const sysF    = document.getElementById('filter-system')?.value  || '';
+    const subF    = document.getElementById('filter-subsystem')?.value || '';
+    const locF    = document.getElementById('filter-location')?.value || '';
+    const sublocF = document.getElementById('filter-sublocation')?.value || '';
+    const stF     = document.getElementById('filter-status')?.value   || '';
+    const q       = (document.getElementById('filter-q')?.value || '').toLowerCase();
+
+    const filtered = cachedItems.filter(item => {
+      if (sysF && item.system !== sysF) return false;
+      if (subF && item.subsystem !== subF) return false;
+      if (locF && item.location !== locF) return false;
+      if (sublocF && item.sublocation !== sublocF) return false;
+      if (stF  && item.status !== stF) return false;
+      if (q && !(
+        (item.name        || '').toLowerCase().includes(q) ||
+        (item.notes       || '').toLowerCase().includes(q) ||
+        (item.condition   || '').toLowerCase().includes(q) ||
+        (item.location    || '').toLowerCase().includes(q) ||
+        (item.sublocation || '').toLowerCase().includes(q)
+      )) return false;
+      return true;
+    });
+
+    const grid  = document.getElementById('items-grid');
+    const empty = document.getElementById('inv-empty');
+    document.getElementById('inv-count').textContent = filtered.length;
+
+    // Remove old cards (keep empty-state div)
+    Array.from(grid.children).forEach(c => { if (c !== empty) c.remove(); });
+
+    if (filtered.length === 0) {
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      filtered.forEach((item, i) => {
+        const sc = { free: 's-free', 'in-use': 's-inuse', out: 's-out' }[item.status] || 's-free';
+        const sl = { free: 'Free to Use', 'in-use': 'In Use', out: 'Out of Stock' }[item.status] || '—';
+
+        let locDisplay = '&mdash;';
+        if (item.location && item.sublocation) {
+          locDisplay = '&#128205; ' + x(item.location) + ' &middot; ' + x(item.sublocation);
+        } else if (item.location) {
+          locDisplay = '&#128205; ' + x(item.location);
+        } else if (item.condition) {
+          locDisplay = x(item.condition);
+        }
+
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.style.animationDelay = `${Math.min(i, 20) * 0.03}s`;
+        card.onclick = () => openEdit(item);
+
+        card.innerHTML = `
+          <div class="item-img-wrap">
+            ${item.imageUrl
+              ? `<img src="${x(item.imageUrl)}" alt="${x(item.name)}" />`
+              : `<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                   <rect x="3" y="3" width="18" height="18" rx="2"/>
+                   <circle cx="8.5" cy="8.5" r="1.5"/>
+                   <polyline points="21 15 16 10 5 21"/>
+                 </svg>`}
+          </div>
+          <div class="item-body">
+            <div class="item-sys-tag">${x(item.system || '')}${item.subsystem ? ' · ' + x(item.subsystem) : ''}</div>
+            <div class="item-name">${x(item.name)}</div>
+            <div class="item-sub-label">${locDisplay}</div>
+            <div class="item-footer">
+              <span class="s-badge ${sc}">${sl}</span>
+              <span class="item-qty">Qty&nbsp;${item.quantity || 1}</span>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+  }
+
+  /* ── Filter: system change ─────────────────────────────── */
+  function onFilterSystemChange(doRender = true) {
+    const code = document.getElementById('filter-system').value;
+    const sel  = document.getElementById('filter-subsystem');
+    sel.innerHTML = '<option value="">All Subsystems</option>';
+    if (code) {
+      sel.style.display = 'inline-block';
+      (cachedSubsystems[code] || []).forEach(s => {
+        const o = document.createElement('option');
+        o.value = s.name; o.textContent = s.name;
+        sel.appendChild(o);
+      });
+    } else {
+      sel.style.display = 'none';
+    }
+    if (doRender) renderInventory();
+  }
+
+  /* ── Filter: location change ───────────────────────────── */
+  function onFilterLocationChange(doRender = true) {
+    const loc = document.getElementById('filter-location').value;
+    const sel = document.getElementById('filter-sublocation');
+    sel.innerHTML = '<option value="">All Sub-locations</option>';
+    if (loc && cachedSublocations[loc] && cachedSublocations[loc].length > 0) {
+      sel.style.display = 'inline-block';
+      cachedSublocations[loc].forEach(sl => {
+        const o = document.createElement('option');
+        o.value = sl.name; o.textContent = sl.name;
+        sel.appendChild(o);
+      });
+    } else {
+      sel.style.display = 'none';
+    }
+    if (doRender) renderInventory();
+  }
+
+  /* ── Form: location change -> rebuild sublocation select ── */
+  function onFormLocationChange() {
+    const loc = document.getElementById('f-location').value;
+    const sel = document.getElementById('f-sublocation');
+    sel.innerHTML = '<option value="">Select Sub-location</option>';
+    if (loc && cachedSublocations[loc]) {
+      cachedSublocations[loc].forEach(sl => {
+        const o = document.createElement('option');
+        o.value = sl.name; o.textContent = sl.name;
+        sel.appendChild(o);
+      });
+    }
+  }
+
+  function refreshSublocationDropdowns() {
+    onFormLocationChange();
+    onFilterLocationChange(false);
+  }
+
+  /* ── Location dropdown (Add form + Filters + Manage) ───── */
+  function refreshLocationDropdown() {
+    const targets = ['f-location', 'filter-location', 'mgmt-loc-sel'];
+    targets.forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const cur = sel.value;
+      const firstText = id === 'filter-location' ? 'All Locations' : 'Select Location';
+      sel.innerHTML = `<option value="">${firstText}</option>`;
+      cachedLocations.forEach(l => {
+        const o = document.createElement('option');
+        o.value = l.name; o.textContent = l.name;
+        sel.appendChild(o);
+      });
+      if (cur) sel.value = cur;
+    });
+  }
+
+  /* ── Manage: render subsystem list ────────────────────── */
+  function renderSubsystemList() {
+    const code = document.getElementById('mgmt-sys').value;
+    const list = document.getElementById('sub-list');
+
+    if (!code) {
+      list.innerHTML = '<div class="mgmt-empty">Select a system above</div>';
+      return;
+    }
+
+    const subs = cachedSubsystems[code] || [];
+    if (subs.length === 0) {
+      list.innerHTML = '<div class="mgmt-empty">No subsystems for this system yet</div>';
+      return;
+    }
+
+    list.innerHTML = subs.map(s => `
+      <div class="mgmt-item">
+        <span>${x(s.name)}</span>
+        <button class="btn-del-mgmt" onclick="deleteSubsystem('${s.id}')" title="Remove">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6"/><path d="M14 11v6"/>
+            <path d="M9 6V4h6v2"/>
+          </svg>
+        </button>
+      </div>
+    `).join('');
+  }
+
+  async function addSubsystem() {
+    const code = document.getElementById('mgmt-sys').value;
+    const name = document.getElementById('mgmt-sub-input').value.trim();
+    if (!code) { toast('Select a system first.', 'err'); return; }
+    if (!name) { toast('Enter a subsystem name.', 'err'); return; }
+
+    // Prevent duplicates
+    if ((cachedSubsystems[code] || []).some(s => s.name.toLowerCase() === name.toLowerCase())) {
+      toast('Subsystem already exists.', 'err'); return;
+    }
+
+    try {
+      if (isFirebaseConfigured && db) {
+        await db.collection('subsystems').add({ system: code, name });
+        toast('Subsystem added to Firebase.', 'ok');
+      } else {
+        if (!cachedSubsystems[code]) cachedSubsystems[code] = [];
+        cachedSubsystems[code].push({ id: 'local_sub_' + Date.now(), name });
+        saveLocalSubsystems();
+        refreshSubsystemDropdowns();
+        renderSubsystemList();
+        toast('Subsystem added locally.', 'ok');
+      }
+      document.getElementById('mgmt-sub-input').value = '';
+    } catch (err) { toast('Error: ' + err.message, 'err'); }
+  }
+
+  async function deleteSubsystem(id) {
+    if (!confirm('Remove this subsystem?')) return;
+    try {
+      if (isFirebaseConfigured && db) {
+        await db.collection('subsystems').doc(id).delete();
+        toast('Subsystem removed from Firebase.', 'ok');
+      } else {
+        const code = document.getElementById('mgmt-sys').value;
+        if (code && cachedSubsystems[code]) {
+          cachedSubsystems[code] = cachedSubsystems[code].filter(s => s.id !== id);
+          saveLocalSubsystems();
+          refreshSubsystemDropdowns();
+          renderSubsystemList();
+          toast('Subsystem removed locally.', 'ok');
+        }
+      }
+    } catch (err) { toast('Error: ' + err.message, 'err'); }
+  }
+
+  /* ── Manage: locations ─────────────────────────────────── */
+  function renderLocationList() {
+    const list = document.getElementById('loc-list');
+    if (cachedLocations.length === 0) {
+      list.innerHTML = '<div class="mgmt-empty">No locations added yet</div>';
+      return;
+    }
+    list.innerHTML = cachedLocations.map(l => `
+      <div class="mgmt-item">
+        <span>${x(l.name)}</span>
+        <button class="btn-del-mgmt" onclick="deleteLocation('${l.id}')" title="Remove">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6"/><path d="M14 11v6"/>
+            <path d="M9 6V4h6v2"/>
+          </svg>
+        </button>
+      </div>
+    `).join('');
+  }
+
+  async function addLocation() {
+    const name = document.getElementById('mgmt-loc-input').value.trim();
+    if (!name) { toast('Enter a location name.', 'err'); return; }
+    if (cachedLocations.some(l => l.name.toLowerCase() === name.toLowerCase())) {
+      toast('Location already exists.', 'err'); return;
+    }
+    try {
+      if (isFirebaseConfigured && db) {
+        await db.collection('locations').add({ name });
+        toast('Location added to Firebase.', 'ok');
+      } else {
+        cachedLocations.push({ id: 'local_loc_' + Date.now(), name });
+        saveLocalLocations();
+        refreshLocationDropdown();
+        renderLocationList();
+        toast('Location added locally.', 'ok');
+      }
+      document.getElementById('mgmt-loc-input').value = '';
+    } catch (err) { toast('Error: ' + err.message, 'err'); }
+  }
+
+  async function deleteLocation(id) {
+    if (!confirm('Remove this location? (Note: sub-locations under it may also need update)')) return;
+    try {
+      if (isFirebaseConfigured && db) {
+        await db.collection('locations').doc(id).delete();
+        toast('Location removed from Firebase.', 'ok');
+      } else {
+        cachedLocations = cachedLocations.filter(l => l.id !== id);
+        saveLocalLocations();
+        refreshLocationDropdown();
+        renderLocationList();
+        toast('Location removed locally.', 'ok');
+      }
+    } catch (err) { toast('Error: ' + err.message, 'err'); }
+  }
+
+  /* ── Manage: sub-locations ─────────────────────────────── */
+  function renderSublocationList() {
+    const loc = document.getElementById('mgmt-loc-sel').value;
+    const list = document.getElementById('subloc-list');
+
+    if (!loc) {
+      list.innerHTML = '<div class="mgmt-empty">Select a location above to see its sub-locations</div>';
+      return;
+    }
+
+    const sublocs = cachedSublocations[loc] || [];
+    if (sublocs.length === 0) {
+      list.innerHTML = '<div class="mgmt-empty">No sub-locations for this location yet</div>';
+      return;
+    }
+
+    list.innerHTML = sublocs.map(sl => `
+      <div class="mgmt-item">
+        <span>${x(sl.name)}</span>
+        <button class="btn-del-mgmt" onclick="deleteSublocation('${sl.id}')" title="Remove">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6"/><path d="M14 11v6"/>
+            <path d="M9 6V4h6v2"/>
+          </svg>
+        </button>
+      </div>
+    `).join('');
+  }
+
+  async function addSublocation() {
+    const loc  = document.getElementById('mgmt-loc-sel').value;
+    const name = document.getElementById('mgmt-subloc-input').value.trim();
+    if (!loc)  { toast('Select a location first.', 'err'); return; }
+    if (!name) { toast('Enter a sub-location name.', 'err'); return; }
+
+    if ((cachedSublocations[loc] || []).some(s => s.name.toLowerCase() === name.toLowerCase())) {
+      toast('Sub-location already exists for this location.', 'err'); return;
+    }
+
+    try {
+      if (isFirebaseConfigured && db) {
+        await db.collection('sublocations').add({ location: loc, name });
+        toast('Sub-location added to Firebase.', 'ok');
+      } else {
+        if (!cachedSublocations[loc]) cachedSublocations[loc] = [];
+        cachedSublocations[loc].push({ id: 'local_subloc_' + Date.now(), name });
+        saveLocalSublocations();
+        refreshSublocationDropdowns();
+        renderSublocationList();
+        toast('Sub-location added locally.', 'ok');
+      }
+      document.getElementById('mgmt-subloc-input').value = '';
+    } catch (err) { toast('Error: ' + err.message, 'err'); }
+  }
+
+  async function deleteSublocation(id) {
+    if (!confirm('Remove this sub-location?')) return;
+    try {
+      if (isFirebaseConfigured && db) {
+        await db.collection('sublocations').doc(id).delete();
+        toast('Sub-location removed from Firebase.', 'ok');
+      } else {
+        const loc = document.getElementById('mgmt-loc-sel').value;
+        if (loc && cachedSublocations[loc]) {
+          cachedSublocations[loc] = cachedSublocations[loc].filter(s => s.id !== id);
+          saveLocalSublocations();
+          refreshSublocationDropdowns();
+          renderSublocationList();
+          toast('Sub-location removed locally.', 'ok');
+        }
+      }
+    } catch (err) { toast('Error: ' + err.message, 'err'); }
+  }
+
+  /* ── Export to Google Sheets / CSV ──────────────────────── */
+  function exportInventoryToCSV() {
+    if (!cachedItems || cachedItems.length === 0) {
+      toast('Inventory is empty. Nothing to export.', 'err');
+      return;
+    }
+
+    // Determine current filter state
+    const sysF    = document.getElementById('filter-system')?.value  || '';
+    const subF    = document.getElementById('filter-subsystem')?.value || '';
+    const locF    = document.getElementById('filter-location')?.value || '';
+    const sublocF = document.getElementById('filter-sublocation')?.value || '';
+    const stF     = document.getElementById('filter-status')?.value   || '';
+    const q       = (document.getElementById('filter-q')?.value || '').toLowerCase();
+
+    const itemsToExport = cachedItems.filter(item => {
+      if (sysF && item.system !== sysF) return false;
+      if (subF && item.subsystem !== subF) return false;
+      if (locF && item.location !== locF) return false;
+      if (sublocF && item.sublocation !== sublocF) return false;
+      if (stF  && item.status !== stF) return false;
+      if (q && !(
+        (item.name        || '').toLowerCase().includes(q) ||
+        (item.notes       || '').toLowerCase().includes(q) ||
+        (item.condition   || '').toLowerCase().includes(q) ||
+        (item.location    || '').toLowerCase().includes(q) ||
+        (item.sublocation || '').toLowerCase().includes(q)
+      )) return false;
+      return true;
+    });
+
+    if (itemsToExport.length === 0) {
+      toast('No items match current filters to export.', 'err');
+      return;
+    }
+
+    const statusMap = {
+      'free': 'Free to Use',
+      'in-use': 'In Use',
+      'out': 'Out of Stock'
+    };
+
+    const sysMap = {};
+    SYSTEMS.forEach(s => { sysMap[s.code] = s.name; });
+
+    // CSV Headers
+    const headers = [
+      'Part Name',
+      'System Code',
+      'System Name',
+      'Subsystem',
+      'Status',
+      'Quantity',
+      'Location',
+      'Sub-location',
+      'Condition',
+      'Notes',
+      'Image URL',
+      'Created By',
+      'Created At'
+    ];
+
+    function csvEscape(val) {
+      if (val === null || val === undefined) return '""';
+      let str = String(val);
+      if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
+        str = '"' + str.replace(/"/g, '""') + '"';
+      } else {
+        str = '"' + str + '"';
+      }
+      return str;
+    }
+
+    const rows = [headers.map(csvEscape).join(',')];
+
+    itemsToExport.forEach(item => {
+      let createdStr = '';
+      if (item.createdAt) {
+        if (typeof item.createdAt.toDate === 'function') {
+          createdStr = item.createdAt.toDate().toLocaleString();
+        } else {
+          createdStr = new Date(item.createdAt).toLocaleString();
+        }
+      }
+
+      const row = [
+        csvEscape(item.name || ''),
+        csvEscape(item.system || ''),
+        csvEscape(sysMap[item.system] || item.system || ''),
+        csvEscape(item.subsystem || ''),
+        csvEscape(statusMap[item.status] || item.status || ''),
+        csvEscape(item.quantity || 1),
+        csvEscape(item.location || ''),
+        csvEscape(item.sublocation || ''),
+        csvEscape(item.condition || ''),
+        csvEscape(item.notes || ''),
+        csvEscape(item.imageUrl || ''),
+        csvEscape(item.createdBy || ''),
+        csvEscape(createdStr)
+      ];
+      rows.push(row.join(','));
+    });
+
+    // Add UTF-8 BOM so Excel and Google Sheets open foreign characters and formatting properly
+    const csvContent = '\uFEFF' + rows.join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    a.download = `Ojas_Racing_Inventory_${dateStr}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast(`Exported ${itemsToExport.length} items to CSV (ready for Google Sheets)!`, 'ok');
+  }
+
+  /* ── Toast ─────────────────────────────────────────────── */
+  let _toastTimer;
+  function toast(msg, type = '') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className   = `toast show ${type}`;
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => { el.className = 'toast'; }, 3200);
+  }
+
+  /* ── HTML escape ────────────────────────────────────────── */
+  function x(s) {
+    return String(s || '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── Init ───────────────────────────────────────────────── */
+  buildStaticDropdowns();
+  startListeners();
+
+</script>
+</body>
+</html>

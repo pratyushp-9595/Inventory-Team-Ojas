@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Ojas Racing — Inventory</title>
+  <script src="config.js"></script>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+
+    /* ── Reset ────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Page foundation ─────────────────────────────────────── */
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      color: #c8cdd6;
+      background-color: #080a0f;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Logo image — very dark, barely-there watermark in background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        url('logo.jpg') center center / 55% auto no-repeat;
+      opacity: 0.04;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Vignette */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 30%, #050709 100%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    header, .hero, main, footer { position: relative; z-index: 1; }
+
+    /* ── Header ──────────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(1rem, 4vw, 2.5rem);
+      height: 64px;
+      background: rgba(8, 10, 16, 0.96);
+      border-bottom: 1px solid #1f2430;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      height: 38px;
+      width: 38px;
+      object-fit: cover;
+      border-radius: 7px;
+      border: 1px solid #2e3445;
+      filter: brightness(0.9) saturate(0.7);
+    }
+
+    .logo-text-stack {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+
+    .logo-text-stack .eyebrow {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.52rem;
+      font-weight: 700;
+      letter-spacing: 0.26em;
+      color: #c49d3b;
+      text-transform: uppercase;
+    }
+
+    .logo-text-stack .wordmark {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #e2e5eb;
+      letter-spacing: 0.02em;
+    }
+
+    .header-right {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.52rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: #4f576b;
+      text-transform: uppercase;
+    }
+
+    /* ── Hero heading ────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1rem, 4vw, 2rem) clamp(1.8rem, 4vw, 3rem);
+    }
+
+    .hero-tag {
+      display: inline-block;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.54rem;
+      font-weight: 700;
+      letter-spacing: 0.30em;
+      color: #555e73;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 {
+      font-weight: 300;
+      font-size: clamp(1.2rem, 3.2vw, 1.85rem);
+      color: #6c768c;
+      letter-spacing: 0.02em;
+      line-height: 1.35;
+    }
+
+    .hero h1 strong {
+      display: block;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1rem, 2.8vw, 1.45rem);
+      color: #e2e5eb;
+      letter-spacing: 0.04em;
+      margin-top: 0.45rem;
+      background: linear-gradient(100deg, #c49d3b 0%, #e2c168 38%, #8aabb8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-rule {
+      width: 48px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #282f40, transparent);
+      margin: 1.6rem auto 0;
+    }
+
+    /* ── Login card ──────────────────────────────────────────── */
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 0 clamp(1rem, 3.5vw, 2rem) 4rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #0b0e15;
+      border: 1px solid #1a202d;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.03) inset,
+        0 22px 65px rgba(0,0,0,0.65);
+      animation: fadeUp 0.4s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-top-rule {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #a08840 25%, #d8b456 50%, #a08840 75%, transparent);
+    }
+
+    .card-body { padding: clamp(1.5rem, 4vw, 2.2rem); }
+
+    .card-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      color: #555e73;
+      text-transform: uppercase;
+      margin-bottom: 1.6rem;
+    }
+
+    /* ── Form ─────────────────────────────────────────────────── */
+    .form-group { margin-bottom: 1.2rem; }
+
+    label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #636d85;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.45rem;
+    }
+
+    .input-wrap { position: relative; }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.75rem 2.5rem 0.75rem 1rem;
+      background: #080a0f;
+      border: 1px solid #1c2333;
+      border-radius: 8px;
+      color: #d5dae5;
+      font-size: 0.92rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      min-height: 44px;
+      transition: all 0.18s ease;
+      caret-color: #c49d3b;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #a08840;
+      box-shadow: 0 0 0 2px rgba(160,136,64,0.15);
+    }
+
+    input::placeholder { color: #2a2d35; }
+
+    .pwd-toggle {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #2e3240;
+      font-size: 0.85rem;
+      padding: 4px;
+      transition: color 0.18s;
+      line-height: 1;
+    }
+    .pwd-toggle:hover { color: #6b7280; }
+
+    /* ── Error ─────────────────────────────────────────────────── */
+    .error-msg {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(127,29,29,0.18);
+      border: 1px solid rgba(153,27,27,0.35);
+      border-radius: 6px;
+      padding: 0.6rem 0.8rem;
+      color: #b45252;
+      font-size: 0.82rem;
+      margin-bottom: 1.1rem;
+      animation: shake 0.3s ease;
+    }
+    .error-msg.visible { display: flex; }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25%,75%  { transform: translateX(-5px); }
+      50%      { transform: translateX(5px); }
+    }
+
+    /* ── Button ─────────────────────────────────────────────────── */
+    .btn-login {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.78rem 1rem;
+      background: #0d0f14;
+      border: 1px solid #a08840;
+      border-radius: 7px;
+      color: #c8a84a;
+      font-size: 0.8rem;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    }
+
+    .btn-login:hover {
+      background: #13100a;
+      box-shadow: 0 0 16px rgba(160,136,64,0.12);
+      color: #d4b86a;
+    }
+
+    .btn-login:active { opacity: 0.8; }
+    .btn-login:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* ── Divider ─────────────────────────────────────────────── */
+    .card-divider {
+      height: 1px;
+      background: #13161c;
+      margin: 1.6rem -2rem;
+    }
+
+    .card-footer-note {
+      font-size: 0.72rem;
+      color: #2a2d35;
+      text-align: center;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Footer ──────────────────────────────────────────────── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid #13161c;
+      padding: 1.1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-left {
+      font-size: 0.7rem;
+      color: #2a2d35;
+      letter-spacing: 0.06em;
+    }
+
+    .footer-right {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.5rem;
+      letter-spacing: 0.22em;
+      color: #1e2229;
+      text-transform: uppercase;
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────────── -->
+<header>
+  <a class="header-logo" href="#">
+    <img src="logo.jpg" alt="Team Ojas Racing" />
+    <div class="logo-text-stack">
+      <span class="eyebrow">Team</span>
+      <span class="wordmark">Ojas Racing</span>
+    </div>
+  </a>
+  <div class="header-right">Inventory System</div>
+</header>
+
+<!-- ── HERO HEADING ───────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-tag">Restricted Access</div>
+  <h1>
+    Welcome to
+    <strong>"Team Ojas Racing - Inventory"</strong>
+  </h1>
+  <div class="hero-rule"></div>
+</div>
+
+<!-- ── LOGIN CARD ─────────────────────────────────────────── -->
+<main>
+  <div class="card">
+    <div class="card-top-rule"></div>
+    <div class="card-body">
+
+      <div class="card-label">Member Sign In</div>
+
+      <!-- Error -->
+      <div class="error-msg" id="error-msg">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="10" cy="10" r="9"/><line x1="10" y1="6" x2="10" y2="10"/><circle cx="10" cy="14" r="0.5" fill="currentColor"/>
+        </svg>
+        <span id="error-text">Invalid credentials.</span>
+      </div>
+
+      <form id="login-form" novalidate>
+
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="input-wrap">
+            <input type="text" id="username" placeholder="Enter username"
+              autocomplete="username" autofocus required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="password" placeholder="Enter password"
+              autocomplete="current-password" required />
+            <button type="button" class="pwd-toggle" id="pwd-toggle" title="Show/hide">
+              <svg id="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button class="btn-login" type="submit" id="login-btn">Sign In</button>
+
+      </form>
+
+      <div class="card-divider"></div>
+      <div class="card-footer-note">Authorised personnel only</div>
+
+    </div>
+  </div>
+</main>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-left">&copy; <span id="js-year"></span> Team Ojas Racing &mdash; All rights reserved</div>
+  <div class="footer-right">Inventory v1.0</div>
+</footer>
+
+<script>
+  document.getElementById('js-year').textContent = new Date().getFullYear();
+
+  if (sessionStorage.getItem('logged_in_user')) {
+    window.location.href = 'dashboard.html';
+  }
+
+  // Eye toggle
+  const pwdInput  = document.getElementById('password');
+  const pwdToggle = document.getElementById('pwd-toggle');
+  const eyeIcon   = document.getElementById('eye-icon');
+
+  const eyeOpen   = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  const eyeSlash  = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+
+  pwdToggle.addEventListener('click', () => {
+    const visible = pwdInput.type === 'password';
+    pwdInput.type    = visible ? 'text' : 'password';
+    eyeIcon.innerHTML = visible ? eyeSlash : eyeOpen;
+  });
+
+  // Form
+  const form     = document.getElementById('login-form');
+  const errorBox = document.getElementById('error-msg');
+  const errorTxt = document.getElementById('error-text');
+  const loginBtn = document.getElementById('login-btn');
+
+  function showError(msg) {
+    errorTxt.textContent = msg;
+    errorBox.classList.remove('visible');
+    void errorBox.offsetWidth;
+    errorBox.classList.add('visible');
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const rawUser = document.getElementById('username').value.trim();
+    const pass    = document.getElementById('password').value;
+
+    if (!rawUser || !pass) { showError('Please fill in all fields.'); return; }
+
+    const userLower  = rawUser.toLowerCase();
+    const users      = SITE_CONFIG.users || {};
+    const matchedKey = Object.keys(users).find(k => k.toLowerCase() === userLower);
+
+    if (!matchedKey)              { showError('Username not recognised.'); return; }
+    if (users[matchedKey] !== pass) { showError('Incorrect password.'); return; }
+
+    loginBtn.disabled    = true;
+    loginBtn.textContent = 'Authenticating...';
+    errorBox.classList.remove('visible');
+
+    sessionStorage.setItem('logged_in_user', matchedKey);
+    sessionStorage.setItem('login_time', Date.now().toString());
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 500);
+  });
+
+  ['username','password'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      errorBox.classList.remove('visible');
+    });
+  });
+</script>
+
+</body>
+</html>
