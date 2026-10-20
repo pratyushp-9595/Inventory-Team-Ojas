@@ -5,7 +5,7 @@
 // https://supabase.com -> Project Settings -> API
 // ============================================================
 
-const SUPABASE_URL = "https://rkrtrtmexldflciincdwi.supabase.co";
+const SUPABASE_URL = "https://rkrtrmexldflciincdwi.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrcnRybWV4bGRmbGNpaW5jZHdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0OTY5MzIsImV4cCI6MjEwODA3MjkzMn0.7PvKvM7mJK1LPMffJaq0CupnZyLMwv7Ca7qrohAckCk";
 
 let supabaseClient = null;
