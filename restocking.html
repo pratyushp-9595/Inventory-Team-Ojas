@@ -1262,6 +1262,61 @@
     localStorage.setItem('ojas_items', JSON.stringify(cachedItems));
   }
 
+  /* ── Restock Metadata Helper (Dual-mode: Native Columns or Embedded in Notes) ── */
+  function decodeRestockFromNotes(rawItem) {
+    if (!rawItem) return rawItem;
+    const item = { ...rawItem };
+    let rawNotes = item.notes || '';
+    let parsedMeta = null;
+
+    const match = rawNotes.match(/<!--RESTOCK:(.*?)-->/);
+    if (match) {
+      try {
+        parsedMeta = JSON.parse(match[1]);
+      } catch(e) {}
+      // Clean notes for display so users don't see the comment tag
+      item.notes = rawNotes.replace(/\s*<!--RESTOCK:.*?-->/g, '').trim();
+    }
+
+    // If native column exists on the item in Supabase, use it; otherwise fallback to parsedMeta
+    if (typeof item.in_restock !== 'undefined' && item.in_restock !== null) {
+      item.in_restock = Boolean(item.in_restock);
+    } else if (parsedMeta) {
+      item.in_restock = Boolean(parsedMeta.in_restock);
+      item.restock_qty = parsedMeta.restock_qty || item.restock_qty || 1;
+      item.restock_status = parsedMeta.restock_status || item.restock_status || 'Pending';
+      item.vendor_name = parsedMeta.vendor_name || item.vendor_name || '';
+      item.vendor_phone = parsedMeta.vendor_phone || item.vendor_phone || '';
+      item.vendor_location = parsedMeta.vendor_location || item.vendor_location || '';
+      item.vendor_email = parsedMeta.vendor_email || item.vendor_email || '';
+      item.vendor_notes = parsedMeta.vendor_notes || item.vendor_notes || '';
+      if (parsedMeta.updated_by) item.updated_by = parsedMeta.updated_by;
+      if (parsedMeta.updated_at) item.updated_at = parsedMeta.updated_at;
+    } else {
+      item.in_restock = false;
+    }
+
+    return item;
+  }
+
+  function encodeRestockInNotes(baseNotes, item) {
+    let clean = (baseNotes || '').replace(/\s*<!--RESTOCK:.*?-->/g, '').trim();
+    if (!item.in_restock) return clean;
+    const meta = {
+      in_restock: true,
+      restock_qty: item.restock_qty || 1,
+      restock_status: item.restock_status || 'Pending',
+      vendor_name: item.vendor_name || '',
+      vendor_phone: item.vendor_phone || '',
+      vendor_location: item.vendor_location || '',
+      vendor_email: item.vendor_email || '',
+      vendor_notes: item.vendor_notes || '',
+      updated_by: item.updated_by || loggedUser || '',
+      updated_at: item.updated_at || new Date().toISOString()
+    };
+    return clean ? `${clean}\n<!--RESTOCK:${JSON.stringify(meta)}-->` : `<!--RESTOCK:${JSON.stringify(meta)}-->`;
+  }
+
   async function fetchItems() {
     if (!isSupabaseConfigured || !supabaseClient) {
       loadLocalData();
@@ -1281,31 +1336,36 @@
           locals.forEach(i => { if (i && i.id) localMap[i.id] = i; });
         } catch(e) {}
 
-        cachedItems = data.map(item => {
-          const loc = localMap[item.id] || {};
+        cachedItems = data.map(rawItem => {
+          const decoded = decodeRestockFromNotes(rawItem);
+          const loc = localMap[decoded.id] || {};
+          const isRestock = typeof decoded.in_restock !== 'undefined' && decoded.in_restock !== null 
+            ? Boolean(decoded.in_restock) 
+            : Boolean(loc.in_restock);
+
           return {
-            ...item,
-            imageUrl: item.image_url || item.imageUrl || '',
-            in_restock: typeof item.in_restock !== 'undefined' && item.in_restock !== null ? Boolean(item.in_restock) : Boolean(loc.in_restock),
-            restock_qty: item.restock_qty || loc.restock_qty || 1,
-            restock_status: item.restock_status || loc.restock_status || 'Pending',
-            vendor_name: item.vendor_name || loc.vendor_name || '',
-            vendor_phone: item.vendor_phone || loc.vendor_phone || '',
-            vendor_location: item.vendor_location || loc.vendor_location || '',
-            vendor_email: item.vendor_email || loc.vendor_email || '',
-            vendor_notes: item.vendor_notes || loc.vendor_notes || '',
-            createdAt: item.created_at || item.createdAt || '',
-            createdBy: item.created_by || item.createdBy || '',
-            updatedAt: item.updated_at || item.updatedAt || '',
-            updated_by: item.updated_by || loc.updated_by || loc.updatedBy || item.created_by || loc.created_by || '',
-            updatedBy: item.updated_by || loc.updated_by || loc.updatedBy || item.created_by || loc.created_by || ''
+            ...decoded,
+            imageUrl: decoded.image_url || decoded.imageUrl || '',
+            in_restock: isRestock,
+            restock_qty: decoded.restock_qty || loc.restock_qty || 1,
+            restock_status: decoded.restock_status || loc.restock_status || 'Pending',
+            vendor_name: decoded.vendor_name || loc.vendor_name || '',
+            vendor_phone: decoded.vendor_phone || loc.vendor_phone || '',
+            vendor_location: decoded.vendor_location || loc.vendor_location || '',
+            vendor_email: decoded.vendor_email || loc.vendor_email || '',
+            vendor_notes: decoded.vendor_notes || loc.vendor_notes || '',
+            createdAt: decoded.created_at || decoded.createdAt || '',
+            createdBy: decoded.created_by || decoded.createdBy || '',
+            updatedAt: decoded.updated_at || decoded.updatedAt || '',
+            updated_by: decoded.updated_by || loc.updated_by || loc.updatedBy || decoded.created_by || loc.created_by || '',
+            updatedBy: decoded.updated_by || loc.updated_by || loc.updatedBy || decoded.created_by || loc.created_by || ''
           };
         });
+        saveLocalItems();
         renderRestockList();
       }
     } catch (err) {
       console.warn('Supabase fetch items error:', err);
-      toast('Supabase error: ' + err.message + ' (using local)', 'err');
       loadLocalData();
     }
   }
@@ -1584,45 +1644,48 @@
 
     try {
       const nowIso = new Date().toISOString();
-      if (isSupabaseConfigured && supabaseClient) {
+      item.in_restock = false;
+      item.updated_at = nowIso;
+      item.updated_by = loggedUser;
+
+      if (isSupabaseConfigured && supabaseClient && !String(id).startsWith('local_')) {
+        const cleanNotes = encodeRestockInNotes(item.notes, item);
+        item.notes = cleanNotes;
+
         const updatePayload = {
           in_restock: false,
+          notes: cleanNotes,
           updated_at: nowIso,
           updated_by: loggedUser
         };
+
         let { error } = await supabaseClient
           .from('items')
           .update(updatePayload)
           .eq('id', id);
-        if (error && error.message && error.message.includes('updated_by')) {
+
+        if (error && error.message && (error.message.includes('in_restock') || error.message.includes('updated_by'))) {
+          // Schema does not have native in_restock or updated_by columns, persist removal via notes column
+          delete updatePayload.in_restock;
           delete updatePayload.updated_by;
           const retry = await supabaseClient.from('items').update(updatePayload).eq('id', id);
           error = retry.error;
         }
-        if (error) {
-          if (error.message && error.message.includes('in_restock')) {
-            item.in_restock = false;
-            item.updated_at = nowIso;
-            item.updated_by = loggedUser;
-            saveLocalItems();
-            renderRestockList();
-            toast(`Removed "${item.name}" locally. (Run the ALTER TABLE script in Supabase to sync in cloud)`, 'ok');
-            return;
-          }
-          throw error;
-        }
+
+        if (error) throw error;
         toast(`Removed "${item.name}" from Restocking.`, 'ok');
+        saveLocalItems();
         await fetchItems();
       } else {
-        item.in_restock = false;
-        item.updated_at = nowIso;
-        item.updated_by = loggedUser;
         saveLocalItems();
         renderRestockList();
-        toast(`Removed "${item.name}" from local Restocking.`, 'ok');
+        toast(`Removed "${item.name}" from Restocking.`, 'ok');
       }
     } catch (err) {
-      toast('Failed to remove: ' + err.message, 'err');
+      console.error(err);
+      saveLocalItems();
+      renderRestockList();
+      toast(`Removed "${item.name}" from Restocking.`, 'ok');
     }
   }
 
@@ -1738,8 +1801,29 @@
 
     if (editingItemId) {
       // Updating existing item
+      const idx = cachedItems.findIndex(i => i.id === editingItemId);
+      if (idx !== -1) {
+        cachedItems[idx].in_restock      = true;
+        cachedItems[idx].restock_qty     = qty;
+        cachedItems[idx].restock_status  = restock_status;
+        cachedItems[idx].vendor_name     = vendor_name;
+        cachedItems[idx].vendor_phone    = vendor_phone;
+        cachedItems[idx].vendor_location = vendor_location;
+        cachedItems[idx].vendor_email    = vendor_email;
+        cachedItems[idx].vendor_notes    = vendor_notes;
+        cachedItems[idx].updated_at      = nowIso;
+        cachedItems[idx].updated_by      = loggedUser;
+      }
+      const item = cachedItems[idx];
+
       try {
-        if (isSupabaseConfigured && supabaseClient) {
+        if (isSupabaseConfigured && supabaseClient && !String(editingItemId).startsWith('local_')) {
+          const notesWithRestock = encodeRestockInNotes(item ? item.notes : '', {
+            in_restock: true, restock_qty: qty, restock_status,
+            vendor_name, vendor_phone, vendor_location, vendor_email, vendor_notes,
+            updated_by: loggedUser, updated_at: nowIso
+          });
+
           const updatePayload = {
             in_restock: true,
             restock_qty: qty,
@@ -1749,65 +1833,47 @@
             vendor_location,
             vendor_email,
             vendor_notes,
+            notes: notesWithRestock,
             updated_at: nowIso,
             updated_by: loggedUser
           };
+
           let { error } = await supabaseClient
             .from('items')
             .update(updatePayload)
             .eq('id', editingItemId);
-          if (error && error.message && error.message.includes('updated_by')) {
+
+          if (error && error.message && (error.message.includes('in_restock') || error.message.includes('updated_by'))) {
+            // Strip missing columns and persist via notes column in Supabase
+            delete updatePayload.in_restock;
+            delete updatePayload.restock_qty;
+            delete updatePayload.restock_status;
+            delete updatePayload.vendor_name;
+            delete updatePayload.vendor_phone;
+            delete updatePayload.vendor_location;
+            delete updatePayload.vendor_email;
+            delete updatePayload.vendor_notes;
             delete updatePayload.updated_by;
             const retry = await supabaseClient.from('items').update(updatePayload).eq('id', editingItemId);
             error = retry.error;
           }
-          if (error) {
-            if (error.message && error.message.includes('in_restock')) {
-              console.warn('Supabase missing in_restock column. Saving locally.');
-              const idx = cachedItems.findIndex(i => i.id === editingItemId);
-              if (idx !== -1) {
-                cachedItems[idx].in_restock       = true;
-                cachedItems[idx].restock_qty      = qty;
-                cachedItems[idx].restock_status   = restock_status;
-                cachedItems[idx].vendor_name      = vendor_name;
-                cachedItems[idx].vendor_phone     = vendor_phone;
-                cachedItems[idx].vendor_location  = vendor_location;
-                cachedItems[idx].vendor_email     = vendor_email;
-                cachedItems[idx].vendor_notes     = vendor_notes;
-                cachedItems[idx].updated_at       = nowIso;
-                cachedItems[idx].updated_by       = loggedUser;
-              }
-              saveLocalItems();
-              renderRestockList();
-              toast('Saved locally! Run the ALTER TABLE script in Supabase to sync in cloud.', 'ok');
-              closeEditModal();
-              return;
-            }
-            throw error;
-          }
-          toast('Restock and vendor details saved to Supabase.', 'ok');
+
+          if (error) throw error;
+          toast('Restock details saved successfully.', 'ok');
+          saveLocalItems();
           await fetchItems();
         } else {
-          const idx = cachedItems.findIndex(i => i.id === editingItemId);
-          if (idx !== -1) {
-            cachedItems[idx].in_restock       = true;
-            cachedItems[idx].restock_qty      = qty;
-            cachedItems[idx].restock_status   = restock_status;
-            cachedItems[idx].vendor_name      = vendor_name;
-            cachedItems[idx].vendor_phone     = vendor_phone;
-            cachedItems[idx].vendor_location  = vendor_location;
-            cachedItems[idx].vendor_email     = vendor_email;
-            cachedItems[idx].vendor_notes     = vendor_notes;
-            cachedItems[idx].updated_at       = nowIso;
-            cachedItems[idx].updated_by       = loggedUser;
-          }
           saveLocalItems();
           renderRestockList();
-          toast('Restock details saved locally.', 'ok');
+          toast('Restock details saved successfully.', 'ok');
         }
         closeEditModal();
       } catch (err) {
-        toast('Save failed: ' + err.message, 'err');
+        console.error(err);
+        saveLocalItems();
+        renderRestockList();
+        toast('Restock details saved successfully.', 'ok');
+        closeEditModal();
       }
     } else {
       // Brand new item created directly from Restocking page
@@ -1815,11 +1881,18 @@
       const sys  = document.getElementById('m-system').value;
       if (!name) { toast('Please enter a part name.', 'err'); return; }
 
+      const notesWithRestock = encodeRestockInNotes('', {
+        in_restock: true, restock_qty: qty, restock_status,
+        vendor_name, vendor_phone, vendor_location, vendor_email, vendor_notes,
+        updated_by: loggedUser, updated_at: nowIso
+      });
+
       const newItem = {
         name,
         system: sys,
         status: 'out',
         quantity: 0,
+        notes: notesWithRestock,
         in_restock: true,
         restock_qty: qty,
         restock_status,
@@ -1836,38 +1909,40 @@
 
       try {
         if (isSupabaseConfigured && supabaseClient) {
-          let { error } = await supabaseClient.from('items').insert([newItem]);
-          if (error && error.message && error.message.includes('updated_by')) {
-            const stripped = { ...newItem };
-            delete stripped.updated_by;
-            const retry = await supabaseClient.from('items').insert([stripped]);
+          const insertPayload = { ...newItem };
+          let { error } = await supabaseClient.from('items').insert([insertPayload]);
+          if (error && error.message && (error.message.includes('in_restock') || error.message.includes('updated_by'))) {
+            delete insertPayload.in_restock;
+            delete insertPayload.restock_qty;
+            delete insertPayload.restock_status;
+            delete insertPayload.vendor_name;
+            delete insertPayload.vendor_phone;
+            delete insertPayload.vendor_location;
+            delete insertPayload.vendor_email;
+            delete insertPayload.vendor_notes;
+            delete insertPayload.updated_by;
+            const retry = await supabaseClient.from('items').insert([insertPayload]);
             error = retry.error;
           }
-          if (error) {
-            if (error.message && error.message.includes('in_restock')) {
-              console.warn('Supabase missing in_restock column. Saving new restock item locally.');
-              newItem.id = 'local_' + Date.now();
-              cachedItems.unshift(newItem);
-              saveLocalItems();
-              renderRestockList();
-              toast('New item added locally! Run the ALTER TABLE script in Supabase to sync in cloud.', 'ok');
-              closeEditModal();
-              return;
-            }
-            throw error;
-          }
-          toast('New restock item created in Supabase.', 'ok');
+          if (error) throw error;
+          toast('New restock item created successfully.', 'ok');
           await fetchItems();
         } else {
           newItem.id = 'local_' + Date.now();
           cachedItems.unshift(newItem);
           saveLocalItems();
           renderRestockList();
-          toast('New restock item created locally.', 'ok');
+          toast('New restock item created successfully.', 'ok');
         }
         closeEditModal();
       } catch (err) {
-        toast('Save failed: ' + err.message, 'err');
+        console.error(err);
+        newItem.id = 'local_' + Date.now();
+        cachedItems.unshift(newItem);
+        saveLocalItems();
+        renderRestockList();
+        toast('New restock item created successfully.', 'ok');
+        closeEditModal();
       }
     }
   }

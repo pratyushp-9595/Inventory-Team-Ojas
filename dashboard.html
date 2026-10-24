@@ -559,6 +559,17 @@
   // ── Helper: Normalize Item from Supabase or Local Storage ──
   function normalizeItem(raw, localMap) {
     const loc = (localMap && raw.id && localMap[raw.id]) || {};
+    let parsedMeta = null;
+    if (raw.notes && raw.notes.includes('<!--RESTOCK:')) {
+      const match = raw.notes.match(/<!--RESTOCK:(.*?)-->/);
+      if (match) {
+        try { parsedMeta = JSON.parse(match[1]); } catch(e) {}
+      }
+    }
+    const isRestock = typeof raw.in_restock !== 'undefined' && raw.in_restock !== null
+      ? Boolean(raw.in_restock)
+      : (parsedMeta ? Boolean(parsedMeta.in_restock) : Boolean(loc.in_restock));
+
     return {
       id: raw.id,
       name: raw.name || loc.name || 'Unnamed Part',
@@ -566,13 +577,13 @@
       subsystem: raw.subsystem || loc.subsystem || '',
       quantity: typeof raw.quantity !== 'undefined' ? raw.quantity : (loc.quantity || 0),
       status: raw.status || loc.status || 'free',
-      in_restock: typeof raw.in_restock !== 'undefined' && raw.in_restock !== null ? Boolean(raw.in_restock) : Boolean(loc.in_restock),
-      restock_qty: raw.restock_qty || loc.restock_qty || 1,
-      restock_status: raw.restock_status || loc.restock_status || 'Pending',
-      vendor_name: raw.vendor_name || loc.vendor_name || '',
+      in_restock: isRestock,
+      restock_qty: raw.restock_qty || (parsedMeta && parsedMeta.restock_qty) || loc.restock_qty || 1,
+      restock_status: raw.restock_status || (parsedMeta && parsedMeta.restock_status) || loc.restock_status || 'Pending',
+      vendor_name: raw.vendor_name || (parsedMeta && parsedMeta.vendor_name) || loc.vendor_name || '',
       created_by: raw.created_by || raw.createdBy || loc.created_by || '',
-      updated_by: raw.updated_by || raw.updatedBy || loc.updated_by || loc.updatedBy || raw.created_by || loc.created_by || 'Team Member',
-      updated_at: raw.updated_at || raw.updatedAt || loc.updated_at || loc.updatedAt || raw.created_at || loc.created_at || ''
+      updated_by: raw.updated_by || raw.updatedBy || (parsedMeta && parsedMeta.updated_by) || loc.updated_by || loc.updatedBy || raw.created_by || loc.created_by || 'Team Member',
+      updated_at: raw.updated_at || raw.updatedAt || (parsedMeta && parsedMeta.updated_at) || loc.updated_at || loc.updatedAt || raw.created_at || loc.created_at || ''
     };
   }
 
