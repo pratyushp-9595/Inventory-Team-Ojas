@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Team Ojas Racing — Inventory</title>
+  <title>Welcome — Team Ojas Racing</title>
   <script src="config.js"></script>
   <link rel="stylesheet" href="shared.css" />
   <style>
@@ -56,103 +56,28 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 clamp(1rem, 4vw, 2.5rem);
-      height: 64px;
-      background: rgba(8, 10, 16, 0.96);
-      border-bottom: 1px solid #1f2430;
-    }
-
-    .header-logo {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      text-decoration: none;
-    }
-
-    .header-logo img {
-      height: 38px;
-      width: 38px;
-      object-fit: cover;
-      border-radius: 7px;
-      border: 1px solid #2e3445;
-      filter: brightness(0.9) saturate(0.7);
-    }
-
-    .logo-text-stack {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.15;
-    }
-
-    .logo-text-stack .eyebrow {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.52rem;
-      font-weight: 700;
-      letter-spacing: 0.26em;
-      color: #c49d3b;
-      text-transform: uppercase;
-    }
-
-    .logo-text-stack .wordmark {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #e2e5eb;
-      letter-spacing: 0.02em;
+      padding: 0 clamp(1rem, 4vw, 2.8rem);
+      height: 66px;
+      background: rgba(8, 9, 13, 0.98);
+      border-bottom: 1px solid var(--color-border-subtle);
     }
 
     .header-right {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.52rem;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      color: #4f576b;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--color-gold-bright);
       text-transform: uppercase;
+      background: var(--color-gold-glow);
+      border: 1px solid rgba(181, 141, 61, 0.3);
+      padding: 0.3rem 0.65rem;
+      border-radius: var(--radius-sharp);
     }
 
     /* ── Hero heading ────────────────────────────────────────── */
     .hero {
       text-align: center;
-      padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1rem, 4vw, 2rem) clamp(1.8rem, 4vw, 3rem);
-    }
-
-    .hero-tag {
-      display: inline-block;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.54rem;
-      font-weight: 700;
-      letter-spacing: 0.30em;
-      color: #555e73;
-      text-transform: uppercase;
-      margin-bottom: 1.2rem;
-    }
-
-    .hero h1 {
-      font-weight: 300;
-      font-size: clamp(1.2rem, 3.2vw, 1.85rem);
-      color: #6c768c;
-      letter-spacing: 0.02em;
-      line-height: 1.35;
-    }
-
-    .hero h1 strong {
-      display: block;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 800;
-      font-size: clamp(1rem, 2.8vw, 1.45rem);
-      color: #e2e5eb;
-      letter-spacing: 0.04em;
-      margin-top: 0.45rem;
-      background: linear-gradient(100deg, #c49d3b 0%, #e2c168 38%, #8aabb8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero-rule {
-      width: 48px;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #282f40, transparent);
-      margin: 1.6rem auto 0;
+      padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1rem, 4vw, 2rem) clamp(1.8rem, 4vw, 2.8rem);
     }
 
     /* ── Login card ──────────────────────────────────────────── */
@@ -167,36 +92,47 @@
     .card {
       width: 100%;
       max-width: 420px;
-      background: #0b0e15;
-      border: 1px solid #1a202d;
-      border-radius: 14px;
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
       overflow: hidden;
-      box-shadow:
-        0 1px 0 rgba(255,255,255,0.03) inset,
-        0 22px 65px rgba(0,0,0,0.65);
-      animation: fadeUp 0.4s ease both;
+      box-shadow: 0 16px 45px rgba(0,0,0,0.65);
+      animation: fadeUp 0.3s ease both;
+      position: relative;
     }
 
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
+      from { opacity: 0; transform: translateY(14px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
     .card-top-rule {
       height: 2px;
-      background: linear-gradient(90deg, transparent, #a08840 25%, #d8b456 50%, #a08840 75%, transparent);
+      background: var(--color-gold-primary);
     }
 
-    .card-body { padding: clamp(1.5rem, 4vw, 2.2rem); }
+    .card-body { padding: clamp(1.6rem, 4vw, 2.4rem); }
 
     .card-label {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.58rem;
-      font-weight: 700;
-      letter-spacing: 0.28em;
-      color: #555e73;
+      font-family: var(--font-racing);
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #ffffff;
       text-transform: uppercase;
-      margin-bottom: 1.6rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-label span.badge {
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      color: var(--color-text-dim);
+      background: var(--color-bg-panel);
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sharp);
     }
 
     /* ── Form ─────────────────────────────────────────────────── */
@@ -205,11 +141,12 @@
     label {
       display: block;
       font-size: 0.68rem;
-      font-weight: 600;
-      color: #636d85;
-      letter-spacing: 0.08em;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       margin-bottom: 0.45rem;
+      font-family: var(--font-tech);
     }
 
     .input-wrap { position: relative; }
@@ -217,26 +154,26 @@
     input[type="text"],
     input[type="password"] {
       width: 100%;
-      padding: 0.75rem 2.5rem 0.75rem 1rem;
-      background: #080a0f;
-      border: 1px solid #1c2333;
-      border-radius: 8px;
-      color: #d5dae5;
-      font-size: 0.92rem;
-      font-family: 'Inter', sans-serif;
+      padding: 0.72rem 2.5rem 0.72rem 0.95rem;
+      background: var(--color-bg-panel);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      color: var(--color-text-main);
+      font-size: 0.9rem;
+      font-family: var(--font-body);
       outline: none;
-      min-height: 44px;
-      transition: all 0.18s ease;
-      caret-color: #c49d3b;
+      min-height: 42px;
+      transition: all 0.15s ease;
+      caret-color: var(--color-gold-bright);
     }
 
     input[type="text"]:focus,
     input[type="password"]:focus {
-      border-color: #a08840;
-      box-shadow: 0 0 0 2px rgba(160,136,64,0.15);
+      border-color: var(--color-gold-primary);
+      background: #141822;
     }
 
-    input::placeholder { color: #2a2d35; }
+    input::placeholder { color: var(--color-text-dim); }
 
     .pwd-toggle {
       position: absolute;
@@ -246,24 +183,24 @@
       background: none;
       border: none;
       cursor: pointer;
-      color: #2e3240;
+      color: var(--color-text-dim);
       font-size: 0.85rem;
       padding: 4px;
-      transition: color 0.18s;
+      transition: color 0.15s;
       line-height: 1;
     }
-    .pwd-toggle:hover { color: #6b7280; }
+    .pwd-toggle:hover { color: #ffffff; }
 
     /* ── Error ─────────────────────────────────────────────────── */
     .error-msg {
       display: none;
       align-items: center;
       gap: 0.5rem;
-      background: rgba(127,29,29,0.18);
-      border: 1px solid rgba(153,27,27,0.35);
-      border-radius: 6px;
+      background: rgba(185,28,28,0.15);
+      border: 1px solid #7f1d1d;
+      border-radius: var(--radius-sharp);
       padding: 0.6rem 0.8rem;
-      color: #b45252;
+      color: #fca5a5;
       font-size: 0.82rem;
       margin-bottom: 1.1rem;
       animation: shake 0.3s ease;
@@ -272,32 +209,32 @@
 
     @keyframes shake {
       0%,100% { transform: translateX(0); }
-      25%,75%  { transform: translateX(-5px); }
-      50%      { transform: translateX(5px); }
+      25%,75%  { transform: translateX(-4px); }
+      50%      { transform: translateX(4px); }
     }
 
     /* ── Button ─────────────────────────────────────────────────── */
     .btn-login {
       width: 100%;
       margin-top: 0.5rem;
-      padding: 0.78rem 1rem;
-      background: #0d0f14;
-      border: 1px solid #a08840;
-      border-radius: 7px;
-      color: #c8a84a;
-      font-size: 0.8rem;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 600;
-      letter-spacing: 0.18em;
+      padding: 0.75rem 1rem;
+      background: var(--color-gold-primary);
+      border: 1px solid var(--color-gold-bright);
+      border-radius: var(--radius-sharp);
+      color: #08090c;
+      font-size: 0.88rem;
+      font-family: var(--font-racing);
+      font-weight: 900;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+      transition: all 0.15s ease;
+      box-shadow: 0 4px 14px rgba(181, 141, 61, 0.25);
     }
 
     .btn-login:hover {
-      background: #13100a;
-      box-shadow: 0 0 16px rgba(160,136,64,0.12);
-      color: #d4b86a;
+      background: var(--color-gold-bright);
+      color: #000;
     }
 
     .btn-login:active { opacity: 0.8; }
@@ -306,22 +243,24 @@
     /* ── Divider ─────────────────────────────────────────────── */
     .card-divider {
       height: 1px;
-      background: #13161c;
+      background: var(--color-border-subtle);
       margin: 1.6rem -2rem;
     }
 
     .card-footer-note {
       font-size: 0.72rem;
-      color: #2a2d35;
+      color: var(--color-text-dim);
       text-align: center;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
     }
 
     /* ── Footer ──────────────────────────────────────────────── */
     footer {
       position: relative;
       z-index: 1;
-      border-top: 1px solid #13161c;
+      border-top: 1px solid var(--color-border-subtle);
       padding: 1.1rem 2rem;
       display: flex;
       align-items: center;
@@ -329,16 +268,17 @@
     }
 
     .footer-left {
-      font-size: 0.7rem;
-      color: #2a2d35;
-      letter-spacing: 0.06em;
+      font-size: 0.74rem;
+      color: #636b7c;
+      letter-spacing: 0.04em;
     }
 
     .footer-right {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.5rem;
-      letter-spacing: 0.22em;
-      color: #1e2229;
+      font-family: var(--font-racing);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      color: var(--color-gold-primary);
       text-transform: uppercase;
     }
 
@@ -350,22 +290,21 @@
 <header>
   <a class="header-logo" href="#">
     <img src="logo.jpg" alt="Team Ojas Racing" />
-    <div class="logo-text-stack">
-      <span class="eyebrow">Team</span>
-      <span class="wordmark">Ojas Racing</span>
-    </div>
+    <span class="logo-wordmark">TEAM <span class="gold-text">OJAS</span> RACING</span>
   </a>
-  <div class="header-right">Inventory System</div>
+  <div class="header-right">TOR-24 PORTAL</div>
 </header>
 
 <!-- ── HERO HEADING ───────────────────────────────────────── -->
 <div class="hero">
-  <div class="hero-tag">Restricted Access</div>
-  <h1>
-    Welcome to
-    <strong>"Team Ojas Racing - Inventory"</strong>
+  <div class="racing-eyebrow" style="justify-content:center;">FORMULA STUDENT ELECTRIC &middot; VIT VELLORE</div>
+  <h1 class="racing-title-huge" style="font-size:clamp(2.1rem,5vw,3.6rem);">
+    WELCOME TO
+    <span class="gold-word">TEAM OJAS RACING</span>
   </h1>
-  <div class="hero-rule"></div>
+  <p class="racing-subtitle" style="margin: 0.8rem auto 0; text-align:center;">
+    Official engineering portal &mdash; parts inventory, restocking tracker, and technical documentation vault. Please sign in with your team credentials.
+  </p>
 </div>
 
 <!-- ── LOGIN CARD ─────────────────────────────────────────── -->

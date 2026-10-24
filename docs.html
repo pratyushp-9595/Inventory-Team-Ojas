@@ -10,47 +10,19 @@
   <style>
     /* ── Hero ───────────────────────────────────────────────── */
     .page-hero {
-      text-align: center;
-      padding: clamp(1.4rem, 3.2vw, 2.2rem) clamp(1rem, 3.5vw, 2.5rem) 1.2rem;
-    }
-
-    .page-hero-tag {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.54rem;
-      font-weight: 700;
-      letter-spacing: 0.28em;
-      color: #3b74aa;
-      text-transform: uppercase;
-      display: block;
-      margin-bottom: 0.5rem;
-    }
-
-    .page-hero h2 {
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 800;
-      font-size: clamp(1.25rem, 3.2vw, 1.85rem);
-      background: linear-gradient(100deg, #5294d4 0%, #7db9f0 40%, #c49d3b 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: 0.03em;
-      margin-bottom: 0.4rem;
-    }
-
-    .page-hero p {
-      font-size: clamp(0.82rem, 1.8vw, 0.9rem);
-      color: #5d677d;
-      max-width: 620px;
+      text-align: left;
+      padding: clamp(2rem, 4vw, 3rem) clamp(1rem, 4vw, 2.8rem) 1.2rem;
+      max-width: 1200px;
       margin: 0 auto;
-      line-height: 1.5;
+      width: 100%;
     }
 
     /* ── Info Hint Pill ────────────────────────────────────── */
     .drive-hint-bar {
       max-width: 1200px;
       width: 100%;
-      margin: 0 auto 1rem;
-      padding: 0 clamp(1rem, 3.5vw, 2.5rem);
+      margin: 0 auto 1.2rem;
+      padding: 0 clamp(1rem, 4vw, 2.8rem);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -62,70 +34,70 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 0.74rem;
-      color: #64748b;
-      background: #080b12;
-      border: 1px solid #1a2233;
-      padding: 0.4rem 0.85rem;
-      border-radius: 7px;
+      font-size: 0.78rem;
+      color: var(--color-text-dim);
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sharp);
+      font-family: var(--font-mono);
     }
 
     .drive-pill strong {
-      color: #7db9f0;
+      color: var(--color-gold-bright);
       font-weight: 600;
     }
 
     .drive-pill svg {
-      color: #4282c0;
+      color: var(--color-gold-bright);
       flex-shrink: 0;
     }
 
     .btn-drive-open {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.64rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
+      gap: 0.45rem;
+      font-family: var(--font-racing);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #5294d4;
-      background: rgba(40, 84, 130, 0.12);
-      border: 1px solid rgba(66, 130, 192, 0.3);
+      color: #08090c;
+      background: var(--color-gold-primary);
+      border: 1px solid var(--color-gold-bright);
       padding: 0.45rem 0.85rem;
-      border-radius: 7px;
+      border-radius: var(--radius-sharp);
       text-decoration: none;
-      transition: all 0.18s ease;
+      transition: all 0.15s ease;
     }
 
     .btn-drive-open:hover {
-      background: rgba(40, 84, 130, 0.22);
-      border-color: #5294d4;
-      color: #93c5fd;
+      background: var(--color-gold-bright);
+      color: #000;
     }
 
     .btn-theme-toggle {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.64rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
+      font-family: var(--font-racing);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #cbd5e1;
-      background: #090c13;
-      border: 1px solid #1f2738;
+      color: var(--color-text-main);
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
       padding: 0.45rem 0.85rem;
-      border-radius: 7px;
+      border-radius: var(--radius-sharp);
       cursor: pointer;
-      transition: all 0.18s ease;
+      transition: all 0.15s ease;
     }
 
     .btn-theme-toggle:hover {
-      border-color: #3b74aa;
-      color: #7db9f0;
-      background: rgba(40, 84, 130, 0.14);
+      border-color: var(--color-gold-primary);
+      color: var(--color-gold-bright);
+      background: var(--color-bg-panel);
     }
 
     /* ── Main Iframe Container ─────────────────────────────── */
@@ -133,7 +105,7 @@
       max-width: 1200px;
       width: 100%;
       margin: 0 auto 3rem;
-      padding: 0 clamp(1rem, 3.5vw, 2.5rem);
+      padding: 0 clamp(1rem, 4vw, 2.8rem);
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -145,8 +117,8 @@
       height: 80vh;
       min-height: 560px;
       background: #ffffff;
-      border: 1px solid #1a202d;
-      border-radius: 12px;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
       overflow: hidden;
       box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5);
     }
@@ -158,7 +130,7 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent, #285482 25%, #5294d4 50%, #285482 75%, transparent);
+      background: var(--color-gold-primary);
       z-index: 2;
     }
 
@@ -181,46 +153,7 @@
       filter: none;
     }
 
-    /* ── Header nav links ──────────────────────────────────── */
-    .header-nav-links {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-
-    .nav-link-item {
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.4rem 0.8rem;
-      border-radius: 7px;
-      font-size: 0.68rem;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      transition: all 0.18s ease;
-    }
-
-    .nav-link-item.inventory {
-      background: #0b0e15;
-      border: 1px solid #1c2333;
-      color: #a08840;
-    }
-
-    .nav-link-item.restock {
-      background: rgba(224,131,56,0.08);
-      border: 1px solid rgba(224,131,56,0.25);
-      color: #e08338;
-    }
-
-    .nav-link-item:hover {
-      transform: translateY(-1px);
-    }
-
     @media (max-width: 680px) {
-      .header-nav-links { display: none; }
       .iframe-wrapper { height: 75vh; min-height: 480px; }
     }
   </style>
@@ -231,21 +164,16 @@
 <header>
   <a class="header-logo" href="dashboard.html">
     <img src="logo.jpg" alt="Team Ojas Racing" />
-    <div class="logo-text-stack">
-      <span class="eyebrow">Team</span>
-      <span class="wordmark">Ojas Racing</span>
-    </div>
+    <span class="logo-wordmark">TEAM <span class="gold-text">OJAS</span> RACING</span>
   </a>
 
   <div class="nav-right">
-    <div class="header-nav-links">
-      <a href="inventory.html" class="nav-link-item inventory">
-        <span>🔧</span> Inventory
-      </a>
-      <a href="restocking.html" class="nav-link-item restock">
-        <span>📦</span> Restocking
-      </a>
-    </div>
+    <nav class="header-nav-links">
+      <a href="inventory.html" class="nav-link-btn">Inventory</a>
+      <a href="restocking.html" class="nav-link-btn">Restocking</a>
+      <a href="docs.html" class="nav-link-btn active">Docs Vault</a>
+      <a href="handbook.html" class="nav-link-btn">Handbook</a>
+    </nav>
 
     <div class="user-pill">
       <div class="user-pill-dot"></div>
@@ -257,10 +185,12 @@
 </header>
 
 <!-- ── HERO ────────────────────────────────────────────── -->
-<div class="page-hero">
-  <span class="page-hero-tag">Module 02</span>
-  <h2>Documentation Vault</h2>
-  <p>Engineering designs, CAD packages, team manuals, and competition rulebooks embedded directly from Google Drive.</p>
+<div class="racing-hero-wrap" style="padding-bottom:1rem;">
+  <div class="racing-eyebrow">FORMULA STUDENT ELECTRIC &middot; VIT VELLORE</div>
+  <h1 class="racing-title-huge" style="font-size:clamp(1.9rem,4.5vw,3rem); margin-bottom:0.4rem;">
+    ENGINEERING &amp; <span class="gold-word" style="display:inline;">DOCS VAULT</span>
+  </h1>
+  <p class="racing-subtitle">Live public engineering archive, CAD models, competition rulebooks, SES documentation &amp; electrical schematics.</p>
 </div>
 
 <!-- ── DRIVE HELPER STRIP ──────────────────────────────── -->

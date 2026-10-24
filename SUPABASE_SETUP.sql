@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS public.items (
     vendor_email TEXT DEFAULT '',
     vendor_notes TEXT DEFAULT '',
     restock_status TEXT DEFAULT 'Pending',
+    updated_by TEXT DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -45,6 +46,10 @@ ALTER TABLE public.items ADD COLUMN IF NOT EXISTS vendor_location TEXT DEFAULT '
 ALTER TABLE public.items ADD COLUMN IF NOT EXISTS vendor_email TEXT DEFAULT '';
 ALTER TABLE public.items ADD COLUMN IF NOT EXISTS vendor_notes TEXT DEFAULT '';
 ALTER TABLE public.items ADD COLUMN IF NOT EXISTS restock_status TEXT DEFAULT 'Pending';
+ALTER TABLE public.items ADD COLUMN IF NOT EXISTS updated_by TEXT DEFAULT '';
+
+-- Notify PostgREST to reload schema cache immediately
+NOTIFY pgrst, 'reload schema';
 
 -- 3. Create 'subsystems' table
 CREATE TABLE IF NOT EXISTS public.subsystems (

@@ -5,294 +5,329 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard — Team Ojas Racing</title>
   <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
   <link rel="stylesheet" href="shared.css" />
   <style>
-
-    /* ── Hero ───────────────────────────────────────────────── */
-    .hero {
-      text-align: center;
-      padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 4vw, 2.5rem) clamp(1.5rem, 3vw, 2.5rem);
-    }
-
-    .hero-tag {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.54rem;
-      font-weight: 700;
-      letter-spacing: 0.30em;
-      color: #555e73;
-      text-transform: uppercase;
-      display: block;
-      margin-bottom: 1rem;
-    }
-
-    .hero h1 {
-      font-weight: 300;
-      font-size: clamp(1.2rem, 3.2vw, 1.85rem);
-      color: #6c768c;
-      letter-spacing: 0.02em;
-      line-height: 1.35;
-    }
-
-    .hero h1 strong {
-      display: block;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 800;
-      font-size: clamp(1rem, 2.8vw, 1.45rem);
-      background: linear-gradient(100deg, #c49d3b 0%, #e2c168 38%, #8aabb8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: 0.04em;
-      margin-top: 0.45rem;
-    }
-
-    .hero-rule {
-      width: 48px;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #282f40, transparent);
-      margin: 1.6rem auto 0;
-    }
-
-    /* ── Welcome strip ──────────────────────────────────────── */
-    .welcome-strip {
+    /* ── Dashboard Hero & Clean Header ─────────────────────── */
+    .dashboard-hero {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      max-width: 960px;
+      flex-direction: column;
+      align-items: flex-start;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: clamp(2.5rem, 5vw, 4rem) clamp(1rem, 4vw, 2.8rem) clamp(1.8rem, 3.5vw, 2.5rem);
       width: 100%;
-      margin: 0 auto 2rem;
-      padding: 0 clamp(1rem, 3.5vw, 1.5rem);
-      flex-wrap: wrap;
-      gap: 0.8rem;
     }
 
-    .welcome-strip .greeting {
-      font-size: clamp(0.82rem, 2vw, 0.9rem);
-      color: #636d85;
-    }
-
-    .welcome-strip .greeting strong {
-      color: #d8b456;
-      font-weight: 600;
-    }
-
-    .meta-pills {
+    .hero-content {
       display: flex;
-      gap: 0.6rem;
+      flex-direction: column;
+      align-items: flex-start;
+      max-width: 860px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 0.85rem;
       flex-wrap: wrap;
+      margin-top: 1.8rem;
     }
 
-    .meta-pill {
-      font-size: 0.72rem;
-      color: #727c94;
-      background: #0b0e15;
-      border: 1px solid #1c2230;
-      border-radius: 6px;
-      padding: 0.32rem 0.75rem;
-      letter-spacing: 0.04em;
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .meta-pill .dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #48bb78;
-      box-shadow: 0 0 6px rgba(72, 187, 120, 0.6);
-      margin-right: 0.45rem;
-    }
-
-    /* ── Nav blocks grid ────────────────────────────────────── */
+    /* ── Main Activity Feeds Section ────────────────────────── */
     main {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 0 clamp(1rem, 3.5vw, 2.5rem) 4rem;
+      padding: 0 clamp(1rem, 4vw, 2.8rem) 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
       width: 100%;
     }
 
-    .blocks-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-      gap: 1.5rem;
-      max-width: 1040px;
-      width: 100%;
-    }
-
-    /* ── Individual block ───────────────────────────────────── */
-    .nav-block {
-      display: flex;
-      flex-direction: column;
-      background: #0b0e15;
-      border: 1px solid #1a202d;
-      border-radius: 14px;
-      overflow: hidden;
-      text-decoration: none;
-      cursor: pointer;
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-      animation: fadeUp 0.4s ease both;
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
-      min-height: 240px;
-    }
-
-    .nav-block:nth-child(1) { animation-delay: 0.05s; }
-    .nav-block:nth-child(2) { animation-delay: 0.12s; }
-    .nav-block:nth-child(3) { animation-delay: 0.19s; }
-    .nav-block:nth-child(4) { animation-delay: 0.26s; }
-
-    .nav-block:hover {
-      border-color: #3b321c;
-      transform: translateY(-4px);
-      box-shadow:
-        0 14px 40px rgba(0, 0, 0, 0.55),
-        0 0 0 1px rgba(196, 157, 59, 0.18);
-    }
-
-    /* Disabled state for Coming Soon */
-    .nav-block.disabled {
-      cursor: default;
-      opacity: 0.45;
-      pointer-events: none;
-    }
-
-    .block-rule {
-      height: 2px;
-      flex-shrink: 0;
-    }
-
-    .nav-block:nth-child(1) .block-rule {
-      background: linear-gradient(90deg, transparent, #a08840 25%, #d8b456 50%, #a08840 75%, transparent);
-    }
-    .nav-block:nth-child(2) .block-rule {
-      background: linear-gradient(90deg, transparent, #285482 25%, #4282c0 50%, #285482 75%, transparent);
-    }
-    .nav-block:nth-child(3) .block-rule {
-      background: linear-gradient(90deg, transparent, #9e5b22 25%, #e08338 50%, #9e5b22 75%, transparent);
-    }
-    .nav-block:nth-child(4) .block-rule {
-      background: linear-gradient(90deg, transparent, #5b379e 25%, #885fd4 50%, #5b379e 75%, transparent);
-    }
-
-    .block-inner {
-      padding: clamp(1.4rem, 3vw, 1.8rem);
-      display: flex;
-      flex-direction: column;
-      gap: 0.95rem;
-      flex: 1;
-    }
-
-    .block-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 9px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .nav-block:nth-child(1) .block-icon { background: rgba(196, 157, 59, 0.1); border: 1px solid rgba(196, 157, 59, 0.22); }
-    .nav-block:nth-child(2) .block-icon { background: rgba(40, 84, 130, 0.14); border: 1px solid rgba(40, 84, 130, 0.25); }
-    .nav-block:nth-child(3) .block-icon { background: rgba(224, 131, 56, 0.12); border: 1px solid rgba(224, 131, 56, 0.25); }
-    .nav-block:nth-child(4) .block-icon { background: rgba(136, 95, 212, 0.12); border: 1px solid rgba(136, 95, 212, 0.25); }
-
-    .block-icon svg { opacity: 0.85; }
-    .nav-block:nth-child(1) .block-icon svg { color: #d8b456; }
-    .nav-block:nth-child(2) .block-icon svg { color: #62a3e0; }
-    .nav-block:nth-child(3) .block-icon svg { color: #e08338; }
-    .nav-block:nth-child(4) .block-icon svg { color: #a78bfa; }
-
-    .block-label {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.58rem;
-      font-weight: 700;
-      letter-spacing: 0.24em;
-      text-transform: uppercase;
-      margin-bottom: 0.15rem;
-    }
-
-    .nav-block:nth-child(1) .block-label { color: #a38234; }
-    .nav-block:nth-child(2) .block-label { color: #3b74aa; }
-    .nav-block:nth-child(3) .block-label { color: #c46e29; }
-    .nav-block:nth-child(4) .block-label { color: #8b5cf6; }
-
-    .block-title {
-      font-size: 1.15rem;
-      font-weight: 600;
-      color: #e5e9f2;
-      letter-spacing: -0.01em;
-    }
-
-    .nav-block:nth-child(3) .block-title { color: #e5e9f2; }
-    .nav-block:nth-child(4) .block-title { color: #e5e9f2; }
-
-    .block-desc {
-      font-size: 0.82rem;
-      color: #555f75;
-      line-height: 1.6;
-      flex: 1;
-    }
-
-    .block-footer {
+    .section-header-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.95rem clamp(1.4rem, 3vw, 1.8rem);
-      border-top: 1px solid #151822;
-      background: rgba(13, 16, 24, 0.5);
+      width: 100%;
+      border-bottom: 1px solid var(--color-border-subtle);
+      padding-bottom: 0.85rem;
+      margin-bottom: 1.6rem;
+      flex-wrap: wrap;
+      gap: 0.8rem;
     }
 
-    .block-cta {
-      font-size: 0.72rem;
-      font-weight: 700;
-      font-family: 'Orbitron', sans-serif;
-      letter-spacing: 0.12em;
+    .section-title {
+      font-family: var(--font-racing);
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
+      color: #ffffff;
       display: flex;
       align-items: center;
-      gap: 0.45rem;
-      transition: gap 0.18s;
+      gap: 0.6rem;
     }
 
-    .nav-block:hover .block-cta { gap: 0.75rem; }
+    .section-meta {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-dim);
+      letter-spacing: 0.04em;
+    }
 
-    .nav-block:nth-child(1) .block-cta { color: #d8b456; }
-    .nav-block:nth-child(2) .block-cta { color: #62a3e0; }
-    .nav-block:nth-child(3) .block-cta { color: #e08338; }
-    .nav-block:nth-child(4) .block-cta { color: #a78bfa; }
+    /* ── 3-Column Recent Updates Grid ──────────────────────── */
+    .updates-feed-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.4rem;
+      width: 100%;
+      align-items: start;
+    }
 
-    .block-badge {
-      font-size: 0.58rem;
-      font-family: 'Orbitron', sans-serif;
-      letter-spacing: 0.16em;
+    @media (max-width: 1024px) {
+      .updates-feed-grid {
+        grid-template-columns: 1fr;
+        gap: 1.8rem;
+      }
+    }
+
+    .update-column-card {
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      padding: 1.35rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      transition: border-color 0.18s ease;
+    }
+
+    .update-column-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--color-gold-primary), transparent 85%);
+    }
+
+    .column-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--color-border-subtle);
+      margin-bottom: 1rem;
+    }
+
+    .column-title {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-family: var(--font-racing);
+      font-size: 1.12rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 0.2rem 0.55rem;
-      border-radius: 5px;
+      color: #ffffff;
+    }
+
+    .column-title svg {
+      color: var(--color-gold-bright);
+      flex-shrink: 0;
+    }
+
+    .column-link {
+      font-family: var(--font-tech);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-gold-bright);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.15s ease;
+    }
+
+    .column-link:hover {
+      color: #ffffff;
+      transform: translateX(2px);
+    }
+
+    .update-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-height: 220px;
+    }
+
+    .feed-item {
+      background: var(--color-bg-panel);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      padding: 0.85rem 0.95rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .feed-item:hover {
+      border-color: var(--color-gold-primary);
+      background: #131722;
+      transform: translateY(-1px);
+    }
+
+    .feed-item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .feed-item-name {
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    .feed-badge {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radius-sharp);
+      white-space: nowrap;
+    }
+
+    .feed-badge.sys {
+      background: rgba(181, 141, 61, 0.15);
+      border: 1px solid rgba(181, 141, 61, 0.35);
+      color: var(--color-gold-bright);
+    }
+
+    .feed-badge.status-ok {
+      background: rgba(74, 222, 128, 0.12);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      color: #4ade80;
+    }
+
+    .feed-badge.status-low {
+      background: rgba(251, 146, 60, 0.12);
+      border: 1px solid rgba(251, 146, 60, 0.3);
+      color: #fb923c;
+    }
+
+    .feed-badge.status-out {
+      background: rgba(248, 113, 113, 0.12);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      color: #f87171;
+    }
+
+    .feed-badge.status-quote {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+    }
+
+    .feed-badge.status-ordered {
+      background: rgba(168, 85, 247, 0.12);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      color: #c084fc;
+    }
+
+    .feed-badge.status-transit {
+      background: rgba(234, 179, 8, 0.12);
+      border: 1px solid rgba(234, 179, 8, 0.3);
+      color: #facc15;
+    }
+
+    .feed-details-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-size: 0.76rem;
+      color: var(--color-text-dim);
+    }
+
+    .feed-details-left {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .feed-audit-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px dashed rgba(255, 255, 255, 0.08);
+      padding-top: 0.45rem;
+      margin-top: 0.15rem;
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+    }
+
+    .updater-name {
+      color: var(--color-gold-bright);
       font-weight: 700;
     }
 
-    .nav-block:nth-child(1) .block-badge { background: rgba(196, 157, 59, 0.1); color: #c49d3b; border: 1px solid rgba(196, 157, 59, 0.22); }
-    .nav-block:nth-child(2) .block-badge { background: rgba(40, 84, 130, 0.12); color: #5294d4; border: 1px solid rgba(40, 84, 130, 0.22); }
-    .nav-block:nth-child(3) .block-badge { background: rgba(224, 131, 56, 0.12); color: #e08338; border: 1px solid rgba(224, 131, 56, 0.25); }
-    .nav-block:nth-child(4) .block-badge { background: rgba(136, 95, 212, 0.12); color: #a78bfa; border: 1px solid rgba(136, 95, 212, 0.25); }
+    .feed-time-ago {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--color-text-dim);
+    }
 
+    .empty-feed-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2.2rem 1rem;
+      color: var(--color-text-dim);
+      font-size: 0.82rem;
+      font-family: var(--font-mono);
+      gap: 0.5rem;
+    }
+
+    .empty-feed-placeholder svg {
+      opacity: 0.4;
+    }
   </style>
 </head>
 <body>
 
-<!-- ── HEADER ──────────────────────────────────────────── -->
+<!-- ── MOTORSPORT HEADER ───────────────────────────────── -->
 <header>
   <a class="header-logo" href="dashboard.html">
     <img src="logo.jpg" alt="Team Ojas Racing" />
-    <div class="logo-text-stack">
-      <span class="eyebrow">Team</span>
-      <span class="wordmark">Ojas Racing</span>
-    </div>
+    <span class="logo-wordmark">TEAM <span class="gold-text">OJAS</span> RACING</span>
   </a>
+
   <div class="nav-right">
+    <nav class="header-nav-links">
+      <a href="inventory.html" class="nav-link-btn">Inventory</a>
+      <a href="restocking.html" class="nav-link-btn">Restocking</a>
+      <a href="docs.html" class="nav-link-btn">Docs Vault</a>
+      <a href="handbook.html" class="nav-link-btn">Handbook</a>
+    </nav>
     <div class="user-pill">
       <div class="user-pill-dot"></div>
       <span id="js-nav-user">User</span>
@@ -301,133 +336,133 @@
   </div>
 </header>
 
-<!-- ── HERO ────────────────────────────────────────────── -->
-<div class="hero">
-  <span class="hero-tag">Dashboard</span>
-  <h1>
-    Welcome to
-    <strong>"Team Ojas Racing - Inventory"</strong>
-  </h1>
-  <div class="hero-rule"></div>
-</div>
-
-<!-- ── WELCOME STRIP ────────────────────────────────────── -->
-<div class="welcome-strip">
-  <div class="greeting">Hello, <strong id="js-welcome-user">User</strong> &mdash; select a module below.</div>
-  <div class="meta-pills">
-    <div class="meta-pill"><span class="dot"></span>Active</div>
-    <div class="meta-pill" id="js-login-time">--:--</div>
+<!-- ── CLEAN MOTORSPORT HERO ───────────────────────────── -->
+<div class="dashboard-hero">
+  <div class="hero-content">
+    <div class="racing-eyebrow">FORMULA STUDENT ELECTRIC &middot; VIT VELLORE</div>
+    <h1 class="racing-title-huge">
+      WELCOME TO
+      <span class="gold-word">TEAM OJAS RACING</span>
+    </h1>
+    <p class="racing-subtitle">
+      India's premier electric motorsport team engineering high-performance, precision, and championship-ready racecars. Centralized parts inventory, procurement restocking tracker, and engineering documentation vault.
+    </p>
+    <div class="hero-actions">
+      <a href="inventory.html" class="racing-btn-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+        EXPLORE INVENTORY
+      </a>
+      <a href="restocking.html" class="racing-btn-secondary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+        RESTOCKING TRACKER
+      </a>
+      <a href="docs.html" class="racing-btn-secondary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        DOCS VAULT
+      </a>
+      <a href="handbook.html" class="racing-btn-secondary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        OJAS HANDBOOK
+      </a>
+    </div>
   </div>
 </div>
 
-<!-- ── NAV BLOCKS ───────────────────────────────────────── -->
+<!-- ── RECENT SYSTEM UPDATES (3 PANELS) ──────────────────── -->
 <main>
-  <div class="blocks-grid">
+  <div class="section-header-bar">
+    <div class="section-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-gold-bright);">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+      </svg>
+      RECENT SYSTEM UPDATES
+    </div>
+    <div class="section-meta">
+      OPERATOR: <span id="js-welcome-user" style="color:#ffffff; font-weight:700;">USER</span> &middot; AUDIT LOG ACTIVE
+    </div>
+  </div>
 
-    <!-- 1 · Inventory -->
-    <a class="nav-block" href="inventory.html">
-      <div class="block-rule"></div>
-      <div class="block-inner">
-        <div class="block-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <div class="updates-feed-grid">
+
+    <!-- 1 · RECENT UPDATES OF INVENTORY -->
+    <div class="update-column-card">
+      <div class="column-header">
+        <div class="column-title">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
             <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
           </svg>
+          Inventory Updates
         </div>
-        <div>
-          <div class="block-label">Module 01</div>
-          <div class="block-title">Inventory</div>
+        <a href="inventory.html" class="column-link">View All &rarr;</a>
+      </div>
+      <div class="update-items-list" id="feed-inventory">
+        <div class="empty-feed-placeholder">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="6" x2="12" y2="12"/><line x1="12" y1="12" x2="16" y2="16"/></svg>
+          <span>Loading inventory updates...</span>
         </div>
-        <div class="block-desc">Track parts, components, and materials. Manage stock levels and item records for the team.</div>
       </div>
-      <div class="block-footer">
-        <span class="block-cta">Open &rarr;</span>
-        <span class="block-badge">Active</span>
-      </div>
-    </a>
+    </div>
 
-    <!-- 2 · Documentation Vault -->
-    <a class="nav-block" href="docs.html">
-      <div class="block-rule"></div>
-      <div class="block-inner">
-        <div class="block-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-            <line x1="12" y1="11" x2="12" y2="17"/>
-            <line x1="9" y1="14" x2="15" y2="14"/>
-          </svg>
-        </div>
-        <div>
-          <div class="block-label">Module 02</div>
-          <div class="block-title">Documentation Vault</div>
-        </div>
-        <div class="block-desc">Access CAD files, technical reports, competition rulebooks, and engineering binders in Google Drive.</div>
-      </div>
-      <div class="block-footer">
-        <span class="block-cta">Open &rarr;</span>
-        <span class="block-badge">Active</span>
-      </div>
-    </a>
-
-    <!-- 3 · Restocking Tracker -->
-    <a class="nav-block" href="restocking.html">
-      <div class="block-rule"></div>
-      <div class="block-inner">
-        <div class="block-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 2 · RECENT UPDATES OF RESTOCKING TRACKER -->
+    <div class="update-column-card">
+      <div class="column-header">
+        <div class="column-title">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
             <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
           </svg>
+          Restocking Updates
         </div>
-        <div>
-          <div class="block-label">Module 03</div>
-          <div class="block-title">Restocking Tracker</div>
+        <a href="restocking.html" class="column-link">View All &rarr;</a>
+      </div>
+      <div class="update-items-list" id="feed-restocking">
+        <div class="empty-feed-placeholder">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="6" x2="12" y2="12"/><line x1="12" y1="12" x2="16" y2="16"/></svg>
+          <span>Loading restocking updates...</span>
         </div>
-        <div class="block-desc">Track parts pending replenishment, manage vendor contacts & location details, order status, and restock logistics.</div>
       </div>
-      <div class="block-footer">
-        <span class="block-cta">Open &rarr;</span>
-        <span class="block-badge">Active</span>
-      </div>
-    </a>
+    </div>
 
-    <!-- 4 · Ojas Handbook (Coming Soon) -->
-    <div class="nav-block disabled">
-      <div class="block-rule"></div>
-      <div class="block-inner">
-        <div class="block-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-            <line x1="9" y1="7" x2="15" y2="7"/>
-            <line x1="9" y1="11" x2="13" y2="11"/>
+    <!-- 3 · RECENT UPDATES OF DOC VAULT -->
+    <div class="update-column-card">
+      <div class="column-header">
+        <div class="column-title">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
           </svg>
+          Doc Vault Updates
         </div>
-        <div>
-          <div class="block-label">Module 04</div>
-          <div class="block-title">Ojas Handbook</div>
-        </div>
-        <div class="block-desc">Standard operating procedures, driver briefings, onboarding workflows, and team guidelines. Coming soon.</div>
+        <a href="docs.html" class="column-link">Open Vault &rarr;</a>
       </div>
-      <div class="block-footer">
-        <span class="block-cta">Locked</span>
-        <span class="block-badge">Soon</span>
+      <div class="update-items-list" id="feed-docs">
+        <div class="empty-feed-placeholder">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="6" x2="12" y2="12"/><line x1="12" y1="12" x2="16" y2="16"/></svg>
+          <span>Loading documentation updates...</span>
+        </div>
       </div>
     </div>
 
   </div>
 </main>
 
-<!-- ── FOOTER ───────────────────────────────────────────── -->
+<!-- ── MOTORSPORT FOOTER ───────────────────────────────── -->
 <footer>
-  <div class="footer-left">&copy; <span id="js-year"></span> Team Ojas Racing &mdash; All rights reserved</div>
-  <div class="footer-right">Inventory v1.0</div>
+  <div class="footer-left">&copy; <span id="js-year"></span> Team Ojas Racing &mdash; Formula Student Electric &middot; VIT Vellore</div>
+  <div class="footer-right">TOR-24 SYSTEM v2.0</div>
 </footer>
 
 <script>
+  // ── Session Authentication Check ────────────────────────
   const loggedUser  = sessionStorage.getItem('logged_in_user');
   const loginTimeMs = parseInt(sessionStorage.getItem('login_time') || '0', 10);
 
@@ -443,16 +478,297 @@
 
   document.getElementById('js-nav-user').textContent     = loggedUser;
   document.getElementById('js-welcome-user').textContent =
-    loggedUser ? loggedUser.charAt(0).toUpperCase() + loggedUser.slice(1) : '';
+    loggedUser ? loggedUser.toUpperCase() : 'USER';
   document.getElementById('js-year').textContent = new Date().getFullYear();
 
-  if (loginTimeMs) {
-    const d = new Date(loginTimeMs);
-    document.getElementById('js-login-time').textContent =
-      d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
+
+  // ── Helper: Escape HTML ─────────────────────────────────
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
-  function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
+  // ── Helper: Format Relative Time ─────────────────────────
+  function formatRelativeTime(isoString) {
+    if (!isoString) return 'Recently';
+    try {
+      const d = new Date(isoString);
+      const timeMs = d.getTime();
+      if (isNaN(timeMs)) return 'Recently';
+      const diffMs = Date.now() - timeMs;
+      if (diffMs < 0) return 'Just now';
+      const mins = Math.floor(diffMs / 60000);
+      if (mins < 1) return 'Just now';
+      if (mins < 60) return `${mins}m ago`;
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return `${hours}h ago`;
+      const days = Math.floor(hours / 24);
+      if (days < 7) return `${days}d ago`;
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    } catch(e) {
+      return 'Recently';
+    }
+  }
+
+  // ── Helper: Normalize Item from Supabase or Local Storage ──
+  function normalizeItem(raw, localMap) {
+    const loc = (localMap && raw.id && localMap[raw.id]) || {};
+    return {
+      id: raw.id,
+      name: raw.name || loc.name || 'Unnamed Part',
+      system: raw.system || loc.system || 'CHASSIS',
+      subsystem: raw.subsystem || loc.subsystem || '',
+      quantity: typeof raw.quantity !== 'undefined' ? raw.quantity : (loc.quantity || 0),
+      status: raw.status || loc.status || 'ok',
+      in_restock: typeof raw.in_restock !== 'undefined' && raw.in_restock !== null ? Boolean(raw.in_restock) : Boolean(loc.in_restock),
+      restock_qty: raw.restock_qty || loc.restock_qty || 1,
+      restock_status: raw.restock_status || loc.restock_status || 'Pending',
+      vendor_name: raw.vendor_name || loc.vendor_name || '',
+      created_by: raw.created_by || raw.createdBy || loc.created_by || '',
+      updated_by: raw.updated_by || raw.updatedBy || loc.updated_by || loc.updatedBy || raw.created_by || loc.created_by || 'Team Member',
+      updated_at: raw.updated_at || raw.updatedAt || loc.updated_at || loc.updatedAt || raw.created_at || loc.created_at || ''
+    };
+  }
+
+  // ── 1. Render Recent Updates of Inventory ─────────────────
+  function renderInventoryFeed(items) {
+    const container = document.getElementById('feed-inventory');
+    if (!items || items.length === 0) {
+      container.innerHTML = `
+        <div class="empty-feed-placeholder">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <span>No inventory parts recorded yet.</span>
+        </div>
+      `;
+      return;
+    }
+
+    // Sort by updated_at descending, take top 5
+    const sorted = [...items].sort((a, b) => {
+      const ta = new Date(a.updated_at || 0).getTime();
+      const tb = new Date(b.updated_at || 0).getTime();
+      return tb - ta;
+    }).slice(0, 5);
+
+    let html = '';
+    sorted.forEach(item => {
+      const statusClass = item.status === 'ok' ? 'status-ok' : (item.status === 'low' ? 'status-low' : 'status-out');
+      const statusLabel = item.status === 'ok' ? 'In Stock' : (item.status === 'low' ? 'Low Stock' : 'Out of Stock');
+      const updater = item.updated_by || 'Team Member';
+      const timeAgo = formatRelativeTime(item.updated_at);
+
+      html += `
+        <a class="feed-item" href="inventory.html" title="View in Inventory">
+          <div class="feed-item-top">
+            <span class="feed-item-name">${escapeHtml(item.name)}</span>
+            <span class="feed-badge sys">${escapeHtml(item.system)}</span>
+          </div>
+          <div class="feed-details-row">
+            <span class="feed-details-left">Stock: <strong>${item.quantity || 0} units</strong></span>
+            <span class="feed-badge ${statusClass}">${statusLabel}</span>
+          </div>
+          <div class="feed-audit-row">
+            <span>Updated by <strong class="updater-name">${escapeHtml(updater)}</strong></span>
+            <span class="feed-time-ago">${timeAgo}</span>
+          </div>
+        </a>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  // ── 2. Render Recent Updates of Restocking Tracker ─────────
+  function renderRestockingFeed(items) {
+    const container = document.getElementById('feed-restocking');
+    const restockItems = (items || []).filter(i => Boolean(i.in_restock));
+
+    if (restockItems.length === 0) {
+      container.innerHTML = `
+        <div class="empty-feed-placeholder">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M5 12l5 5L20 7"/></svg>
+          <span>All parts stocked. No active restock requests.</span>
+        </div>
+      `;
+      return;
+    }
+
+    const sorted = [...restockItems].sort((a, b) => {
+      const ta = new Date(a.updated_at || 0).getTime();
+      const tb = new Date(b.updated_at || 0).getTime();
+      return tb - ta;
+    }).slice(0, 5);
+
+    const stClassMap = {
+      'Pending': 'status-low',
+      'Quote Requested': 'status-quote',
+      'Order Placed': 'status-ordered',
+      'In Transit': 'status-transit',
+      'Received': 'status-ok'
+    };
+
+    let html = '';
+    sorted.forEach(item => {
+      const stClass = stClassMap[item.restock_status] || 'status-low';
+      const updater = item.updated_by || 'Team Member';
+      const timeAgo = formatRelativeTime(item.updated_at);
+      const vendorText = item.vendor_name ? `Vendor: ${escapeHtml(item.vendor_name)}` : 'Vendor unassigned';
+
+      html += `
+        <a class="feed-item" href="restocking.html" title="Open Restocking Tracker">
+          <div class="feed-item-top">
+            <span class="feed-item-name">${escapeHtml(item.name)}</span>
+            <span class="feed-badge ${stClass}">${escapeHtml(item.restock_status || 'Pending')}</span>
+          </div>
+          <div class="feed-details-row">
+            <span class="feed-details-left">${vendorText}</span>
+            <span style="font-family:var(--font-mono); font-size:0.72rem; color:#ffffff;">Target: <strong>${item.restock_qty || 1}</strong></span>
+          </div>
+          <div class="feed-audit-row">
+            <span>Updated by <strong class="updater-name">${escapeHtml(updater)}</strong></span>
+            <span class="feed-time-ago">${timeAgo}</span>
+          </div>
+        </a>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  // ── 3. Render Recent Updates of Doc Vault ──────────────────
+  function getDocVaultData() {
+    let list = [];
+    try {
+      const stored = localStorage.getItem('ojas_docs_updates');
+      if (stored) list = JSON.parse(stored);
+    } catch(e) {}
+
+    if (!list || list.length === 0) {
+      list = [
+        {
+          title: 'SES Structural Equivalency Sheet 2025 v2.1',
+          category: 'SES REPORT',
+          folder: 'Formula Bharat / SES',
+          updated_by: 'jacob',
+          updated_at: new Date(Date.now() - 3600000 * 3).toISOString()
+        },
+        {
+          title: 'TOR-25 High Voltage Harness Routing & CAD',
+          category: 'CAD MODEL',
+          folder: 'CAD & Schematics / Powertrain',
+          updated_by: 'pratyush',
+          updated_at: new Date(Date.now() - 3600000 * 16).toISOString()
+        },
+        {
+          title: 'FSAE Electric Rulebook 2025 - Compliance Matrix',
+          category: 'RULEBOOK',
+          folder: 'Official Regulations / 2025',
+          updated_by: 'admin',
+          updated_at: new Date(Date.now() - 3600000 * 32).toISOString()
+        },
+        {
+          title: 'Accumulator Container Impact FMEA & Thermal Runaway',
+          category: 'SAFETY LOG',
+          folder: 'Tractive System / Battery',
+          updated_by: 'jacob',
+          updated_at: new Date(Date.now() - 3600000 * 55).toISOString()
+        }
+      ];
+      try { localStorage.setItem('ojas_docs_updates', JSON.stringify(list)); } catch(e) {}
+    }
+    return list;
+  }
+
+  function renderDocsFeed() {
+    const container = document.getElementById('feed-docs');
+    const docs = getDocVaultData();
+
+    if (!docs || docs.length === 0) {
+      container.innerHTML = `
+        <div class="empty-feed-placeholder">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <span>No documents updated recently.</span>
+        </div>
+      `;
+      return;
+    }
+
+    const sorted = [...docs].sort((a, b) => {
+      const ta = new Date(a.updated_at || 0).getTime();
+      const tb = new Date(b.updated_at || 0).getTime();
+      return tb - ta;
+    }).slice(0, 5);
+
+    let html = '';
+    sorted.forEach(doc => {
+      const updater = doc.updated_by || 'Team Member';
+      const timeAgo = formatRelativeTime(doc.updated_at);
+
+      html += `
+        <a class="feed-item" href="docs.html" title="Open in Documentation Vault">
+          <div class="feed-item-top">
+            <span class="feed-item-name">${escapeHtml(doc.title)}</span>
+            <span class="feed-badge sys">${escapeHtml(doc.category || 'DOC')}</span>
+          </div>
+          <div class="feed-details-row">
+            <span class="feed-details-left" style="color:#8f9cb3;">${escapeHtml(doc.folder || 'Google Drive Folder')}</span>
+            <span style="font-family:var(--font-mono); font-size:0.68rem; color:var(--color-gold-bright);">Drive Synced</span>
+          </div>
+          <div class="feed-audit-row">
+            <span>Updated by <strong class="updater-name">${escapeHtml(updater)}</strong></span>
+            <span class="feed-time-ago">${timeAgo}</span>
+          </div>
+        </a>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  // ── Fetch & Sync All Feeds ───────────────────────────────
+  async function loadAllFeeds() {
+    renderDocsFeed();
+
+    // Local storage lookup map
+    let localMap = {};
+    let localRawItems = [];
+    try {
+      localRawItems = JSON.parse(localStorage.getItem('ojas_items') || localStorage.getItem('ojas_fb_items') || '[]');
+      localRawItems.forEach(i => { if (i && i.id) localMap[i.id] = i; });
+    } catch(e) {}
+
+    if (typeof isSupabaseConfigured !== 'undefined' && isSupabaseConfigured && supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('items')
+          .select('*')
+          .order('updated_at', { ascending: false });
+
+        if (error) throw error;
+        if (data && data.length > 0) {
+          const items = data.map(raw => normalizeItem(raw, localMap));
+          renderInventoryFeed(items);
+          renderRestockingFeed(items);
+          return;
+        }
+      } catch (err) {
+        console.warn('Supabase feed fetch failed, falling back to local storage:', err);
+      }
+    }
+
+    // Fallback: render local items
+    const fallbackItems = localRawItems.map(raw => normalizeItem(raw, localMap));
+    renderInventoryFeed(fallbackItems);
+    renderRestockingFeed(fallbackItems);
+  }
+
+  // Initialize feeds on page load
+  loadAllFeeds();
 </script>
 
 </body>

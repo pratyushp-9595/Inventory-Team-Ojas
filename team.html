@@ -65,30 +65,28 @@
 
     .btn-add {
       padding: 0.65rem 1.25rem;
-      background: rgba(40, 84, 130, 0.12);
-      border: 1px solid #3b74aa;
-      border-radius: 8px;
-      color: #69a7e0;
-      font-size: 0.68rem;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 700;
-      letter-spacing: 0.14em;
+      background: var(--color-gold-primary);
+      border: 1px solid var(--color-gold-bright);
+      border-radius: var(--radius-sharp);
+      color: #08090c;
+      font-size: 0.82rem;
+      font-family: var(--font-racing);
+      font-weight: 900;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 0.5rem;
       min-height: 42px;
-      transition: all 0.18s ease;
+      transition: all 0.15s ease;
       white-space: nowrap;
       touch-action: manipulation;
     }
 
     .btn-add:hover {
-      background: rgba(40, 84, 130, 0.22);
-      border-color: #4f8dc7;
-      color: #8ac0f0;
-      box-shadow: 0 0 14px rgba(40, 84, 130, 0.25);
+      background: var(--color-gold-bright);
+      color: #000;
     }
 
     /* ── Members grid ────────────────────────────────────── */
@@ -99,26 +97,24 @@
     }
 
     .member-card {
-      background: #0b0e15;
-      border: 1px solid #1a202d;
-      border-radius: 13px;
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
       overflow: hidden;
       box-shadow: 0 6px 20px rgba(0,0,0,0.35);
       animation: fadeUp 0.35s ease both;
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.18s ease;
     }
 
     .member-card:hover {
-      border-color: #244161;
+      border-color: var(--color-border-strong);
       transform: translateY(-3px);
-      box-shadow:
-        0 12px 30px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(61, 122, 184, 0.2);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
     }
 
     .member-card-rule {
       height: 2px;
-      background: linear-gradient(90deg, transparent, #285482 25%, #4282c0 50%, #285482 75%, transparent);
+      background: var(--color-gold-primary);
     }
 
     .member-inner { padding: 1.4rem; }
@@ -126,16 +122,16 @@
     .member-avatar {
       width: 46px;
       height: 46px;
-      border-radius: 11px;
-      background: rgba(40, 84, 130, 0.15);
-      border: 1px solid rgba(40, 84, 130, 0.28);
+      border-radius: var(--radius-sharp);
+      background: var(--color-bg-panel);
+      border: 1px solid var(--color-border-subtle);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #69a7e0;
-      font-family: 'Orbitron', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--color-gold-bright);
+      font-family: var(--font-racing);
       margin-bottom: 0.95rem;
       letter-spacing: 0.04em;
     }
@@ -286,36 +282,36 @@
     .btn-confirm {
       flex: 1;
       padding: 0.7rem;
-      background: transparent;
-      border: 1px solid #3d7ab8;
-      border-radius: 7px;
-      color: #5a9acc;
-      font-size: 0.72rem;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 600;
-      letter-spacing: 0.14em;
+      background: var(--color-gold-primary);
+      border: 1px solid var(--color-gold-bright);
+      border-radius: var(--radius-sharp);
+      color: #08090c;
+      font-size: 0.82rem;
+      font-family: var(--font-racing);
+      font-weight: 900;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: background 0.18s;
+      transition: background 0.15s;
     }
 
-    .btn-confirm:hover { background: rgba(61,122,184,0.08); }
+    .btn-confirm:hover { background: var(--color-gold-bright); color: #000; }
 
     .btn-cancel {
       padding: 0.7rem 1rem;
-      background: transparent;
-      border: 1px solid #1c1f26;
-      border-radius: 7px;
-      color: #3a3f4a;
-      font-size: 0.72rem;
-      font-family: 'Orbitron', sans-serif;
-      letter-spacing: 0.14em;
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      color: var(--color-text-muted);
+      font-size: 0.82rem;
+      font-family: var(--font-racing);
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: border-color 0.18s, color 0.18s;
+      transition: border-color 0.15s, color 0.15s;
     }
 
-    .btn-cancel:hover { border-color: #3a3f4a; color: #6b7280; }
+    .btn-cancel:hover { border-color: var(--color-border-strong); color: #ffffff; }
 
     /* Count strip */
     .count-strip {
@@ -335,14 +331,14 @@
 <header>
   <a class="header-logo" href="dashboard.html">
     <img src="logo.jpg" alt="Team Ojas Racing" />
-    <div class="logo-text-stack">
-      <span class="eyebrow">Team</span>
-      <span class="wordmark">Ojas Racing</span>
-    </div>
+    <span class="logo-wordmark">TEAM <span class="gold-text">OJAS</span> RACING</span>
   </a>
   <div class="nav-right">
-    <a href="inventory.html" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem; padding:0.42rem 0.85rem; border-radius:7px; background:#0b0e15; border:1px solid #1c2333; color:#a08840; font-size:0.7rem; font-family:'Orbitron',sans-serif; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;"><span>🔧</span> Inventory</a>
-    <a href="restocking.html" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem; padding:0.42rem 0.85rem; border-radius:7px; background:rgba(224,131,56,0.08); border:1px solid rgba(224,131,56,0.25); color:#e08338; font-size:0.7rem; font-family:'Orbitron',sans-serif; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;"><span>📦</span> Restocking</a>
+    <nav class="header-nav-links">
+      <a href="inventory.html" class="nav-link-btn">Inventory</a>
+      <a href="restocking.html" class="nav-link-btn">Restocking</a>
+      <a href="docs.html" class="nav-link-btn">Docs Vault</a>
+    </nav>
     <div class="user-pill">
       <div class="user-pill-dot"></div>
       <span id="js-nav-user">User</span>

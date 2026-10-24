@@ -18,12 +18,12 @@
     ══════════════════════════════════════════ */
     .tab-bar {
       display: flex;
-      background: rgba(7, 9, 14, 0.97);
-      border-bottom: 1px solid #1a202c;
+      background: rgba(8, 9, 13, 0.98);
+      border-bottom: 1px solid var(--color-border-subtle);
       position: sticky;
-      top: 64px;
+      top: 66px;
       z-index: 100;
-      padding: 0 clamp(0.75rem, 3vw, 2.5rem);
+      padding: 0 clamp(1rem, 4vw, 2.8rem);
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
@@ -32,27 +32,27 @@
     .tab-bar::-webkit-scrollbar { display: none; }
 
     .tab-btn {
-      padding: 0.9rem 1.4rem;
+      padding: 0.85rem 1.4rem;
       background: none;
       border: none;
       border-bottom: 2px solid transparent;
-      color: #4e576d;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.58rem;
-      font-weight: 700;
-      letter-spacing: 0.2em;
+      color: var(--color-text-dim);
+      font-family: var(--font-racing);
+      font-size: 0.92rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: all 0.18s ease;
+      transition: all 0.15s ease;
       margin-bottom: -1px;
       white-space: nowrap;
       flex-shrink: 0;
     }
 
-    .tab-btn:hover { color: #8c97ad; }
+    .tab-btn:hover { color: #ffffff; }
     .tab-btn.active {
-      color: #d8b456;
-      border-bottom-color: #c49d3b;
+      color: var(--color-gold-bright);
+      border-bottom-color: var(--color-gold-primary);
     }
 
     .tab-panel { display: none; }
@@ -67,35 +67,35 @@
       align-items: center;
       gap: 0.75rem;
       flex-wrap: wrap;
-      background: #0a0d14;
-      border: 1px solid #1a202e;
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      margin: 1.5rem clamp(1rem, 3.5vw, 2.5rem) 1.2rem;
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      padding: 0.85rem 1.1rem;
+      margin: 1.5rem clamp(1rem, 4vw, 2.8rem) 1.2rem;
       box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
     }
 
     .inv-toolbar select,
     .inv-toolbar input[type="text"] {
-      padding: 0.58rem 0.9rem;
-      background: #080a0f;
-      border: 1px solid #1f2637;
-      border-radius: 8px;
-      color: #d5dae5;
-      font-size: 0.82rem;
-      font-family: 'Inter', sans-serif;
+      padding: 0.55rem 0.85rem;
+      background: var(--color-bg-panel);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      color: var(--color-text-main);
+      font-size: 0.84rem;
+      font-family: var(--font-body);
       outline: none;
-      transition: all 0.18s ease;
-      min-height: 40px;
+      transition: all 0.15s ease;
+      min-height: 38px;
     }
 
     .inv-toolbar select:focus,
     .inv-toolbar input:focus {
-      border-color: #a08840;
-      box-shadow: 0 0 0 2px rgba(160, 136, 64, 0.15);
+      border-color: var(--color-gold-primary);
+      background: #141822;
     }
 
-    .inv-toolbar select option { background: #0c0f16; }
+    .inv-toolbar select option { background: #0c0e14; }
     .inv-toolbar input[type="text"] {
       min-width: 180px;
       flex: 1 1 200px;
@@ -103,57 +103,56 @@
 
     .inv-count {
       margin-left: auto;
-      font-size: 0.72rem;
-      color: #4b5468;
-      letter-spacing: 0.08em;
+      font-size: 0.76rem;
+      color: var(--color-text-dim);
+      letter-spacing: 0.06em;
       white-space: nowrap;
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font-mono);
       padding: 0.2rem 0.5rem;
     }
 
     .inv-count strong {
-      color: #d8b456;
+      color: var(--color-gold-bright);
       font-weight: 700;
     }
 
     /* Items grid */
     .items-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
-      gap: 1.2rem;
-      padding: 0.5rem clamp(1rem, 3.5vw, 2.5rem) 4rem;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+      gap: 1.1rem;
+      padding: 0.5rem clamp(1rem, 4vw, 2.8rem) 4rem;
     }
 
     .item-card {
-      background: #0b0e15;
-      border: 1px solid #1a202d;
-      border-radius: 12px;
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
       overflow: hidden;
       cursor: pointer;
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
       animation: fadeUp 0.3s ease both;
       display: flex;
       flex-direction: column;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+      position: relative;
     }
 
     .item-card:hover {
-      border-color: #3b321c;
+      border-color: var(--color-border-strong);
       transform: translateY(-3px);
-      box-shadow:
-        0 12px 30px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(196, 157, 59, 0.2);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
     }
 
     .item-img-wrap {
       width: 100%;
-      height: 155px;
-      background: #080a0f;
+      height: 160px;
+      background: #06070a;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      border-bottom: 1px solid #161a24;
+      border-bottom: 1px solid var(--color-border-subtle);
       position: relative;
     }
 
@@ -161,43 +160,46 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.3s ease;
+      transition: transform 0.25s ease;
     }
     .item-card:hover .item-img-wrap img {
-      transform: scale(1.03);
+      transform: scale(1.04);
     }
 
-    .item-img-wrap svg { opacity: 0.12; color: #7a8499; }
+    .item-img-wrap svg { opacity: 0.15; color: #7a8499; }
 
     .item-body {
-      padding: 1rem 1.1rem;
+      padding: 0.95rem 1.05rem;
       display: flex;
       flex-direction: column;
       flex: 1;
     }
 
     .item-sys-tag {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.52rem;
+      font-family: var(--font-tech);
+      font-size: 0.62rem;
       font-weight: 700;
-      letter-spacing: 0.22em;
-      color: #a38234;
+      letter-spacing: 0.16em;
+      color: var(--color-gold-bright);
       text-transform: uppercase;
       margin-bottom: 0.35rem;
     }
 
     .item-name {
-      font-size: 0.92rem;
-      font-weight: 600;
-      color: #e5e9f2;
-      margin-bottom: 0.35rem;
-      line-height: 1.35;
+      font-family: var(--font-racing);
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+      margin-bottom: 0.3rem;
+      line-height: 1.2;
+      text-transform: uppercase;
       word-break: break-word;
     }
 
     .item-sub-label {
-      font-size: 0.73rem;
-      color: #555f75;
+      font-size: 0.74rem;
+      color: var(--color-text-dim);
       margin-bottom: 0.85rem;
       display: flex;
       align-items: center;
@@ -210,40 +212,67 @@
       align-items: center;
       justify-content: space-between;
       padding-top: 0.75rem;
-      border-top: 1px solid #151822;
+      border-top: 1px solid var(--color-border-subtle);
       margin-top: auto;
       gap: 0.5rem;
     }
 
     .s-badge {
-      font-size: 0.56rem;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 700;
-      letter-spacing: 0.12em;
+      font-size: 0.66rem;
+      font-family: var(--font-racing);
+      font-weight: 800;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      padding: 0.2rem 0.55rem;
-      border-radius: 5px;
+      padding: 0.22rem 0.55rem;
+      border-radius: var(--radius-sharp);
       white-space: nowrap;
     }
 
-    .s-free   { background: rgba(72, 187, 120, 0.1); color: #52c781; border: 1px solid rgba(72, 187, 120, 0.22); }
-    .s-inuse  { background: rgba(196, 157, 59, 0.1); color: #d8b456; border: 1px solid rgba(196, 157, 59, 0.22); }
-    .s-out    { background: rgba(220, 38, 38, 0.1); color: #e57373; border: 1px solid rgba(220, 38, 38, 0.24); }
-    .s-restock{ background: rgba(224, 131, 56, 0.12); color: #e08338; border: 1px solid rgba(224, 131, 56, 0.3); }
+    .s-free   { background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.25); }
+    .s-inuse  { background: rgba(181, 141, 61, 0.12); color: var(--color-gold-bright); border: 1px solid rgba(181, 141, 61, 0.28); }
+    .s-out    { background: rgba(220, 38, 38, 0.12); color: #f87171; border: 1px solid rgba(220, 38, 38, 0.28); }
+    .s-restock{ background: rgba(234, 88, 12, 0.14); color: #fb923c; border: 1px solid rgba(234, 88, 12, 0.3); }
 
     .item-qty {
-      font-size: 0.74rem;
-      color: #555f75;
-      font-family: 'Inter', sans-serif;
+      font-size: 0.76rem;
+      color: var(--color-text-muted);
+      font-family: var(--font-mono);
       font-weight: 500;
       white-space: nowrap;
+    }
+
+    .item-audit-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--color-text-dim);
+      margin-top: 0.6rem;
+      padding-top: 0.6rem;
+      border-top: 1px dashed var(--color-border-subtle);
+      line-height: 1.25;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .item-audit-pill strong {
+      color: var(--color-gold-bright);
+      font-weight: 700;
+    }
+    .item-audit-pill .audit-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--color-gold-primary);
+      flex-shrink: 0;
     }
 
     .inv-empty {
       grid-column: 1/-1;
       text-align: center;
       padding: 5rem 1.5rem;
-      color: #4b5468;
+      color: var(--color-text-dim);
       font-size: 0.88rem;
       line-height: 1.6;
     }
@@ -255,15 +284,15 @@
        TAB 2 — ADD / EDIT ITEM
     ══════════════════════════════════════════ */
     .add-wrap {
-      max-width: 900px;
+      max-width: 920px;
       margin: 1.8rem auto 4rem;
-      padding: 0 clamp(1rem, 3.5vw, 2.5rem);
+      padding: 0 clamp(1rem, 4vw, 2.8rem);
     }
 
     .add-panel {
-      background: #0b0e15;
-      border: 1px solid #1a202d;
-      border-radius: 14px;
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
       overflow: hidden;
       box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
     }
@@ -272,29 +301,30 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1.4rem clamp(1.2rem, 3vw, 2rem);
-      border-bottom: 1px solid #161a25;
-      background: rgba(13, 16, 24, 0.6);
+      padding: 1.2rem clamp(1.2rem, 3vw, 2rem);
+      border-bottom: 1px solid var(--color-border-subtle);
+      background: var(--color-bg-panel);
       gap: 1rem;
     }
 
     .add-title {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: #e5e8f0;
-      letter-spacing: -0.01em;
+      font-family: var(--font-racing);
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #ffffff;
     }
 
     .edit-pill {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.52rem;
-      font-weight: 700;
-      letter-spacing: 0.2em;
+      font-family: var(--font-racing);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: #d8b456;
-      background: rgba(196, 157, 59, 0.1);
-      border: 1px solid rgba(196, 157, 59, 0.25);
-      border-radius: 5px;
+      color: #000000;
+      background: var(--color-gold-bright);
+      border-radius: var(--radius-sharp);
       padding: 0.25rem 0.65rem;
       display: none;
     }
@@ -318,9 +348,9 @@
     .img-drop {
       width: 100%;
       aspect-ratio: 1;
-      background: #080a0f;
-      border: 1.5px dashed #202738;
-      border-radius: 11px;
+      background: var(--color-bg-panel);
+      border: 1.5px dashed var(--color-border-strong);
+      border-radius: var(--radius-sharp);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -328,13 +358,13 @@
       cursor: pointer;
       overflow: hidden;
       position: relative;
-      transition: all 0.2s ease;
+      transition: all 0.18s ease;
       touch-action: manipulation;
     }
 
     .img-drop:hover {
-      border-color: #a08840;
-      background: #0d1018;
+      border-color: var(--color-gold-primary);
+      background: #141822;
     }
 
     .img-drop img {
@@ -351,7 +381,7 @@
       flex-direction: column;
       align-items: center;
       gap: 0.6rem;
-      color: #40495c;
+      color: var(--color-text-dim);
       pointer-events: none;
       padding: 1rem;
       text-align: center;
@@ -371,24 +401,24 @@
       display: none;
       width: 100%;
       padding: 0.55rem;
-      background: rgba(185, 28, 28, 0.08);
-      border: 1px solid #3c1e22;
-      border-radius: 7px;
-      color: #d16e6e;
-      font-size: 0.68rem;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 600;
-      letter-spacing: 0.12em;
+      background: rgba(185, 28, 28, 0.12);
+      border: 1px solid #7f1d1d;
+      border-radius: var(--radius-sharp);
+      color: #fca5a5;
+      font-size: 0.74rem;
+      font-family: var(--font-racing);
+      font-weight: 800;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: all 0.18s ease;
+      transition: all 0.15s ease;
       text-align: center;
     }
 
     .img-clear-btn:hover {
-      border-color: #5a262a;
-      background: rgba(220, 38, 38, 0.15);
-      color: #ff9191;
+      border-color: #991b1b;
+      background: rgba(220, 38, 38, 0.25);
+      color: #fff;
     }
 
     /* ── Fields column ── */
@@ -409,38 +439,38 @@
 
     .fg label {
       font-size: 0.68rem;
-      font-weight: 600;
-      color: #636d85;
-      letter-spacing: 0.1em;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font-tech);
     }
 
     .fg input,
     .fg select,
     .fg textarea {
-      padding: 0.72rem 0.95rem;
-      background: #080a0f;
-      border: 1px solid #1c2333;
-      border-radius: 8px;
-      color: #d5dae5;
-      font-size: 0.88rem;
-      font-family: 'Inter', sans-serif;
+      padding: 0.68rem 0.85rem;
+      background: var(--color-bg-panel);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      color: var(--color-text-main);
+      font-size: 0.86rem;
+      font-family: var(--font-body);
       outline: none;
       width: 100%;
-      min-height: 42px;
-      transition: all 0.18s ease;
-      caret-color: #c49d3b;
+      min-height: 40px;
+      transition: all 0.15s ease;
+      caret-color: var(--color-gold-bright);
     }
 
     .fg input:focus,
     .fg select:focus,
     .fg textarea:focus {
-      border-color: #a08840;
-      box-shadow: 0 0 0 2px rgba(160, 136, 64, 0.15);
+      border-color: var(--color-gold-primary);
+      background: #141822;
     }
 
-    .fg select option { background: #0c0f16; }
+    .fg select option { background: #0c0e14; }
     .fg textarea { resize: vertical; min-height: 85px; line-height: 1.5; }
 
     /* ── Form actions ── */
@@ -449,79 +479,76 @@
       align-items: center;
       gap: 0.85rem;
       padding: 1.25rem clamp(1.2rem, 3vw, 2rem);
-      border-top: 1px solid #161a25;
-      background: rgba(13, 16, 24, 0.6);
+      border-top: 1px solid var(--color-border-subtle);
+      background: var(--color-bg-panel);
       flex-wrap: wrap;
     }
 
     .btn-submit {
       flex: 1 1 200px;
-      min-height: 44px;
-      padding: 0.75rem 1.4rem;
-      background: rgba(196, 157, 59, 0.08);
-      border: 1px solid #a08840;
-      border-radius: 8px;
-      color: #d8b456;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.18em;
+      min-height: 42px;
+      padding: 0.7rem 1.4rem;
+      background: var(--color-gold-primary);
+      border: 1px solid var(--color-gold-bright);
+      border-radius: var(--radius-sharp);
+      color: #08090c;
+      font-family: var(--font-racing);
+      font-size: 0.88rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: all 0.18s ease;
-      touch-action: manipulation;
+      transition: all 0.16s ease;
+      box-shadow: 0 4px 12px rgba(181, 141, 61, 0.25);
     }
 
     .btn-submit:hover {
-      background: rgba(196, 157, 59, 0.18);
-      border-color: #d8b456;
-      box-shadow: 0 0 20px rgba(196, 157, 59, 0.2);
+      background: var(--color-gold-bright);
+      color: #000;
     }
     .btn-submit:disabled { opacity: 0.45; cursor: not-allowed; }
 
     .btn-del-part {
-      min-height: 44px;
-      padding: 0.75rem 1.25rem;
-      background: rgba(185, 28, 28, 0.08);
-      border: 1px solid #481f23;
-      border-radius: 8px;
-      color: #d16e6e;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
+      min-height: 42px;
+      padding: 0.7rem 1.25rem;
+      background: rgba(185, 28, 28, 0.15);
+      border: 1px solid #7f1d1d;
+      border-radius: var(--radius-sharp);
+      color: #fca5a5;
+      font-family: var(--font-racing);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: all 0.18s ease;
+      transition: all 0.15s ease;
       display: none;
-      touch-action: manipulation;
     }
 
     .btn-del-part:hover {
-      border-color: #632328;
-      background: rgba(220, 38, 38, 0.16);
-      color: #ff9191;
+      background: #b91c1c;
+      color: #ffffff;
     }
 
     .btn-clear-form {
-      min-height: 44px;
-      padding: 0.75rem 1.15rem;
-      background: transparent;
-      border: 1px solid #1c2333;
-      border-radius: 8px;
-      color: #555f75;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.65rem;
-      letter-spacing: 0.14em;
+      min-height: 42px;
+      padding: 0.7rem 1.15rem;
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      color: var(--color-text-muted);
+      font-family: var(--font-racing);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: all 0.18s ease;
-      touch-action: manipulation;
+      transition: all 0.15s ease;
     }
 
     .btn-clear-form:hover {
-      border-color: #313b52;
-      color: #8c97ad;
+      color: #ffffff;
+      border-color: var(--color-border-strong);
     }
 
     /* ── Upload overlay ── */
@@ -541,24 +568,24 @@
     .upload-overlay.on { display: flex; }
 
     .upload-label {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.68rem;
+      font-family: var(--font-tech);
+      font-size: 0.72rem;
       letter-spacing: 0.22em;
-      color: #9da6b8;
+      color: var(--color-text-main);
       text-transform: uppercase;
     }
 
     .upload-track {
       width: min(280px, 80vw);
       height: 3px;
-      background: #1a202d;
-      border-radius: 3px;
+      background: var(--color-border-subtle);
+      border-radius: 2px;
       overflow: hidden;
     }
 
     .upload-fill {
       height: 100%;
-      background: linear-gradient(90deg, #a08840, #d8b456);
+      background: var(--color-gold-bright);
       width: 0%;
       transition: width 0.2s;
     }
@@ -570,16 +597,16 @@
     .manage-wrap {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-      gap: 1.5rem;
+      gap: 1.25rem;
       max-width: 1100px;
       margin: 1.8rem auto 4rem;
-      padding: 0 clamp(1rem, 3.5vw, 2.5rem);
+      padding: 0 clamp(1rem, 4vw, 2.8rem);
     }
 
     .mgmt-card {
-      background: #0b0e15;
-      border: 1px solid #1a202d;
-      border-radius: 13px;
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
       overflow: hidden;
       box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
       display: flex;
@@ -589,15 +616,15 @@
     .mgmt-rule { height: 2px; }
 
     .mgmt-card.gold .mgmt-rule {
-      background: linear-gradient(90deg, transparent, #a08840 25%, #d8b456 50%, #a08840 75%, transparent);
+      background: var(--color-gold-primary);
     }
 
     .mgmt-card.blue .mgmt-rule {
-      background: linear-gradient(90deg, transparent, #285482 25%, #4282c0 50%, #285482 75%, transparent);
+      background: #2563eb;
     }
 
     .mgmt-card.purple .mgmt-rule {
-      background: linear-gradient(90deg, transparent, #5b379e 25%, #885fd4 50%, #5b379e 75%, transparent);
+      background: #8b5cf6;
     }
 
     .mgmt-body {
@@ -608,12 +635,12 @@
     }
 
     .mgmt-heading {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.6rem;
+      font-family: var(--font-tech);
+      font-size: 0.68rem;
       font-weight: 700;
-      letter-spacing: 0.24em;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: #636d85;
+      color: var(--color-text-muted);
       margin-bottom: 1.15rem;
     }
 
@@ -627,70 +654,69 @@
     .mgmt-row input {
       flex: 1;
       padding: 0.62rem 0.85rem;
-      background: #080a0f;
-      border: 1px solid #1c2333;
-      border-radius: 8px;
-      color: #d5dae5;
+      background: var(--color-bg-panel);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      color: var(--color-text-main);
       font-size: 0.84rem;
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font-body);
       outline: none;
       min-height: 40px;
-      transition: all 0.18s ease;
+      transition: all 0.15s ease;
     }
 
     .mgmt-row select:focus,
-    .mgmt-row input:focus { border-color: #a08840; }
-    .mgmt-row select option { background: #0c0f16; }
+    .mgmt-row input:focus { border-color: var(--color-gold-primary); }
+    .mgmt-row select option { background: #0c0e14; }
 
     .mgmt-card.blue .mgmt-row select:focus,
-    .mgmt-card.blue .mgmt-row input:focus { border-color: #2b5d8f; }
+    .mgmt-card.blue .mgmt-row input:focus { border-color: #3b82f6; }
 
     .mgmt-card.purple .mgmt-row select:focus,
-    .mgmt-card.purple .mgmt-row input:focus { border-color: #6f47b8; }
+    .mgmt-card.purple .mgmt-row input:focus { border-color: #a855f7; }
 
     .btn-mgmt {
       padding: 0.62rem 1.05rem;
-      background: rgba(196, 157, 59, 0.08);
-      border: 1px solid #a08840;
-      border-radius: 8px;
-      color: #d8b456;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.62rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
+      background: var(--color-gold-primary);
+      border: 1px solid var(--color-gold-bright);
+      border-radius: var(--radius-sharp);
+      color: #08090c;
+      font-family: var(--font-racing);
+      font-size: 0.82rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
       white-space: nowrap;
       min-height: 40px;
-      transition: all 0.18s ease;
-      touch-action: manipulation;
+      transition: all 0.15s ease;
     }
     .btn-mgmt:hover {
-      background: rgba(196, 157, 59, 0.18);
-      box-shadow: 0 0 12px rgba(196, 157, 59, 0.2);
+      background: var(--color-gold-bright);
+      color: #000;
     }
 
     .mgmt-card.blue .btn-mgmt {
-      background: rgba(40, 84, 130, 0.12);
-      border-color: #3b74aa;
-      color: #69a7e0;
+      background: #1d4ed8;
+      border-color: #3b82f6;
+      color: #ffffff;
     }
     .mgmt-card.blue .btn-mgmt:hover {
-      background: rgba(40, 84, 130, 0.25);
+      background: #2563eb;
     }
 
     .mgmt-card.purple .btn-mgmt {
-      background: rgba(91, 55, 158, 0.12);
-      border-color: #784ec2;
-      color: #b592f7;
+      background: #7e22ce;
+      border-color: #a855f7;
+      color: #ffffff;
     }
     .mgmt-card.purple .btn-mgmt:hover {
-      background: rgba(91, 55, 158, 0.25);
+      background: #9333ea;
     }
 
     .mgmt-divider {
       height: 1px;
-      background: #151822;
+      background: var(--color-border-subtle);
       margin: 0.85rem 0;
     }
 
@@ -708,18 +734,17 @@
       align-items: center;
       justify-content: space-between;
       padding: 0.6rem 0.85rem;
-      background: #080a0f;
-      border: 1px solid #161a25;
-      border-radius: 7px;
+      background: var(--color-bg-panel);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
       font-size: 0.84rem;
-      color: #9da6b8;
-      animation: fadeUp 0.18s ease both;
+      color: var(--color-text-main);
     }
 
     .btn-del-mgmt {
       background: none;
       border: none;
-      color: #3c4457;
+      color: var(--color-text-dim);
       cursor: pointer;
       padding: 4px 6px;
       display: flex;
@@ -727,41 +752,38 @@
       transition: color 0.15s;
     }
 
-    .btn-del-mgmt:hover { color: #e57373; }
+    .btn-del-mgmt:hover { color: #f87171; }
 
     .mgmt-empty {
       font-size: 0.76rem;
-      color: #3c4457;
+      color: var(--color-text-dim);
       text-align: center;
       padding: 1.5rem 0;
       letter-spacing: 0.04em;
     }
 
     .btn-export {
-      padding: 0.58rem 1rem;
-      background: rgba(40, 100, 58, 0.12);
-      border: 1px solid #28633b;
-      border-radius: 8px;
-      color: #5ec781;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.6rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
+      padding: 0.55rem 1rem;
+      background: var(--color-bg-panel);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      color: var(--color-text-main);
+      font-family: var(--font-racing);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
-      transition: all 0.18s ease;
+      transition: all 0.15s ease;
       white-space: nowrap;
-      min-height: 40px;
-      touch-action: manipulation;
+      min-height: 38px;
     }
     .btn-export:hover {
-      background: rgba(40, 100, 58, 0.25);
-      border-color: #3e9159;
-      color: #7eed9f;
-      box-shadow: 0 0 14px rgba(62, 145, 89, 0.2);
+      border-color: var(--color-gold-primary);
+      color: var(--color-gold-bright);
     }
 
     /* ══════════════════════════════════════════
@@ -838,14 +860,15 @@
 <header>
   <a class="header-logo" href="dashboard.html">
     <img src="logo.jpg" alt="Team Ojas Racing" />
-    <div class="logo-text-stack">
-      <span class="eyebrow">Team</span>
-      <span class="wordmark">Ojas Racing</span>
-    </div>
+    <span class="logo-wordmark">TEAM <span class="gold-text">OJAS</span> RACING</span>
   </a>
   <div class="nav-right">
-    <a href="docs.html" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem; padding:0.42rem 0.85rem; border-radius:7px; background:rgba(40,84,130,0.12); border:1px solid rgba(66,130,192,0.3); color:#5294d4; font-size:0.7rem; font-family:'Orbitron',sans-serif; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; transition:all 0.18s ease;"><span>📁</span> Docs Vault</a>
-    <a href="restocking.html" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem; padding:0.42rem 0.85rem; border-radius:7px; background:rgba(224,131,56,0.08); border:1px solid rgba(224,131,56,0.25); color:#e08338; font-size:0.7rem; font-family:'Orbitron',sans-serif; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; transition:all 0.18s ease;"><span>📦</span> Restocking</a>
+    <nav class="header-nav-links">
+      <a href="inventory.html" class="nav-link-btn active">Inventory</a>
+      <a href="restocking.html" class="nav-link-btn">Restocking</a>
+      <a href="docs.html" class="nav-link-btn">Docs Vault</a>
+      <a href="handbook.html" class="nav-link-btn">Handbook</a>
+    </nav>
     <div class="user-pill">
       <div class="user-pill-dot"></div>
       <span id="js-nav-user">User</span>
@@ -855,13 +878,19 @@
 </header>
 
 <!-- ══ PAGE HERO ════════════════════════════════════════════ -->
-<div class="page-hero">
-  <span class="page-hero-tag">Module 01</span>
-  <h2>Inventory</h2>
-  <p>Manage parts, components, and materials — backed by Supabase.</p>
-  <div id="db-status-banner" style="margin-top:0.8rem; padding:0.5rem 0.9rem; border-radius:6px; font-size:0.75rem; display:inline-flex; align-items:center; gap:0.5rem; background:rgba(160,136,64,0.1); border:1px solid rgba(160,136,64,0.3); color:#c8a84a;">
-    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#c8a84a;"></span>
-    <span id="db-status-text">Checking Database connection...</span>
+<div class="racing-hero-wrap" style="padding-bottom:1rem;">
+  <div class="racing-eyebrow">FORMULA STUDENT ELECTRIC &middot; VIT VELLORE</div>
+  <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem;">
+    <div>
+      <h1 class="racing-title-huge" style="font-size:clamp(1.9rem,4.5vw,3rem); margin-bottom:0.4rem;">
+        PARTS &amp; COMPONENTS <span class="gold-word" style="display:inline;">INVENTORY</span>
+      </h1>
+      <p class="racing-subtitle">Live cloud parts catalog, CAD associations, quantities, and workshop storage racks.</p>
+    </div>
+    <div id="db-status-banner" style="padding:0.45rem 0.85rem; border-radius:var(--radius-sharp); font-size:0.75rem; font-family:var(--font-mono); display:inline-flex; align-items:center; gap:0.5rem; background:rgba(181,141,61,0.08); border:1px solid rgba(181,141,61,0.25); color:var(--color-gold-bright);">
+      <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--color-gold-bright);"></span>
+      <span id="db-status-text">Checking Database connection...</span>
+    </div>
   </div>
 </div>
 
@@ -946,7 +975,10 @@
   <div class="add-panel">
     <!-- Header -->
     <div class="add-header">
-      <div class="add-title" id="form-title">Add New Part</div>
+      <div>
+        <div class="add-title" id="form-title">Add New Part</div>
+        <div id="form-audit-subtitle" style="display:none; font-family:var(--font-mono); font-size:0.74rem; color:var(--color-text-dim); margin-top:0.3rem;"></div>
+      </div>
       <div class="edit-pill" id="edit-pill">Editing</div>
     </div>
 
@@ -1051,19 +1083,19 @@
       </div>
 
       <!-- ── Restocking Tracker Section ── -->
-      <div class="fg full" style="background:#090c13; border:1px solid #1c2333; border-radius:10px; padding:1.1rem; margin-top:0.4rem;">
+      <div class="fg full" style="background:var(--color-bg-surface); border:1px solid var(--color-border-subtle); border-radius:var(--radius-sharp); padding:1.1rem; margin-top:0.4rem;">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
           <div>
             <div style="display:flex; align-items:center; gap:0.6rem;">
-              <span style="font-family:'Orbitron',sans-serif; font-size:0.7rem; font-weight:700; color:#e08338; letter-spacing:0.12em; text-transform:uppercase;">📦 Restocking Tracker</span>
-              <span id="restock-active-pill" style="display:none; font-size:0.56rem; font-family:'Orbitron',sans-serif; background:rgba(224,131,56,0.15); border:1px solid rgba(224,131,56,0.35); color:#e08338; padding:0.2rem 0.55rem; border-radius:4px; font-weight:700; letter-spacing:0.08em;">IN RESTOCK QUEUE</span>
+              <span style="font-family:var(--font-racing); font-size:0.95rem; font-weight:800; color:#fb923c; letter-spacing:0.08em; text-transform:uppercase;">📦 Restocking Tracker</span>
+              <span id="restock-active-pill" style="display:none; font-size:0.66rem; font-family:var(--font-racing); background:rgba(234,88,12,0.18); border:1px solid rgba(234,88,12,0.4); color:#fb923c; padding:0.2rem 0.55rem; border-radius:var(--radius-sharp); font-weight:800; letter-spacing:0.08em;">IN RESTOCK QUEUE</span>
             </div>
-            <div style="font-size:0.76rem; color:#636d85; margin-top:0.3rem; line-height:1.4;">
+            <div style="font-size:0.76rem; color:var(--color-text-dim); margin-top:0.3rem; line-height:1.4;">
               Track this item on the dedicated Restocking page to coordinate quotes, vendors, and reorders.
             </div>
           </div>
           <div style="display:flex; align-items:center; gap:0.6rem;">
-            <button type="button" id="btn-toggle-restock" onclick="toggleRestockForCurrentItem()" style="padding:0.55rem 1rem; background:rgba(224,131,56,0.12); border:1px solid rgba(224,131,56,0.35); border-radius:7px; color:#e08338; font-family:'Orbitron',sans-serif; font-size:0.65rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; transition:all 0.18s ease;">
+            <button type="button" id="btn-toggle-restock" onclick="toggleRestockForCurrentItem()" style="padding:0.55rem 1rem; background:rgba(234,88,12,0.15); border:1px solid rgba(234,88,12,0.4); border-radius:var(--radius-sharp); color:#fb923c; font-family:var(--font-racing); font-size:0.82rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; transition:all 0.15s ease;">
               + Add to Restocking
             </button>
             <input type="checkbox" id="f-in-restock" style="display:none;" />
@@ -1071,7 +1103,7 @@
         </div>
 
         <!-- Vendor & Procurement Fields -->
-        <div id="restock-form-details" style="display:none; margin-top:1rem; padding-top:1rem; border-top:1px dashed #1c2333;">
+        <div id="restock-form-details" style="display:none; margin-top:1rem; padding-top:1rem; border-top:1px dashed var(--color-border-subtle);">
           <div class="field-row">
             <div class="fg">
               <label>Target Restock Qty</label>
@@ -1387,6 +1419,7 @@
 
         cachedItems = data.map(item => {
           const loc = localMap[item.id] || {};
+          const auditUser = item.updated_by || loc.updated_by || item.created_by || loc.created_by || '';
           return {
             ...item,
             imageUrl: item.image_url || item.imageUrl || '',
@@ -1400,7 +1433,10 @@
             vendor_notes: item.vendor_notes || loc.vendor_notes || '',
             createdAt: item.created_at || item.createdAt || '',
             createdBy: item.created_by || item.createdBy || '',
-            updatedAt: item.updated_at || item.updatedAt || ''
+            updatedAt: item.updated_at || item.updatedAt || '',
+            updated_at: item.updated_at || item.updatedAt || '',
+            updated_by: auditUser,
+            updatedBy: auditUser
           };
         });
         renderInventory();
@@ -1863,6 +1899,7 @@
             in_restock, restock_qty, restock_status,
             vendor_name, vendor_phone, vendor_location,
             vendor_email, vendor_notes,
+            updated_by: loggedUser,
             updated_at: nowIso
           };
           let { error } = await supabaseClient
@@ -1870,8 +1907,8 @@
             .update(updatePayload)
             .eq('id', currentEditId);
 
-          if (error && error.message && error.message.includes('in_restock')) {
-            console.warn('Database missing in_restock column. Retrying update with core fields.');
+          if (error && error.message && (error.message.includes('in_restock') || error.message.includes('updated_by'))) {
+            console.warn('Database schema missing columns. Retrying update with core fields.');
             delete updatePayload.in_restock;
             delete updatePayload.restock_qty;
             delete updatePayload.restock_status;
@@ -1880,15 +1917,23 @@
             delete updatePayload.vendor_location;
             delete updatePayload.vendor_email;
             delete updatePayload.vendor_notes;
+            delete updatePayload.updated_by;
             const retryRes = await supabaseClient
               .from('items')
               .update(updatePayload)
               .eq('id', currentEditId);
             error = retryRes.error;
             if (!error) {
-              toast('Part updated in Supabase! (Run the SQL update to sync Restocking in cloud)', 'ok');
+              toast('Part updated in Supabase! (Run SUPABASE_SETUP.sql to sync audit columns)', 'ok');
             }
           }
+
+          // Also keep localMap updated with updated_by
+          const locMap = getLocalRestockMap();
+          if (!locMap[currentEditId]) locMap[currentEditId] = {};
+          locMap[currentEditId].updated_by = loggedUser;
+          locMap[currentEditId].updated_at = nowIso;
+          saveLocalRestockMap(locMap);
 
           if (error) throw error;
           if (!error) toast('Part updated in Supabase.', 'ok');
@@ -1902,15 +1947,17 @@
             vendor_name, vendor_phone, vendor_location,
             vendor_email, vendor_notes,
             created_by: loggedUser,
+            updated_by: loggedUser,
             created_at: nowIso,
             updated_at: nowIso
           };
-          let { error } = await supabaseClient
+          let { data: insertedData, error } = await supabaseClient
             .from('items')
-            .insert([insertPayload]);
+            .insert([insertPayload])
+            .select();
 
-          if (error && error.message && error.message.includes('in_restock')) {
-            console.warn('Database missing in_restock column. Retrying insert with core fields.');
+          if (error && error.message && (error.message.includes('in_restock') || error.message.includes('updated_by'))) {
+            console.warn('Database schema missing columns. Retrying insert with core fields.');
             delete insertPayload.in_restock;
             delete insertPayload.restock_qty;
             delete insertPayload.restock_status;
@@ -1919,13 +1966,22 @@
             delete insertPayload.vendor_location;
             delete insertPayload.vendor_email;
             delete insertPayload.vendor_notes;
+            delete insertPayload.updated_by;
             const retryRes = await supabaseClient
               .from('items')
-              .insert([insertPayload]);
+              .insert([insertPayload])
+              .select();
             error = retryRes.error;
+            insertedData = retryRes.data;
             if (!error) {
-              toast('Part added to Supabase! (Run the SQL update to sync Restocking in cloud)', 'ok');
+              toast('Part added to Supabase! (Run SUPABASE_SETUP.sql to sync audit columns)', 'ok');
             }
+          }
+
+          if (insertedData && insertedData[0]) {
+            const locMap = getLocalRestockMap();
+            locMap[insertedData[0].id] = { updated_by: loggedUser, updated_at: nowIso };
+            saveLocalRestockMap(locMap);
           }
 
           if (error) throw error;
@@ -1941,6 +1997,8 @@
           in_restock, restock_qty, restock_status,
           vendor_name, vendor_phone, vendor_location,
           vendor_email, vendor_notes,
+          updated_by: loggedUser,
+          updatedBy: loggedUser,
           updatedAt: nowIso, updated_at: nowIso
         };
         if (currentEditId) {
@@ -1955,9 +2013,14 @@
           payload.created_at = nowIso;
           payload.createdBy = loggedUser;
           payload.created_by = loggedUser;
+          payload.updated_by = loggedUser;
+          payload.updatedBy = loggedUser;
           cachedItems.unshift(payload);
           toast('Part saved to local inventory.', 'ok');
         }
+        saveLocalItems();
+        renderInventory();
+      }
         saveLocalItems();
         renderInventory();
       }
@@ -2020,6 +2083,8 @@
     document.getElementById('f-qty').selectedIndex = 0;
     clearImg();
     document.getElementById('form-title').textContent    = 'Add New Part';
+    const auditEl = document.getElementById('form-audit-subtitle');
+    if (auditEl) auditEl.style.display = 'none';
     document.getElementById('edit-pill').style.display   = 'none';
     document.getElementById('btn-submit').textContent    = 'Add to Inventory';
     document.getElementById('btn-del-part').style.display = 'none';
@@ -2064,6 +2129,25 @@
     }
 
     document.getElementById('form-title').textContent    = 'Edit Part';
+    const auditUser = item.updated_by || item.updatedBy || item.created_by || item.createdBy || '';
+    const auditTime = item.updated_at || item.updatedAt || item.created_at || item.createdAt;
+    const auditEl = document.getElementById('form-audit-subtitle');
+    if (auditEl) {
+      if (auditUser || auditTime) {
+        let tStr = '';
+        if (auditTime) {
+          try {
+            const d = new Date(auditTime);
+            tStr = ' on ' + d.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) + ' at ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          } catch(e) {}
+        }
+        auditEl.innerHTML = `Last updated by: <strong style="color:var(--color-gold-bright);">${x(auditUser || 'Team Member')}</strong>${tStr}`;
+        auditEl.style.display = 'block';
+      } else {
+        auditEl.style.display = 'none';
+      }
+    }
+
     document.getElementById('edit-pill').style.display   = 'inline-block';
     document.getElementById('btn-submit').textContent    = 'Update Part';
     document.getElementById('btn-del-part').style.display = 'inline-block';
@@ -2133,6 +2217,16 @@
 
         const cardImg = item.imageUrl || item.image_url;
 
+        const auditPerson = item.updated_by || item.updatedBy || item.created_by || item.createdBy || 'Team';
+        const auditDateStr = item.updated_at || item.updatedAt || item.created_at || item.createdAt;
+        let timeStr = '';
+        if (auditDateStr) {
+          try {
+            const d = new Date(auditDateStr);
+            timeStr = d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          } catch(e) {}
+        }
+
         card.innerHTML = `
           <div class="item-img-wrap">
             ${cardImg
@@ -2151,6 +2245,10 @@
               <span class="s-badge ${sc}">${sl}</span>
               ${item.in_restock ? `<span class="s-badge s-restock" title="Item tracked in Restocking page">&#128260; Restock</span>` : ''}
               <span class="item-qty">Qty&nbsp;${item.quantity || 1}</span>
+            </div>
+            <div class="item-audit-pill">
+              <span class="audit-dot"></span>
+              <span>Updated by <strong>${x(auditPerson)}</strong>${timeStr ? ` &middot; ${timeStr}` : ''}</span>
             </div>
           </div>
         `;

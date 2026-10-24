@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coming Soon — Team Ojas Racing</title>
+  <script src="config.js"></script>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: clamp(3rem, 8vw, 6rem) clamp(1rem, 4vw, 2.5rem);
+    }
+
+    .coming-soon-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      max-width: 680px;
+      width: 100%;
+    }
+
+    .status-pill-minimal {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-gold-bright);
+      background: rgba(181, 141, 61, 0.1);
+      border: 1px solid rgba(181, 141, 61, 0.3);
+      padding: 0.35rem 0.85rem;
+      border-radius: var(--radius-sharp);
+      margin-bottom: 1.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .status-pill-minimal::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-gold-bright);
+      box-shadow: 0 0 8px var(--color-gold-bright);
+    }
+
+    .huge-coming-soon {
+      font-family: var(--font-racing);
+      font-size: clamp(3rem, 9vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #ffffff;
+      line-height: 1;
+      margin: 0 0 1.2rem;
+    }
+
+    .huge-coming-soon .gold-word {
+      color: var(--color-gold-bright);
+      text-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
+    }
+
+    .coming-soon-subtitle {
+      font-family: var(--font-tech);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-text-dim);
+      margin-bottom: 2.5rem;
+    }
+
+    .btn-back-wrap {
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── MOTORSPORT HEADER ───────────────────────────────── -->
+<header>
+  <a class="header-logo" href="dashboard.html">
+    <img src="logo.jpg" alt="Team Ojas Racing" />
+    <span class="logo-wordmark">TEAM <span class="gold-text">OJAS</span> RACING</span>
+  </a>
+
+  <div class="nav-right">
+    <nav class="header-nav-links">
+      <a href="inventory.html" class="nav-link-btn">Inventory</a>
+      <a href="restocking.html" class="nav-link-btn">Restocking</a>
+      <a href="docs.html" class="nav-link-btn">Docs Vault</a>
+      <a href="handbook.html" class="nav-link-btn active">Handbook</a>
+    </nav>
+    <div class="user-pill">
+      <div class="user-pill-dot"></div>
+      <span id="js-nav-user">User</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Sign Out</button>
+  </div>
+</header>
+
+<!-- ── MAIN: COMING SOON AND NOTHING ELSE ──────────────── -->
+<main>
+  <div class="coming-soon-wrapper">
+    <div class="status-pill-minimal">OJAS HANDBOOK</div>
+    <h1 class="huge-coming-soon">
+      COMING <span class="gold-word">SOON</span>
+    </h1>
+    <div class="coming-soon-subtitle">This section is currently under development</div>
+    <div class="btn-back-wrap">
+      <a href="dashboard.html" class="racing-btn-primary">
+        &larr; BACK TO DASHBOARD
+      </a>
+    </div>
+  </div>
+</main>
+
+<!-- ── FOOTER ──────────────────────────────────────────── -->
+<footer>
+  <div class="footer-left">&copy; <span id="js-year"></span> Team Ojas Racing &mdash; Formula Student Electric &middot; VIT Vellore</div>
+  <div class="footer-right">TOR-24 SYSTEM v2.0</div>
+</footer>
+
+<script>
+  const loggedUser  = sessionStorage.getItem('logged_in_user');
+  const loginTimeMs = parseInt(sessionStorage.getItem('login_time') || '0', 10);
+
+  if (!loggedUser) { window.location.href = 'index.html'; }
+
+  const timeout = SITE_CONFIG.sessionTimeoutMinutes;
+  if (timeout > 0 && loginTimeMs) {
+    if ((Date.now() - loginTimeMs) / 60000 > timeout) {
+      sessionStorage.clear();
+      window.location.href = 'index.html';
+    }
+  }
+
+  document.getElementById('js-nav-user').textContent = loggedUser;
+  document.getElementById('js-year').textContent = new Date().getFullYear();
+
+  function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
+</script>
+
+</body>
+</html>
