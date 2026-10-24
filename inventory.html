@@ -1400,6 +1400,18 @@
   function saveLocalSublocations() {
     localStorage.setItem('ojas_sublocations', JSON.stringify(cachedSublocations));
   }
+  function getLocalRestockMap() {
+    try {
+      return JSON.parse(localStorage.getItem('local_restock_map_v1') || '{}');
+    } catch(e) {
+      return {};
+    }
+  }
+  function saveLocalRestockMap(map) {
+    try {
+      localStorage.setItem('local_restock_map_v1', JSON.stringify(map || {}));
+    } catch(e) {}
+  }
 
   /* ── Supabase Fetchers ───────────────────────────────────── */
   async function fetchItems() {
@@ -1415,6 +1427,10 @@
         try {
           const locals = JSON.parse(localStorage.getItem('ojas_items') || '[]');
           locals.forEach(i => { if (i && i.id) localMap[i.id] = i; });
+          const restockMap = getLocalRestockMap();
+          Object.keys(restockMap).forEach(k => {
+            localMap[k] = { ...(localMap[k] || {}), ...restockMap[k] };
+          });
         } catch(e) {}
 
         cachedItems = data.map(item => {
@@ -1815,9 +1831,13 @@
         item.vendor_email     = vendor_email;
         item.vendor_notes     = vendor_notes;
 
+        const nowIso = new Date().toISOString();
+        item.updated_by = loggedUser;
+        item.updated_at = nowIso;
+
         if (isSupabaseConfigured && supabaseClient) {
           try {
-            const { error: toggleErr } = await supabaseClient.from('items').update({
+            const togglePayload = {
               in_restock: newState,
               restock_qty,
               restock_status,
@@ -1826,8 +1846,15 @@
               vendor_location,
               vendor_email,
               vendor_notes,
-              updated_at: new Date().toISOString()
-            }).eq('id', currentEditId);
+              updated_at: nowIso,
+              updated_by: loggedUser
+            };
+            let { error: toggleErr } = await supabaseClient.from('items').update(togglePayload).eq('id', currentEditId);
+            if (toggleErr && toggleErr.message && toggleErr.message.includes('updated_by')) {
+              delete togglePayload.updated_by;
+              const retry = await supabaseClient.from('items').update(togglePayload).eq('id', currentEditId);
+              toggleErr = retry.error;
+            }
 
             if (toggleErr) {
               if (toggleErr.message && toggleErr.message.includes('in_restock')) {
@@ -1840,6 +1867,13 @@
             console.error('Supabase restock toggle warning:', e);
           }
         }
+        const locMap = getLocalRestockMap();
+        if (!locMap[currentEditId]) locMap[currentEditId] = {};
+        locMap[currentEditId].in_restock = newState;
+        locMap[currentEditId].updated_by = loggedUser;
+        locMap[currentEditId].updated_at = nowIso;
+        saveLocalRestockMap(locMap);
+
         saveLocalItems();
         renderInventory();
       }
