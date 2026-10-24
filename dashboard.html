@@ -77,20 +77,12 @@
       letter-spacing: 0.04em;
     }
 
-    /* ── 3-Column Recent Updates Grid ──────────────────────── */
+    /* ── Stacked Recent Updates Feed (Top -> Below -> Below) ── */
     .updates-feed-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.8rem;
       width: 100%;
-      align-items: start;
-    }
-
-    @media (max-width: 1024px) {
-      .updates-feed-grid {
-        grid-template-columns: 1fr;
-        gap: 1.8rem;
-      }
     }
 
     .update-column-card {
@@ -103,6 +95,7 @@
       position: relative;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
       transition: border-color 0.18s ease;
+      width: 100%;
     }
 
     .update-column-card::before {
@@ -161,10 +154,16 @@
     }
 
     .update-items-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      min-height: 220px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.85rem;
+      min-height: auto;
+    }
+
+    @media (max-width: 680px) {
+      .update-items-list {
+        grid-template-columns: 1fr;
+      }
     }
 
     .feed-item {
@@ -225,6 +224,12 @@
       background: rgba(74, 222, 128, 0.12);
       border: 1px solid rgba(74, 222, 128, 0.3);
       color: #4ade80;
+    }
+
+    .feed-badge.status-inuse {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
     }
 
     .feed-badge.status-low {
@@ -402,7 +407,7 @@
             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
             <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
           </svg>
-          Inventory Updates
+          Recent updates of Inventory
         </div>
         <a href="inventory.html" class="column-link">View All &rarr;</a>
       </div>
@@ -421,7 +426,7 @@
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
             <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
           </svg>
-          Restocking Updates
+          Recent updates of Restocking Tracker
         </div>
         <a href="restocking.html" class="column-link">View All &rarr;</a>
       </div>
@@ -440,7 +445,7 @@
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
           </svg>
-          Doc Vault Updates
+          Recent updates of Doc Vault
         </div>
         <a href="docs.html" class="column-link">Open Vault &rarr;</a>
       </div>
@@ -524,7 +529,7 @@
       system: raw.system || loc.system || 'CHASSIS',
       subsystem: raw.subsystem || loc.subsystem || '',
       quantity: typeof raw.quantity !== 'undefined' ? raw.quantity : (loc.quantity || 0),
-      status: raw.status || loc.status || 'ok',
+      status: raw.status || loc.status || 'free',
       in_restock: typeof raw.in_restock !== 'undefined' && raw.in_restock !== null ? Boolean(raw.in_restock) : Boolean(loc.in_restock),
       restock_qty: raw.restock_qty || loc.restock_qty || 1,
       restock_status: raw.restock_status || loc.restock_status || 'Pending',
@@ -548,17 +553,43 @@
       return;
     }
 
-    // Sort by updated_at descending, take top 5
+    // Sort by updated_at descending, take top 6
     const sorted = [...items].sort((a, b) => {
       const ta = new Date(a.updated_at || 0).getTime();
       const tb = new Date(b.updated_at || 0).getTime();
       return tb - ta;
-    }).slice(0, 5);
+    }).slice(0, 6);
 
     let html = '';
     sorted.forEach(item => {
-      const statusClass = item.status === 'ok' ? 'status-ok' : (item.status === 'low' ? 'status-low' : 'status-out');
-      const statusLabel = item.status === 'ok' ? 'In Stock' : (item.status === 'low' ? 'Low Stock' : 'Out of Stock');
+      let statusClass = 'status-ok';
+      let statusLabel = 'Free to Use';
+
+      const s = (item.status || '').toLowerCase().trim();
+      const q = Number(item.quantity);
+
+      if (s === 'out' || (!isNaN(q) && q <= 0)) {
+        statusClass = 'status-out';
+        statusLabel = 'Out of Stock';
+      } else if (s === 'in-use' || s === 'inuse') {
+        statusClass = 'status-inuse';
+        statusLabel = 'In Use';
+      } else if (s === 'low') {
+        statusClass = 'status-low';
+        statusLabel = 'Low Stock';
+      } else if (s === 'free') {
+        statusClass = 'status-ok';
+        statusLabel = 'Free to Use';
+      } else {
+        if (!isNaN(q) && q > 0) {
+          statusClass = 'status-ok';
+          statusLabel = 'Free to Use';
+        } else {
+          statusClass = 'status-out';
+          statusLabel = 'Out of Stock';
+        }
+      }
+
       const updater = item.updated_by || 'Team Member';
       const timeAgo = formatRelativeTime(item.updated_at);
 
@@ -602,7 +633,7 @@
       const ta = new Date(a.updated_at || 0).getTime();
       const tb = new Date(b.updated_at || 0).getTime();
       return tb - ta;
-    }).slice(0, 5);
+    }).slice(0, 6);
 
     const stClassMap = {
       'Pending': 'status-low',
@@ -702,7 +733,7 @@
       const ta = new Date(a.updated_at || 0).getTime();
       const tb = new Date(b.updated_at || 0).getTime();
       return tb - ta;
-    }).slice(0, 5);
+    }).slice(0, 6);
 
     let html = '';
     sorted.forEach(doc => {

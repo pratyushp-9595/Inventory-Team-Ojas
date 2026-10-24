@@ -268,6 +268,187 @@
       flex-shrink: 0;
     }
 
+    /* ── View Switcher & Rows View ──────────────────────────── */
+    .view-switch {
+      display: inline-flex;
+      align-items: center;
+      background: var(--color-bg-panel);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .view-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.38rem 0.65rem;
+      font-size: 0.74rem;
+      font-family: var(--font-display, 'Barlow Condensed', sans-serif);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: transparent;
+      color: var(--color-text-dim);
+      border: 1px solid transparent;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      line-height: 1;
+    }
+
+    .view-btn:hover {
+      color: var(--color-text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .view-btn.active {
+      background: rgba(181, 141, 61, 0.18);
+      border-color: var(--color-gold-bright);
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(181, 141, 61, 0.22);
+    }
+
+    .items-grid.view-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .item-row {
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
+      border-left: 3px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-sharp);
+      padding: 0.75rem 1.15rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      animation: fadeUp 0.2s ease both;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .item-row:hover {
+      background: #11151f;
+      border-color: rgba(255, 255, 255, 0.2);
+      border-left-color: var(--color-gold-bright);
+      transform: translateX(3px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    }
+
+    .item-row-main {
+      min-width: 200px;
+      flex: 2 1 240px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .item-row-main .item-sys-tag {
+      margin-bottom: 0.1rem;
+    }
+
+    .item-row-name {
+      font-family: var(--font-racing);
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+
+    .item-row-sub {
+      font-size: 0.74rem;
+      color: var(--color-text-dim);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .item-row-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1 1 auto;
+      flex-wrap: wrap;
+    }
+
+    .item-row-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .item-row-qty {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      padding: 0.28rem 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--color-text-muted);
+    }
+
+    .item-row-qty .qty-val {
+      font-weight: 700;
+      color: var(--color-gold-bright);
+      font-size: 0.85rem;
+    }
+
+    .item-row-audit {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-dim);
+      min-width: 170px;
+      flex: 1 1 170px;
+    }
+
+    .item-row-audit strong {
+      color: var(--color-gold-bright);
+    }
+
+    .item-row-arrow {
+      color: var(--color-text-dim);
+      opacity: 0.5;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .item-row:hover .item-row-arrow {
+      color: var(--color-gold-bright);
+      opacity: 1;
+      transform: translateX(2px);
+    }
+
+    @media (max-width: 768px) {
+      .item-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+      .item-row-meta {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .item-row-arrow {
+        display: none;
+      }
+    }
+
     .inv-empty {
       grid-column: 1/-1;
       text-align: center;
@@ -950,6 +1131,27 @@
       Export CSV / Sheets
     </button>
 
+    <!-- View Switcher (Tiles vs Rows) -->
+    <div class="view-switch" id="inv-view-switch">
+      <button type="button" class="view-btn active" id="btn-view-tiles" onclick="setInventoryViewMode('tiles')" title="Tiles view (with image previews)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        Tiles
+      </button>
+      <button type="button" class="view-btn" id="btn-view-rows" onclick="setInventoryViewMode('rows')" title="Rows view (compact, no images)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        Rows
+      </button>
+    </div>
+
     <div class="inv-count"><strong id="inv-count">0</strong> items</div>
   </div>
 
@@ -1412,6 +1614,8 @@
       localStorage.setItem('local_restock_map_v1', JSON.stringify(map || {}));
     } catch(e) {}
   }
+  window.getLocalRestockMap = getLocalRestockMap;
+  window.saveLocalRestockMap = saveLocalRestockMap;
 
   /* ── Supabase Fetchers ───────────────────────────────────── */
   async function fetchItems() {
@@ -1867,13 +2071,9 @@
             console.error('Supabase restock toggle warning:', e);
           }
         }
-        const locMap = getLocalRestockMap();
-        if (!locMap[currentEditId]) locMap[currentEditId] = {};
-        locMap[currentEditId].in_restock = newState;
-        locMap[currentEditId].updated_by = loggedUser;
-        locMap[currentEditId].updated_at = nowIso;
-        saveLocalRestockMap(locMap);
-
+        item.in_restock = newState;
+        item.updated_by = loggedUser;
+        item.updated_at = nowIso;
         saveLocalItems();
         renderInventory();
       }
@@ -1962,12 +2162,11 @@
             }
           }
 
-          // Also keep localMap updated with updated_by
-          const locMap = getLocalRestockMap();
-          if (!locMap[currentEditId]) locMap[currentEditId] = {};
-          locMap[currentEditId].updated_by = loggedUser;
-          locMap[currentEditId].updated_at = nowIso;
-          saveLocalRestockMap(locMap);
+          const editIdx = cachedItems.findIndex(i => i.id === currentEditId);
+          if (editIdx !== -1) {
+            cachedItems[editIdx] = { ...cachedItems[editIdx], ...updatePayload, updated_by: loggedUser, updated_at: nowIso };
+            saveLocalItems();
+          }
 
           if (error) throw error;
           if (!error) toast('Part updated in Supabase.', 'ok');
@@ -2013,9 +2212,9 @@
           }
 
           if (insertedData && insertedData[0]) {
-            const locMap = getLocalRestockMap();
-            locMap[insertedData[0].id] = { updated_by: loggedUser, updated_at: nowIso };
-            saveLocalRestockMap(locMap);
+            const newItemObj = { ...insertPayload, ...insertedData[0], updated_by: loggedUser, updated_at: nowIso };
+            cachedItems.unshift(newItemObj);
+            saveLocalItems();
           }
 
           if (error) throw error;
@@ -2186,7 +2385,32 @@
     goTab('add');
   }
 
-  /* ── Render inventory cards ────────────────────────────── */
+  /* ── View Mode: Tiles vs Rows ───────────────────────────── */
+  let invViewMode = localStorage.getItem('ojas_inv_view_mode') || 'tiles';
+
+  function setInventoryViewMode(mode) {
+    invViewMode = mode;
+    try { localStorage.setItem('ojas_inv_view_mode', mode); } catch(e){}
+    updateInventoryViewButtons();
+    renderInventory();
+  }
+
+  function updateInventoryViewButtons() {
+    const btnTiles = document.getElementById('btn-view-tiles');
+    const btnRows = document.getElementById('btn-view-rows');
+    const grid = document.getElementById('items-grid');
+    if (btnTiles) btnTiles.classList.toggle('active', invViewMode === 'tiles');
+    if (btnRows) btnRows.classList.toggle('active', invViewMode === 'rows');
+    if (grid) {
+      if (invViewMode === 'rows') {
+        grid.classList.add('view-rows');
+      } else {
+        grid.classList.remove('view-rows');
+      }
+    }
+  }
+
+  /* ── Render inventory cards / rows ──────────────────────── */
   function renderInventory() {
     const sysF    = document.getElementById('filter-system')?.value  || '';
     const subF    = document.getElementById('filter-subsystem')?.value || '';
@@ -2221,6 +2445,15 @@
     const empty = document.getElementById('inv-empty');
     document.getElementById('inv-count').textContent = filtered.length;
 
+    // Ensure grid has current view mode class
+    if (grid) {
+      if (invViewMode === 'rows') {
+        grid.classList.add('view-rows');
+      } else {
+        grid.classList.remove('view-rows');
+      }
+    }
+
     // Remove old cards (keep empty-state div)
     Array.from(grid.children).forEach(c => { if (c !== empty) c.remove(); });
 
@@ -2241,13 +2474,6 @@
           locDisplay = x(item.condition);
         }
 
-        const card = document.createElement('div');
-        card.className = 'item-card';
-        card.style.animationDelay = `${Math.min(i, 20) * 0.03}s`;
-        card.onclick = () => openEdit(item);
-
-        const cardImg = item.imageUrl || item.image_url;
-
         const auditPerson = item.updated_by || item.updatedBy || item.created_by || item.createdBy || 'Team';
         const auditDateStr = item.updated_at || item.updatedAt || item.created_at || item.createdAt;
         let timeStr = '';
@@ -2258,32 +2484,74 @@
           } catch(e) {}
         }
 
-        card.innerHTML = `
-          <div class="item-img-wrap">
-            ${cardImg
-              ? `<img src="${x(cardImg)}" alt="${x(item.name)}" />`
-              : `<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                   <rect x="3" y="3" width="18" height="18" rx="2"/>
-                   <circle cx="8.5" cy="8.5" r="1.5"/>
-                   <polyline points="21 15 16 10 5 21"/>
-                 </svg>`}
-          </div>
-          <div class="item-body">
-            <div class="item-sys-tag">${x(item.system || '')}${item.subsystem ? ' · ' + x(item.subsystem) : ''}</div>
-            <div class="item-name">${x(item.name)}</div>
-            <div class="item-sub-label">${locDisplay}</div>
-            <div class="item-footer">
-              <span class="s-badge ${sc}">${sl}</span>
-              ${item.in_restock ? `<span class="s-badge s-restock" title="Item tracked in Restocking page">&#128260; Restock</span>` : ''}
-              <span class="item-qty">Qty&nbsp;${item.quantity || 1}</span>
+        if (invViewMode === 'rows') {
+          // ROWS VIEW - NO IMAGE PREVIEW
+          const row = document.createElement('div');
+          row.className = 'item-row';
+          row.style.animationDelay = `${Math.min(i, 20) * 0.02}s`;
+          row.onclick = () => openEdit(item);
+
+          row.innerHTML = `
+            <div class="item-row-main">
+              <div class="item-sys-tag">${x(item.system || '')}${item.subsystem ? ' · ' + x(item.subsystem) : ''}</div>
+              <div class="item-row-name">${x(item.name)}</div>
+              <div class="item-row-sub">${locDisplay}</div>
             </div>
-            <div class="item-audit-pill">
+            <div class="item-row-meta">
+              <div class="item-row-badges">
+                <span class="s-badge ${sc}">${sl}</span>
+                ${item.in_restock ? `<span class="s-badge s-restock" title="Item tracked in Restocking page">&#128260; Restock</span>` : ''}
+              </div>
+              <div class="item-row-qty">
+                <span class="qty-label">Qty</span>
+                <span class="qty-val">${item.quantity || 1}</span>
+              </div>
+            </div>
+            <div class="item-row-audit">
               <span class="audit-dot"></span>
               <span>Updated by <strong>${x(auditPerson)}</strong>${timeStr ? ` &middot; ${timeStr}` : ''}</span>
             </div>
-          </div>
-        `;
-        grid.appendChild(card);
+            <div class="item-row-arrow" title="Edit part">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          `;
+          grid.appendChild(row);
+        } else {
+          // TILES VIEW - WITH IMAGE PREVIEW
+          const card = document.createElement('div');
+          card.className = 'item-card';
+          card.style.animationDelay = `${Math.min(i, 20) * 0.03}s`;
+          card.onclick = () => openEdit(item);
+
+          const cardImg = item.imageUrl || item.image_url;
+
+          card.innerHTML = `
+            <div class="item-img-wrap">
+              ${cardImg
+                ? `<img src="${x(cardImg)}" alt="${x(item.name)}" />`
+                : `<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                     <rect x="3" y="3" width="18" height="18" rx="2"/>
+                     <circle cx="8.5" cy="8.5" r="1.5"/>
+                     <polyline points="21 15 16 10 5 21"/>
+                   </svg>`}
+            </div>
+            <div class="item-body">
+              <div class="item-sys-tag">${x(item.system || '')}${item.subsystem ? ' · ' + x(item.subsystem) : ''}</div>
+              <div class="item-name">${x(item.name)}</div>
+              <div class="item-sub-label">${locDisplay}</div>
+              <div class="item-footer">
+                <span class="s-badge ${sc}">${sl}</span>
+                ${item.in_restock ? `<span class="s-badge s-restock" title="Item tracked in Restocking page">&#128260; Restock</span>` : ''}
+                <span class="item-qty">Qty&nbsp;${item.quantity || 1}</span>
+              </div>
+              <div class="item-audit-pill">
+                <span class="audit-dot"></span>
+                <span>Updated by <strong>${x(auditPerson)}</strong>${timeStr ? ` &middot; ${timeStr}` : ''}</span>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        }
       });
     }
   }
@@ -2765,6 +3033,7 @@
 
   /* ── Init ───────────────────────────────────────────────── */
   buildStaticDropdowns();
+  updateInventoryViewButtons();
   startListeners();
 
 </script>

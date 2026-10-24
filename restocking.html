@@ -429,6 +429,237 @@
       color: #fff;
     }
 
+    /* ── View Switcher & Rows View ──────────────────────────── */
+    .view-switch {
+      display: inline-flex;
+      align-items: center;
+      background: var(--color-bg-panel);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .view-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.42rem 0.7rem;
+      font-size: 0.74rem;
+      font-family: var(--font-racing);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: transparent;
+      color: var(--color-text-dim);
+      border: 1px solid transparent;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      line-height: 1;
+    }
+
+    .view-btn:hover {
+      color: var(--color-text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .view-btn.active {
+      background: rgba(181, 141, 61, 0.18);
+      border-color: var(--color-gold-bright);
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(181, 141, 61, 0.22);
+    }
+
+    .restock-grid.view-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .restock-row {
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
+      border-left: 3px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-sharp);
+      padding: 0.85rem 1.25rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      transition: all 0.15s ease;
+      animation: fadeUp 0.2s ease both;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .restock-row:hover {
+      background: #11151f;
+      border-color: rgba(255, 255, 255, 0.2);
+      border-left-color: var(--color-gold-bright);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+    }
+
+    .restock-row-left {
+      min-width: 200px;
+      flex: 2 1 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .restock-row-system {
+      font-family: var(--font-tech);
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: var(--color-gold-bright);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .restock-row-name {
+      font-family: var(--font-racing);
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+
+    .restock-row-stock {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      font-size: 0.76rem;
+      font-family: var(--font-mono);
+      min-width: 130px;
+      flex: 1 1 130px;
+    }
+
+    .restock-row-stock .curr {
+      color: #8590a6;
+    }
+    .restock-row-stock .curr strong {
+      color: #fff;
+    }
+    .restock-row-stock .need {
+      color: var(--color-gold-bright);
+      font-weight: 700;
+    }
+
+    .restock-row-status {
+      min-width: 120px;
+      flex: 1 1 120px;
+      display: flex;
+      align-items: center;
+    }
+
+    .restock-row-vendor {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      font-size: 0.74rem;
+      color: #94a3b8;
+      min-width: 180px;
+      flex: 2 1 200px;
+    }
+
+    .restock-row-vendor strong {
+      color: #f0a35c;
+    }
+
+    .restock-row-vendor a {
+      color: var(--color-gold-bright);
+      text-decoration: none;
+    }
+    .restock-row-vendor a:hover {
+      text-decoration: underline;
+    }
+
+    .restock-row-audit {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      color: #8590a6;
+      min-width: 160px;
+      flex: 1 1 160px;
+    }
+
+    .restock-row-audit strong {
+      color: var(--color-gold-bright);
+      font-weight: 700;
+    }
+
+    .restock-row-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .btn-row-edit {
+      padding: 0.45rem 0.85rem;
+      background: var(--color-bg-panel);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      color: var(--color-text-main);
+      font-family: var(--font-racing);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-row-edit:hover {
+      background: var(--color-gold-primary);
+      color: #000;
+      border-color: var(--color-gold-bright);
+    }
+
+    .btn-row-remove {
+      padding: 0.45rem 0.65rem;
+      background: rgba(185, 28, 28, 0.12);
+      border: 1px solid #7f1d1d;
+      border-radius: var(--radius-sharp);
+      color: #fca5a5;
+      font-family: var(--font-racing);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-row-remove:hover {
+      background: #b91c1c;
+      color: #fff;
+    }
+
+    @media (max-width: 768px) {
+      .restock-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+      .restock-row-actions {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-end;
+      }
+    }
+
     /* ── Empty State ── */
     .restock-empty {
       grid-column: 1/-1;
@@ -733,6 +964,27 @@
   </div>
 
   <div class="actions-right">
+    <!-- View Switcher (Tiles vs Rows) -->
+    <div class="view-switch" id="restock-view-switch">
+      <button type="button" class="view-btn active" id="btn-view-tiles" onclick="setRestockViewMode('tiles')" title="Tiles view (with image previews)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        Tiles
+      </button>
+      <button type="button" class="view-btn" id="btn-view-rows" onclick="setRestockViewMode('rows')" title="Rows view (compact, no images)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        Rows
+      </button>
+    </div>
+
     <button class="btn-action-primary" onclick="openAddRestockModal()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Add Restock Item
@@ -988,6 +1240,31 @@
     }
   }
 
+  /* ── View Mode: Tiles vs Rows ───────────────────────────── */
+  let restockViewMode = localStorage.getItem('ojas_restock_view_mode') || 'tiles';
+
+  function setRestockViewMode(mode) {
+    restockViewMode = mode;
+    try { localStorage.setItem('ojas_restock_view_mode', mode); } catch(e){}
+    updateRestockViewButtons();
+    renderRestockList();
+  }
+
+  function updateRestockViewButtons() {
+    const btnTiles = document.getElementById('btn-view-tiles');
+    const btnRows = document.getElementById('btn-view-rows');
+    const grid = document.getElementById('restock-grid');
+    if (btnTiles) btnTiles.classList.toggle('active', restockViewMode === 'tiles');
+    if (btnRows) btnRows.classList.toggle('active', restockViewMode === 'rows');
+    if (grid) {
+      if (restockViewMode === 'rows') {
+        grid.classList.add('view-rows');
+      } else {
+        grid.classList.remove('view-rows');
+      }
+    }
+  }
+
   /* ── Render Restocking List ─────────────────────────────── */
   function renderRestockList() {
     const q       = (document.getElementById('filter-q')?.value || '').toLowerCase();
@@ -1022,6 +1299,15 @@
     const grid = document.getElementById('restock-grid');
     const empty = document.getElementById('restock-empty');
 
+    // Ensure grid has current view mode class
+    if (grid) {
+      if (restockViewMode === 'rows') {
+        grid.classList.add('view-rows');
+      } else {
+        grid.classList.remove('view-rows');
+      }
+    }
+
     // Remove old cards except empty placeholder
     Array.from(grid.children).forEach(c => { if (c !== empty) c.remove(); });
 
@@ -1030,10 +1316,6 @@
     } else {
       empty.style.display = 'none';
       restockItems.forEach((item, idx) => {
-        const card = document.createElement('div');
-        card.className = 'restock-card';
-        card.style.animationDelay = `${Math.min(idx, 15) * 0.04}s`;
-
         const stClassMap = {
           'Pending': 'st-pending',
           'Quote Requested': 'st-quote',
@@ -1056,92 +1338,150 @@
           } catch(e) {}
         }
 
-        const cardImg = item.imageUrl || item.image_url;
+        if (restockViewMode === 'rows') {
+          // ROWS VIEW - NO IMAGE PREVIEW
+          const row = document.createElement('div');
+          row.className = 'restock-row';
+          row.style.animationDelay = `${Math.min(idx, 15) * 0.02}s`;
 
-        // Build Vendor Box HTML
-        let vendorContent = '';
-        const hasVendor = item.vendor_name || item.vendor_phone || item.vendor_location || item.vendor_email || item.vendor_notes;
-        if (hasVendor) {
-          vendorContent = `
-            ${item.vendor_name ? `
-              <div class="vendor-row" style="font-weight:600; color:#f0a35c;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <span>${x(item.vendor_name)}</span>
-              </div>
-            ` : ''}
-            ${item.vendor_phone ? `
-              <div class="vendor-row">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                <a href="tel:${x(item.vendor_phone)}" title="Call vendor">${x(item.vendor_phone)}</a>
-              </div>
-            ` : ''}
-            ${item.vendor_location ? `
-              <div class="vendor-row">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span>${x(item.vendor_location)}</span>
-              </div>
-            ` : ''}
-            ${item.vendor_email ? `
-              <div class="vendor-row">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                <a href="mailto:${x(item.vendor_email)}" title="Email vendor">${x(item.vendor_email)}</a>
-              </div>
-            ` : ''}
-            ${item.vendor_notes ? `
-              <div class="vendor-row" style="color:#94a3b8; font-size:0.73rem; margin-top:0.2rem; border-top:1px dashed #1c2333; padding-top:0.35rem;">
-                <span>${x(item.vendor_notes)}</span>
-              </div>
-            ` : ''}
-          `;
-        } else {
-          vendorContent = `<div class="vendor-empty">No vendor contact or location added yet. Click &quot;Edit Details&quot; to assign.</div>`;
-        }
+          let vendorSummary = '&mdash;';
+          if (item.vendor_name && item.vendor_phone) {
+            vendorSummary = `<strong>${x(item.vendor_name)}</strong> &middot; <a href="tel:${x(item.vendor_phone)}">${x(item.vendor_phone)}</a>`;
+          } else if (item.vendor_name) {
+            vendorSummary = `<strong>${x(item.vendor_name)}</strong>${item.vendor_location ? ' &middot; ' + x(item.vendor_location) : ''}`;
+          } else if (item.vendor_location) {
+            vendorSummary = x(item.vendor_location);
+          }
 
-        card.innerHTML = `
-          <div class="rc-top">
-            <div class="rc-img">
-              ${cardImg ? `<img src="${x(cardImg)}" alt="${x(item.name)}" />` : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`}
-            </div>
-            <div class="rc-meta">
-              <span class="rc-system">${x(item.system || 'SYSTEM')}${item.subsystem ? ' &middot; ' + x(item.subsystem) : ''}</span>
-              <div class="rc-name">${x(item.name)}</div>
-            </div>
-          </div>
-
-          <div class="rc-body">
-            <div class="qty-strip">
-              <span class="curr">Current Stock: <strong>${item.quantity || 0}</strong></span>
-              <span class="target">Need: ${item.restock_qty || 1} units</span>
+          row.innerHTML = `
+            <div class="restock-row-left">
+              <span class="restock-row-system">${x(item.system || 'SYSTEM')}${item.subsystem ? ' &middot; ' + x(item.subsystem) : ''}</span>
+              <div class="restock-row-name">${x(item.name)}</div>
             </div>
 
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-top:-0.2rem;">
-              <span style="font-size:0.68rem; color:#636d85; text-transform:uppercase; font-weight:600;">Status</span>
+            <div class="restock-row-stock">
+              <div class="curr">Stock: <strong>${item.quantity || 0}</strong></div>
+              <div class="need">Need: ${item.restock_qty || 1} units</div>
+            </div>
+
+            <div class="restock-row-status">
               <span class="st-badge ${stBadgeClass}">${stLabel}</span>
             </div>
 
-            <div class="vendor-box">
-              <span class="vendor-title">Vendor &amp; Location Details</span>
-              ${vendorContent}
+            <div class="restock-row-vendor">
+              <div style="font-size:0.65rem; color:#636d85; text-transform:uppercase; font-weight:700;">Vendor</div>
+              <div>${vendorSummary}</div>
             </div>
 
-            <div class="rc-audit-bar" style="margin-top:0.65rem; padding-top:0.5rem; border-top:1px dashed rgba(255,255,255,0.08); font-size:0.72rem; color:#8590a6; display:flex; align-items:center; gap:0.4rem;">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--color-gold-bright,#d4af37);"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <span>Updated by <strong style="color:var(--color-gold-bright,#d4af37); font-weight:700;">${x(updaterName)}</strong>${updatedTimeStr ? ` &middot; ${updatedTimeStr}` : ''}</span>
+            <div class="restock-row-audit">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--color-gold-bright,#d4af37); flex-shrink:0;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Updated by <strong>${x(updaterName)}</strong>${updatedTimeStr ? ` &middot; ${updatedTimeStr}` : ''}</span>
             </div>
-          </div>
 
-          <div class="rc-footer">
-            <button class="btn-edit-restock" onclick="openEditModal('${item.id}')" title="Edit Vendor Details, Restock Qty, and Status">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              Edit Details
-            </button>
-            <button class="btn-remove-restock" onclick="removeFromRestock('${item.id}')" title="Remove this item from the restocking list">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              Remove
-            </button>
-          </div>
-        `;
-        grid.appendChild(card);
+            <div class="restock-row-actions">
+              <button class="btn-row-edit" onclick="openEditModal('${item.id}')" title="Edit Vendor Details, Restock Qty, and Status">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Edit
+              </button>
+              <button class="btn-row-remove" onclick="removeFromRestock('${item.id}')" title="Remove this item from the restocking list">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          `;
+          grid.appendChild(row);
+        } else {
+          // TILES VIEW - WITH IMAGE PREVIEW
+          const card = document.createElement('div');
+          card.className = 'restock-card';
+          card.style.animationDelay = `${Math.min(idx, 15) * 0.04}s`;
+
+          const cardImg = item.imageUrl || item.image_url;
+
+          // Build Vendor Box HTML
+          let vendorContent = '';
+          const hasVendor = item.vendor_name || item.vendor_phone || item.vendor_location || item.vendor_email || item.vendor_notes;
+          if (hasVendor) {
+            vendorContent = `
+              ${item.vendor_name ? `
+                <div class="vendor-row" style="font-weight:600; color:#f0a35c;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <span>${x(item.vendor_name)}</span>
+                </div>
+              ` : ''}
+              ${item.vendor_phone ? `
+                <div class="vendor-row">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <a href="tel:${x(item.vendor_phone)}" title="Call vendor">${x(item.vendor_phone)}</a>
+                </div>
+              ` : ''}
+              ${item.vendor_location ? `
+                <div class="vendor-row">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <span>${x(item.vendor_location)}</span>
+                </div>
+              ` : ''}
+              ${item.vendor_email ? `
+                <div class="vendor-row">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  <a href="mailto:${x(item.vendor_email)}" title="Email vendor">${x(item.vendor_email)}</a>
+                </div>
+              ` : ''}
+              ${item.vendor_notes ? `
+                <div class="vendor-row" style="color:#94a3b8; font-size:0.73rem; margin-top:0.2rem; border-top:1px dashed #1c2333; padding-top:0.35rem;">
+                  <span>${x(item.vendor_notes)}</span>
+                </div>
+              ` : ''}
+            `;
+          } else {
+            vendorContent = `<div class="vendor-empty">No vendor contact or location added yet. Click &quot;Edit Details&quot; to assign.</div>`;
+          }
+
+          card.innerHTML = `
+            <div class="rc-top">
+              <div class="rc-img">
+                ${cardImg ? `<img src="${x(cardImg)}" alt="${x(item.name)}" />` : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`}
+              </div>
+              <div class="rc-meta">
+                <span class="rc-system">${x(item.system || 'SYSTEM')}${item.subsystem ? ' &middot; ' + x(item.subsystem) : ''}</span>
+                <div class="rc-name">${x(item.name)}</div>
+              </div>
+            </div>
+
+            <div class="rc-body">
+              <div class="qty-strip">
+                <span class="curr">Current Stock: <strong>${item.quantity || 0}</strong></span>
+                <span class="target">Need: ${item.restock_qty || 1} units</span>
+              </div>
+
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-top:-0.2rem;">
+                <span style="font-size:0.68rem; color:#636d85; text-transform:uppercase; font-weight:600;">Status</span>
+                <span class="st-badge ${stBadgeClass}">${stLabel}</span>
+              </div>
+
+              <div class="vendor-box">
+                <span class="vendor-title">Vendor &amp; Location Details</span>
+                ${vendorContent}
+              </div>
+
+              <div class="rc-audit-bar" style="margin-top:0.65rem; padding-top:0.5rem; border-top:1px dashed rgba(255,255,255,0.08); font-size:0.72rem; color:#8590a6; display:flex; align-items:center; gap:0.4rem;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--color-gold-bright,#d4af37);"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Updated by <strong style="color:var(--color-gold-bright,#d4af37); font-weight:700;">${x(updaterName)}</strong>${updatedTimeStr ? ` &middot; ${updatedTimeStr}` : ''}</span>
+              </div>
+            </div>
+
+            <div class="rc-footer">
+              <button class="btn-edit-restock" onclick="openEditModal('${item.id}')" title="Edit Vendor Details, Restock Qty, and Status">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Edit Details
+              </button>
+              <button class="btn-remove-restock" onclick="removeFromRestock('${item.id}')" title="Remove this item from the restocking list">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Remove
+              </button>
+            </div>
+          `;
+          grid.appendChild(card);
+        }
       });
     }
   }
@@ -1531,6 +1871,7 @@
   }
 
   /* ── Init ───────────────────────────────────────────────── */
+  updateRestockViewButtons();
   startListeners();
 </script>
 
