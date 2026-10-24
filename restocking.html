@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Restocking Tracker — Team Ojas Racing</title>
+  <script src="config.js"></script>
+  <link rel="stylesheet" href="shared.css" />
+  <!-- Supabase JS Client v2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase project credentials -->
+  <script src="supabase-config.js"></script>
+
+  <style>
+    /* ── Hero ───────────────────────────────────────────────── */
+    .page-hero {
+      text-align: center;
+      padding: clamp(1.8rem, 4vw, 3rem) clamp(1rem, 3.5vw, 2.5rem) 1.5rem;
+    }
+
+    .page-hero-tag {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.54rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      color: #9e5b22;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.6rem;
+    }
+
+    .page-hero h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.3rem, 3.4vw, 1.95rem);
+      background: linear-gradient(100deg, #d88339 0%, #f0a35c 40%, #c49d3b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.45rem;
+    }
+
+    .page-hero p {
+      font-size: clamp(0.82rem, 2vw, 0.92rem);
+      color: #5d677d;
+      max-width: 580px;
+      margin: 0 auto;
+      line-height: 1.55;
+    }
+
+    /* ── Stat Counters Strip ───────────────────────────────── */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      max-width: 1100px;
+      width: 100%;
+      margin: 1.2rem auto 2rem;
+      padding: 0 clamp(1rem, 3.5vw, 2.5rem);
+    }
+
+    .stat-card {
+      background: #090c13;
+      border: 1px solid #19202f;
+      border-radius: 11px;
+      padding: 1rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #e08338, transparent);
+    }
+
+    .stat-num {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #e5e9f2;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.68rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #636d85;
+    }
+
+    /* ── Toolbar & Filters ─────────────────────────────────── */
+    .toolbar-wrap {
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto 1.5rem;
+      padding: 0 clamp(1rem, 3.5vw, 2.5rem);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .filters-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      flex: 1 1 300px;
+    }
+
+    .filters-left input,
+    .filters-left select {
+      padding: 0.65rem 0.9rem;
+      background: #080a0f;
+      border: 1px solid #1c2333;
+      border-radius: 8px;
+      color: #d5dae5;
+      font-size: 0.84rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      min-height: 40px;
+      transition: all 0.18s ease;
+      caret-color: #e08338;
+    }
+
+    .filters-left input:focus,
+    .filters-left select:focus {
+      border-color: #e08338;
+      box-shadow: 0 0 0 2px rgba(224, 131, 56, 0.15);
+    }
+
+    .filters-left select option { background: #0c0f16; }
+
+    .actions-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-action-primary {
+      padding: 0.65rem 1.15rem;
+      background: rgba(224, 131, 56, 0.12);
+      border: 1px solid #e08338;
+      border-radius: 8px;
+      color: #f0a35c;
+      font-size: 0.7rem;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+
+    .btn-action-primary:hover {
+      background: rgba(224, 131, 56, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .btn-action-secondary {
+      padding: 0.65rem 1rem;
+      background: #0a0d14;
+      border: 1px solid #1c2333;
+      border-radius: 8px;
+      color: #7b859b;
+      font-size: 0.7rem;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+
+    .btn-action-secondary:hover {
+      border-color: #2b364e;
+      color: #cbd5e1;
+    }
+
+    /* ── Restock Cards Grid ────────────────────────────────── */
+    .restock-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+      gap: 1.4rem;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto 4rem;
+      padding: 0 clamp(1rem, 3.5vw, 2.5rem);
+    }
+
+    .restock-card {
+      background: #090c13;
+      border: 1px solid #1a202d;
+      border-radius: 13px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .restock-card:hover {
+      border-color: #2c364c;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.55);
+    }
+
+    .rc-top {
+      display: flex;
+      gap: 0.9rem;
+      padding: 1.1rem;
+      border-bottom: 1px solid #141824;
+      background: rgba(12, 16, 24, 0.5);
+    }
+
+    .rc-img {
+      width: 62px;
+      height: 62px;
+      border-radius: 8px;
+      background: #06080d;
+      border: 1px solid #1c2232;
+      flex-shrink: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .rc-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .rc-img svg {
+      color: #3b4356;
+    }
+
+    .rc-meta {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .rc-system {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.54rem;
+      font-weight: 700;
+      color: #9e5b22;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .rc-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #e5e9f2;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+
+    .rc-body {
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      flex: 1;
+    }
+
+    .qty-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #06080d;
+      border: 1px solid #151a27;
+      border-radius: 8px;
+      padding: 0.55rem 0.85rem;
+      font-size: 0.78rem;
+    }
+
+    .qty-strip .curr {
+      color: #636d85;
+    }
+    .qty-strip .target {
+      color: #e08338;
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.72rem;
+    }
+
+    /* ── Vendor Info Box ── */
+    .vendor-box {
+      background: #06080c;
+      border: 1px solid #161c2b;
+      border-radius: 9px;
+      padding: 0.8rem 0.95rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .vendor-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.56rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      color: #7b859b;
+      text-transform: uppercase;
+      margin-bottom: 0.15rem;
+    }
+
+    .vendor-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.77rem;
+      color: #cbd5e1;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .vendor-row svg {
+      color: #e08338;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .vendor-row a {
+      color: #cbd5e1;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .vendor-row a:hover {
+      color: #f0a35c;
+      text-decoration: underline;
+    }
+
+    .vendor-empty {
+      font-size: 0.75rem;
+      color: #4b5468;
+      font-style: italic;
+    }
+
+    /* ── Status Badges ── */
+    .st-badge {
+      font-size: 0.55rem;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border-radius: 5px;
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    .st-pending   { background: rgba(224,131,56,0.12); color: #f0a35c; border: 1px solid rgba(224,131,56,0.28); }
+    .st-quote     { background: rgba(196,157,59,0.12); color: #d8b456; border: 1px solid rgba(196,157,59,0.28); }
+    .st-ordered   { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.28); }
+    .st-transit   { background: rgba(168,85,247,0.12); color: #c084fc; border: 1px solid rgba(168,85,247,0.28); }
+    .st-received  { background: rgba(34,197,94,0.12);  color: #4ade80; border: 1px solid rgba(34,197,94,0.28); }
+
+    /* ── Card Footer Actions ── */
+    .rc-footer {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.1rem;
+      border-top: 1px solid #141824;
+      background: rgba(12, 16, 24, 0.4);
+    }
+
+    .btn-edit-restock {
+      flex: 1;
+      padding: 0.55rem 0.75rem;
+      background: rgba(224,131,56,0.08);
+      border: 1px solid rgba(224,131,56,0.3);
+      border-radius: 7px;
+      color: #f0a35c;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      transition: all 0.18s ease;
+    }
+
+    .btn-edit-restock:hover {
+      background: rgba(224,131,56,0.18);
+    }
+
+    .btn-remove-restock {
+      padding: 0.55rem 0.75rem;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 7px;
+      color: #f87171;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      transition: all 0.18s ease;
+    }
+
+    .btn-remove-restock:hover {
+      background: rgba(239,68,68,0.18);
+      color: #fca5a5;
+    }
+
+    /* ── Empty State ── */
+    .restock-empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 5rem 1.5rem;
+      color: #4b5468;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    .restock-empty svg {
+      margin: 0 auto 1.2rem;
+      display: block;
+      opacity: 0.2;
+      color: #e08338;
+    }
+
+    /* ── Modal (Edit Vendor & Restock Details) ───────────────── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 5, 8, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-box {
+      background: #0a0d15;
+      border: 1px solid #1e2638;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 16px 45px rgba(0,0,0,0.6);
+      transform: translateY(18px);
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-backdrop.open .modal-box {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid #161c2a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(14, 18, 28, 0.6);
+    }
+
+    .modal-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #e5e9f2;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: #555e75;
+      cursor: pointer;
+      font-size: 1.2rem;
+      line-height: 1;
+      padding: 0.2rem;
+      transition: color 0.15s;
+    }
+
+    .modal-close:hover { color: #e5e9f2; }
+
+    .modal-body {
+      padding: 1.4rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+
+    @media (max-width: 520px) {
+      .field-row { grid-template-columns: 1fr; }
+    }
+
+    .fg {
+      display: flex;
+      flex-direction: column;
+      gap: 0.38rem;
+    }
+
+    .fg label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #636d85;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .fg input,
+    .fg select,
+    .fg textarea {
+      padding: 0.68rem 0.9rem;
+      background: #06080d;
+      border: 1px solid #1c2333;
+      border-radius: 8px;
+      color: #d5dae5;
+      font-size: 0.86rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: all 0.18s ease;
+      caret-color: #e08338;
+      width: 100%;
+    }
+
+    .fg input:focus,
+    .fg select:focus,
+    .fg textarea:focus {
+      border-color: #e08338;
+      box-shadow: 0 0 0 2px rgba(224, 131, 56, 0.15);
+    }
+
+    .fg select option { background: #0c0f16; }
+
+    .modal-footer {
+      padding: 1.1rem 1.5rem;
+      border-top: 1px solid #161c2a;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      background: rgba(14, 18, 28, 0.4);
+    }
+
+    .btn-cancel {
+      padding: 0.65rem 1.1rem;
+      background: transparent;
+      border: 1px solid #202738;
+      border-radius: 7px;
+      color: #6c768c;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .btn-cancel:hover { color: #cbd5e1; border-color: #3b4660; }
+
+    .btn-save {
+      padding: 0.65rem 1.3rem;
+      background: rgba(224,131,56,0.12);
+      border: 1px solid #e08338;
+      border-radius: 7px;
+      color: #f0a35c;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .btn-save:hover {
+      background: rgba(224,131,56,0.22);
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 1.8rem;
+      right: 1.8rem;
+      background: #0d1017;
+      border: 1px solid #1f2533;
+      border-radius: 9px;
+      padding: 0.85rem 1.25rem;
+      font-size: 0.84rem;
+      color: #c8cdd6;
+      z-index: 700;
+      transform: translateY(16px);
+      opacity: 0;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      max-width: 340px;
+      line-height: 1.45;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.ok  { border-color: rgba(74,124,89,0.45); color: #5a9c6a; }
+    .toast.err { border-color: rgba(127,29,29,0.45); color: #b45252; }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────── -->
+<header>
+  <a class="header-logo" href="dashboard.html">
+    <img src="logo.jpg" alt="Team Ojas Racing" />
+    <div class="logo-text-stack">
+      <span class="eyebrow">Team</span>
+      <span class="wordmark">Ojas Racing</span>
+    </div>
+  </a>
+  <div class="nav-right">
+    <a href="docs.html" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem; padding:0.42rem 0.85rem; border-radius:7px; background:rgba(40,84,130,0.12); border:1px solid rgba(66,130,192,0.3); color:#5294d4; font-size:0.7rem; font-family:'Orbitron',sans-serif; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; transition:all 0.18s ease;">
+      <span>📁</span> Docs Vault
+    </a>
+    <a href="inventory.html" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem; padding:0.42rem 0.85rem; border-radius:7px; background:#0b0e15; border:1px solid #1c2333; color:#a08840; font-size:0.7rem; font-family:'Orbitron',sans-serif; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;">
+      <span>🔧</span> Inventory
+    </a>
+    <div class="user-pill">
+      <div class="user-pill-dot"></div>
+      <span id="js-nav-user">User</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Sign Out</button>
+  </div>
+</header>
+
+<!-- ── HERO ────────────────────────────────────────────── -->
+<div class="page-hero">
+  <span class="page-hero-tag">Module 03</span>
+  <h2>Restocking Tracker</h2>
+  <p>Monitor parts pending replenishment, manage vendor details, quotes, lead times, and purchase status.</p>
+  
+  <div id="db-status-banner" style="margin-top:0.85rem; padding:0.45rem 0.9rem; border-radius:6px; font-size:0.75rem; display:inline-flex; align-items:center; gap:0.5rem; background:rgba(224,131,56,0.1); border:1px solid rgba(224,131,56,0.3); color:#f0a35c;">
+    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#e08338;"></span>
+    <span id="db-status-text">Checking Database connection...</span>
+  </div>
+</div>
+
+<!-- ── STATS COUNTER STRIP ──────────────────────────────── -->
+<div class="stats-strip">
+  <div class="stat-card">
+    <span class="stat-num" id="stat-total">0</span>
+    <span class="stat-label">Items to Restock</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-num" id="stat-pending">0</span>
+    <span class="stat-label">Pending / Quotes</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-num" id="stat-ordered">0</span>
+    <span class="stat-label">Orders Placed</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-num" id="stat-transit">0</span>
+    <span class="stat-label">In Transit / Shipped</span>
+  </div>
+</div>
+
+<!-- ── TOOLBAR ──────────────────────────────────────────── -->
+<div class="toolbar-wrap">
+  <div class="filters-left">
+    <!-- Search -->
+    <input type="text" id="filter-q" placeholder="Search restock parts, vendors, cities…" oninput="renderRestockList()" style="min-width: 200px; flex: 1 1 200px;" />
+
+    <!-- System Filter -->
+    <select id="filter-sys" onchange="renderRestockList()">
+      <option value="">All Systems</option>
+      <option value="BRAKES">Brakes</option>
+      <option value="CHASSIS">Chassis</option>
+      <option value="ELECTRONICS">Electronics</option>
+      <option value="POWERTRAIN">Powertrain</option>
+      <option value="STEERING">Steering</option>
+      <option value="SUSPENSION">Suspension</option>
+    </select>
+
+    <!-- Status Filter -->
+    <select id="filter-st" onchange="renderRestockList()">
+      <option value="">All Restock Statuses</option>
+      <option value="Pending">Pending</option>
+      <option value="Quote Requested">Quote Requested</option>
+      <option value="Order Placed">Order Placed</option>
+      <option value="In Transit">In Transit</option>
+      <option value="Received">Received / Completed</option>
+    </select>
+  </div>
+
+  <div class="actions-right">
+    <button class="btn-action-primary" onclick="openAddRestockModal()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Restock Item
+    </button>
+    <button class="btn-action-secondary" onclick="exportRestockCSV()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export CSV / Orders
+    </button>
+  </div>
+</div>
+
+<!-- ── RESTOCK CARDS GRID ───────────────────────────────── -->
+<div class="restock-grid" id="restock-grid">
+  <div class="restock-empty" id="restock-empty">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+      <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+    </svg>
+    <div>No items are currently in the Restocking Queue.</div>
+    <div style="margin-top:0.5rem; font-size:0.78rem; color:#636d85;">
+      You can mark items for restocking directly from the <strong>Inventory</strong> edit page or click <strong>+ Add Restock Item</strong> above.
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ───────────────────────────────────────────── -->
+<footer>
+  <div class="footer-left">&copy; <span id="js-year"></span> Team Ojas Racing &mdash; Restocking Module</div>
+  <div class="footer-right">Inventory v1.0</div>
+</footer>
+
+<!-- ── MODAL: EDIT VENDOR & RESTOCK DETAILS ─────────────── -->
+<div class="modal-backdrop" id="edit-modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="m-title">Edit Restock & Vendor Details</h3>
+      <button class="modal-close" onclick="closeEditModal()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Part Selection (if adding new) -->
+      <div class="fg" id="m-select-part-group" style="display:none;">
+        <label>Select Inventory Part *</label>
+        <select id="m-pick-item" onchange="onModalPickItemChange()">
+          <option value="">-- Choose an item to restock --</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div class="fg">
+          <label>Part Name</label>
+          <input type="text" id="m-name" placeholder="e.g. Brake Caliper Mount" />
+        </div>
+        <div class="fg">
+          <label>System</label>
+          <select id="m-system">
+            <option value="BRAKES">Brakes</option>
+            <option value="CHASSIS">Chassis</option>
+            <option value="ELECTRONICS">Electronics</option>
+            <option value="POWERTRAIN">Powertrain</option>
+            <option value="STEERING">Steering</option>
+            <option value="SUSPENSION">Suspension</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="fg">
+          <label>Target Quantity to Restock *</label>
+          <input type="number" id="m-qty" min="1" max="1000" placeholder="e.g. 4" />
+        </div>
+        <div class="fg">
+          <label>Restock Status</label>
+          <select id="m-status">
+            <option value="Pending">Pending</option>
+            <option value="Quote Requested">Quote Requested</option>
+            <option value="Order Placed">Order Placed</option>
+            <option value="In Transit">In Transit</option>
+            <option value="Received">Received / Completed</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Vendor Details -->
+      <div style="font-family:'Orbitron',sans-serif; font-size:0.6rem; font-weight:700; color:#e08338; letter-spacing:0.14em; text-transform:uppercase; margin-top:0.4rem;">
+        Vendor & Procurement Information
+      </div>
+
+      <div class="field-row">
+        <div class="fg">
+          <label>Vendor Name</label>
+          <input type="text" id="m-vendor-name" placeholder="e.g. Bosch Motorsport / Precision CNC" />
+        </div>
+        <div class="fg">
+          <label>Vendor Phone / Contact</label>
+          <input type="text" id="m-vendor-phone" placeholder="e.g. +91 98765 43210" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="fg">
+          <label>Vendor Location / City / Address</label>
+          <input type="text" id="m-vendor-location" placeholder="e.g. MIDC Bhosari, Pune, MH" />
+        </div>
+        <div class="fg">
+          <label>Vendor Email / Website</label>
+          <input type="text" id="m-vendor-email" placeholder="e.g. sales@vendor.com" />
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>Vendor & Procurement Notes</label>
+        <textarea id="m-vendor-notes" rows="3" placeholder="Quotation details, unit cost estimate, part serial/spec, tracking or purchase order #…"></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-save" onclick="saveRestockDetails()">Save Details</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST NOTIFICATION ───────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ── Auth Session Protection ────────────────────────────── */
+  const loggedUser  = sessionStorage.getItem('logged_in_user');
+  const loginTimeMs = parseInt(sessionStorage.getItem('login_time') || '0', 10);
+  if (!loggedUser) { window.location.href = 'index.html'; }
+
+  const timeout = SITE_CONFIG.sessionTimeoutMinutes;
+  if (timeout > 0 && loginTimeMs) {
+    if ((Date.now() - loginTimeMs) / 60000 > timeout) {
+      sessionStorage.clear();
+      window.location.href = 'index.html';
+    }
+  }
+
+  document.getElementById('js-nav-user').textContent = loggedUser;
+  document.getElementById('js-year').textContent     = new Date().getFullYear();
+
+  function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
+
+  /* ── App Data State ─────────────────────────────────────── */
+  let cachedItems = [];
+  let editingItemId = null; // ID of item currently in edit modal
+  let isCreatingNew = false;
+
+  /* ── Supabase & Local Fallback Handlers ─────────────────── */
+  function updateDbBanner() {
+    const banner = document.getElementById('db-status-banner');
+    const text   = document.getElementById('db-status-text');
+    if (!banner || !text) return;
+
+    if (typeof isSupabaseConfigured !== 'undefined' && isSupabaseConfigured && supabaseClient) {
+      banner.style.background = 'rgba(74,124,89,0.12)';
+      banner.style.borderColor = 'rgba(74,124,89,0.35)';
+      banner.style.color = '#4a7c59';
+      banner.firstElementChild.style.background = '#4a7c59';
+      text.textContent = 'Connected to Supabase PostgreSQL & Realtime';
+    } else {
+      banner.style.background = 'rgba(224,131,56,0.12)';
+      banner.style.borderColor = 'rgba(224,131,56,0.35)';
+      banner.style.color = '#f0a35c';
+      banner.firstElementChild.style.background = '#e08338';
+      text.innerHTML = 'Running in <strong>Local Storage Mode</strong> (Configure keys in supabase-config.js).';
+    }
+  }
+
+  function loadLocalData() {
+    try {
+      cachedItems = JSON.parse(localStorage.getItem('ojas_items') || localStorage.getItem('ojas_fb_items') || '[]');
+    } catch(e) {
+      console.error(e);
+      cachedItems = [];
+    }
+    renderRestockList();
+  }
+
+  function saveLocalItems() {
+    localStorage.setItem('ojas_items', JSON.stringify(cachedItems));
+  }
+
+  async function fetchItems() {
+    if (!isSupabaseConfigured || !supabaseClient) {
+      loadLocalData();
+      return;
+    }
+    try {
+      const { data, error } = await supabaseClient
+        .from('items')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data) {
+        // Merge with local storage in case cloud table columns are still being migrated
+        let localMap = {};
+        try {
+          const locals = JSON.parse(localStorage.getItem('ojas_items') || '[]');
+          locals.forEach(i => { if (i && i.id) localMap[i.id] = i; });
+        } catch(e) {}
+
+        cachedItems = data.map(item => {
+          const loc = localMap[item.id] || {};
+          return {
+            ...item,
+            imageUrl: item.image_url || item.imageUrl || '',
+            in_restock: typeof item.in_restock !== 'undefined' && item.in_restock !== null ? Boolean(item.in_restock) : Boolean(loc.in_restock),
+            restock_qty: item.restock_qty || loc.restock_qty || 1,
+            restock_status: item.restock_status || loc.restock_status || 'Pending',
+            vendor_name: item.vendor_name || loc.vendor_name || '',
+            vendor_phone: item.vendor_phone || loc.vendor_phone || '',
+            vendor_location: item.vendor_location || loc.vendor_location || '',
+            vendor_email: item.vendor_email || loc.vendor_email || '',
+            vendor_notes: item.vendor_notes || loc.vendor_notes || '',
+            createdAt: item.created_at || item.createdAt || '',
+            createdBy: item.created_by || item.createdBy || '',
+            updatedAt: item.updated_at || item.updatedAt || ''
+          };
+        });
+        renderRestockList();
+      }
+    } catch (err) {
+      console.warn('Supabase fetch items error:', err);
+      toast('Supabase error: ' + err.message + ' (using local)', 'err');
+      loadLocalData();
+    }
+  }
+
+  /* ── Realtime Listener ──────────────────────────────────── */
+  let restockChannel = null;
+  function startListeners() {
+    updateDbBanner();
+    fetchItems();
+
+    if (isSupabaseConfigured && supabaseClient) {
+      try {
+        if (restockChannel) supabaseClient.removeChannel(restockChannel);
+        restockChannel = supabaseClient.channel('ojas-restock-channel')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, () => {
+            fetchItems();
+          })
+          .subscribe();
+      } catch (err) {
+        console.warn('Realtime subscribe error:', err);
+      }
+    }
+  }
+
+  /* ── Render Restocking List ─────────────────────────────── */
+  function renderRestockList() {
+    const q       = (document.getElementById('filter-q')?.value || '').toLowerCase();
+    const sysF    = document.getElementById('filter-sys')?.value || '';
+    const stF     = document.getElementById('filter-st')?.value || '';
+
+    // Only items where in_restock is true
+    const restockItems = cachedItems.filter(item => {
+      if (!item.in_restock) return false;
+      if (sysF && item.system !== sysF) return false;
+      if (stF && item.restock_status !== stF) return false;
+      if (q && !(
+        (item.name            || '').toLowerCase().includes(q) ||
+        (item.system          || '').toLowerCase().includes(q) ||
+        (item.subsystem       || '').toLowerCase().includes(q) ||
+        (item.vendor_name     || '').toLowerCase().includes(q) ||
+        (item.vendor_phone    || '').toLowerCase().includes(q) ||
+        (item.vendor_location || '').toLowerCase().includes(q) ||
+        (item.vendor_email    || '').toLowerCase().includes(q) ||
+        (item.vendor_notes    || '').toLowerCase().includes(q)
+      )) return false;
+      return true;
+    });
+
+    // Update Stats counters based on all restock items (unfiltered)
+    const allRestock = cachedItems.filter(i => Boolean(i.in_restock));
+    document.getElementById('stat-total').textContent   = allRestock.length;
+    document.getElementById('stat-pending').textContent = allRestock.filter(i => (i.restock_status || 'Pending') === 'Pending' || i.restock_status === 'Quote Requested').length;
+    document.getElementById('stat-ordered').textContent = allRestock.filter(i => i.restock_status === 'Order Placed').length;
+    document.getElementById('stat-transit').textContent = allRestock.filter(i => i.restock_status === 'In Transit').length;
+
+    const grid = document.getElementById('restock-grid');
+    const empty = document.getElementById('restock-empty');
+
+    // Remove old cards except empty placeholder
+    Array.from(grid.children).forEach(c => { if (c !== empty) c.remove(); });
+
+    if (restockItems.length === 0) {
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      restockItems.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'restock-card';
+        card.style.animationDelay = `${Math.min(idx, 15) * 0.04}s`;
+
+        const stClassMap = {
+          'Pending': 'st-pending',
+          'Quote Requested': 'st-quote',
+          'Order Placed': 'st-ordered',
+          'In Transit': 'st-transit',
+          'Received': 'st-received'
+        };
+        const stBadgeClass = stClassMap[item.restock_status] || 'st-pending';
+        const stLabel = item.restock_status || 'Pending';
+
+        const cardImg = item.imageUrl || item.image_url;
+
+        // Build Vendor Box HTML
+        let vendorContent = '';
+        const hasVendor = item.vendor_name || item.vendor_phone || item.vendor_location || item.vendor_email || item.vendor_notes;
+        if (hasVendor) {
+          vendorContent = `
+            ${item.vendor_name ? `
+              <div class="vendor-row" style="font-weight:600; color:#f0a35c;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>${x(item.vendor_name)}</span>
+              </div>
+            ` : ''}
+            ${item.vendor_phone ? `
+              <div class="vendor-row">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <a href="tel:${x(item.vendor_phone)}" title="Call vendor">${x(item.vendor_phone)}</a>
+              </div>
+            ` : ''}
+            ${item.vendor_location ? `
+              <div class="vendor-row">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>${x(item.vendor_location)}</span>
+              </div>
+            ` : ''}
+            ${item.vendor_email ? `
+              <div class="vendor-row">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <a href="mailto:${x(item.vendor_email)}" title="Email vendor">${x(item.vendor_email)}</a>
+              </div>
+            ` : ''}
+            ${item.vendor_notes ? `
+              <div class="vendor-row" style="color:#94a3b8; font-size:0.73rem; margin-top:0.2rem; border-top:1px dashed #1c2333; padding-top:0.35rem;">
+                <span>${x(item.vendor_notes)}</span>
+              </div>
+            ` : ''}
+          `;
+        } else {
+          vendorContent = `<div class="vendor-empty">No vendor contact or location added yet. Click &quot;Edit Details&quot; to assign.</div>`;
+        }
+
+        card.innerHTML = `
+          <div class="rc-top">
+            <div class="rc-img">
+              ${cardImg ? `<img src="${x(cardImg)}" alt="${x(item.name)}" />` : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`}
+            </div>
+            <div class="rc-meta">
+              <span class="rc-system">${x(item.system || 'SYSTEM')}${item.subsystem ? ' &middot; ' + x(item.subsystem) : ''}</span>
+              <div class="rc-name">${x(item.name)}</div>
+            </div>
+          </div>
+
+          <div class="rc-body">
+            <div class="qty-strip">
+              <span class="curr">Current Stock: <strong>${item.quantity || 0}</strong></span>
+              <span class="target">Need: ${item.restock_qty || 1} units</span>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-top:-0.2rem;">
+              <span style="font-size:0.68rem; color:#636d85; text-transform:uppercase; font-weight:600;">Status</span>
+              <span class="st-badge ${stBadgeClass}">${stLabel}</span>
+            </div>
+
+            <div class="vendor-box">
+              <span class="vendor-title">Vendor &amp; Location Details</span>
+              ${vendorContent}
+            </div>
+          </div>
+
+          <div class="rc-footer">
+            <button class="btn-edit-restock" onclick="openEditModal('${item.id}')" title="Edit Vendor Details, Restock Qty, and Status">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit Details
+            </button>
+            <button class="btn-remove-restock" onclick="removeFromRestock('${item.id}')" title="Remove this item from the restocking list">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Remove
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+  }
+
+  /* ── Remove from Restocking ─────────────────────────────── */
+  async function removeFromRestock(id) {
+    const item = cachedItems.find(i => i.id === id);
+    if (!item) return;
+    if (!confirm(`Remove "${item.name}" from the Restocking Tracker?`)) return;
+
+    try {
+      if (isSupabaseConfigured && supabaseClient) {
+        const { error } = await supabaseClient
+          .from('items')
+          .update({
+            in_restock: false,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', id);
+        if (error) {
+          if (error.message && error.message.includes('in_restock')) {
+            item.in_restock = false;
+            saveLocalItems();
+            renderRestockList();
+            toast(`Removed "${item.name}" locally. (Run the ALTER TABLE script in Supabase to sync in cloud)`, 'ok');
+            return;
+          }
+          throw error;
+        }
+        toast(`Removed "${item.name}" from Restocking.`, 'ok');
+        await fetchItems();
+      } else {
+        item.in_restock = false;
+        saveLocalItems();
+        renderRestockList();
+        toast(`Removed "${item.name}" from local Restocking.`, 'ok');
+      }
+    } catch (err) {
+      toast('Failed to remove: ' + err.message, 'err');
+    }
+  }
+
+  /* ── Modal Handling ─────────────────────────────────────── */
+  function openEditModal(id) {
+    editingItemId = id;
+    isCreatingNew = false;
+    const item = cachedItems.find(i => i.id === id);
+    if (!item) return;
+
+    document.getElementById('m-title').textContent = 'Edit Vendor & Restock Details';
+    document.getElementById('m-select-part-group').style.display = 'none';
+
+    document.getElementById('m-name').value            = item.name || '';
+    document.getElementById('m-name').disabled         = true;
+    document.getElementById('m-system').value          = item.system || 'CHASSIS';
+    document.getElementById('m-system').disabled       = true;
+    document.getElementById('m-qty').value             = item.restock_qty || 1;
+    document.getElementById('m-status').value          = item.restock_status || 'Pending';
+    document.getElementById('m-vendor-name').value     = item.vendor_name || '';
+    document.getElementById('m-vendor-phone').value    = item.vendor_phone || '';
+    document.getElementById('m-vendor-location').value = item.vendor_location || '';
+    document.getElementById('m-vendor-email').value    = item.vendor_email || '';
+    document.getElementById('m-vendor-notes').value    = item.vendor_notes || '';
+
+    document.getElementById('edit-modal-backdrop').classList.add('open');
+  }
+
+  function openAddRestockModal() {
+    editingItemId = null;
+    isCreatingNew = true;
+    document.getElementById('m-title').textContent = 'Add Item to Restock';
+
+    // Populate pick dropdown with existing items not yet in restock
+    const select = document.getElementById('m-pick-item');
+    select.innerHTML = '<option value="">-- Choose an item from Inventory --</option>';
+    const available = cachedItems.filter(i => !i.in_restock);
+    available.forEach(i => {
+      const o = document.createElement('option');
+      o.value = i.id;
+      o.textContent = `${i.name} (${i.system}) [Current Stock: ${i.quantity || 0}]`;
+      select.appendChild(o);
+    });
+
+    document.getElementById('m-select-part-group').style.display = 'flex';
+    document.getElementById('m-name').value            = '';
+    document.getElementById('m-name').disabled         = false;
+    document.getElementById('m-system').selectedIndex  = 0;
+    document.getElementById('m-system').disabled       = false;
+    document.getElementById('m-qty').value             = 1;
+    document.getElementById('m-status').value          = 'Pending';
+    document.getElementById('m-vendor-name').value     = '';
+    document.getElementById('m-vendor-phone').value    = '';
+    document.getElementById('m-vendor-location').value = '';
+    document.getElementById('m-vendor-email').value    = '';
+    document.getElementById('m-vendor-notes').value    = '';
+
+    document.getElementById('edit-modal-backdrop').classList.add('open');
+  }
+
+  function onModalPickItemChange() {
+    const id = document.getElementById('m-pick-item').value;
+    if (!id) return;
+    const item = cachedItems.find(i => i.id === id);
+    if (!item) return;
+
+    document.getElementById('m-name').value            = item.name || '';
+    document.getElementById('m-name').disabled         = true;
+    document.getElementById('m-system').value          = item.system || 'CHASSIS';
+    document.getElementById('m-system').disabled       = true;
+    document.getElementById('m-qty').value             = item.restock_qty || 1;
+    document.getElementById('m-vendor-name').value     = item.vendor_name || '';
+    document.getElementById('m-vendor-phone').value    = item.vendor_phone || '';
+    document.getElementById('m-vendor-location').value = item.vendor_location || '';
+    document.getElementById('m-vendor-email').value    = item.vendor_email || '';
+    document.getElementById('m-vendor-notes').value    = item.vendor_notes || '';
+    editingItemId = item.id;
+  }
+
+  function closeEditModal() {
+    document.getElementById('edit-modal-backdrop').classList.remove('open');
+  }
+
+  async function saveRestockDetails() {
+    const qty             = parseInt(document.getElementById('m-qty').value) || 1;
+    const restock_status  = document.getElementById('m-status').value || 'Pending';
+    const vendor_name     = document.getElementById('m-vendor-name').value.trim();
+    const vendor_phone    = document.getElementById('m-vendor-phone').value.trim();
+    const vendor_location = document.getElementById('m-vendor-location').value.trim();
+    const vendor_email    = document.getElementById('m-vendor-email').value.trim();
+    const vendor_notes    = document.getElementById('m-vendor-notes').value.trim();
+
+    const nowIso = new Date().toISOString();
+
+    if (editingItemId) {
+      // Updating existing item
+      try {
+        if (isSupabaseConfigured && supabaseClient) {
+          const { error } = await supabaseClient
+            .from('items')
+            .update({
+              in_restock: true,
+              restock_qty: qty,
+              restock_status,
+              vendor_name,
+              vendor_phone,
+              vendor_location,
+              vendor_email,
+              vendor_notes,
+              updated_at: nowIso
+            })
+            .eq('id', editingItemId);
+          if (error) {
+            if (error.message && error.message.includes('in_restock')) {
+              console.warn('Supabase missing in_restock column. Saving locally.');
+              const idx = cachedItems.findIndex(i => i.id === editingItemId);
+              if (idx !== -1) {
+                cachedItems[idx].in_restock       = true;
+                cachedItems[idx].restock_qty      = qty;
+                cachedItems[idx].restock_status   = restock_status;
+                cachedItems[idx].vendor_name      = vendor_name;
+                cachedItems[idx].vendor_phone     = vendor_phone;
+                cachedItems[idx].vendor_location  = vendor_location;
+                cachedItems[idx].vendor_email     = vendor_email;
+                cachedItems[idx].vendor_notes     = vendor_notes;
+                cachedItems[idx].updated_at       = nowIso;
+              }
+              saveLocalItems();
+              renderRestockList();
+              toast('Saved locally! Run the ALTER TABLE script in Supabase to sync in cloud.', 'ok');
+              closeEditModal();
+              return;
+            }
+            throw error;
+          }
+          toast('Restock and vendor details saved to Supabase.', 'ok');
+          await fetchItems();
+        } else {
+          const idx = cachedItems.findIndex(i => i.id === editingItemId);
+          if (idx !== -1) {
+            cachedItems[idx].in_restock       = true;
+            cachedItems[idx].restock_qty      = qty;
+            cachedItems[idx].restock_status   = restock_status;
+            cachedItems[idx].vendor_name      = vendor_name;
+            cachedItems[idx].vendor_phone     = vendor_phone;
+            cachedItems[idx].vendor_location  = vendor_location;
+            cachedItems[idx].vendor_email     = vendor_email;
+            cachedItems[idx].vendor_notes     = vendor_notes;
+            cachedItems[idx].updated_at       = nowIso;
+          }
+          saveLocalItems();
+          renderRestockList();
+          toast('Restock details saved locally.', 'ok');
+        }
+        closeEditModal();
+      } catch (err) {
+        toast('Save failed: ' + err.message, 'err');
+      }
+    } else {
+      // Brand new item created directly from Restocking page
+      const name = document.getElementById('m-name').value.trim();
+      const sys  = document.getElementById('m-system').value;
+      if (!name) { toast('Please enter a part name.', 'err'); return; }
+
+      const newItem = {
+        name,
+        system: sys,
+        status: 'out',
+        quantity: 0,
+        in_restock: true,
+        restock_qty: qty,
+        restock_status,
+        vendor_name,
+        vendor_phone,
+        vendor_location,
+        vendor_email,
+        vendor_notes,
+        created_by: loggedUser,
+        created_at: nowIso,
+        updated_at: nowIso
+      };
+
+      try {
+        if (isSupabaseConfigured && supabaseClient) {
+          const { error } = await supabaseClient.from('items').insert([newItem]);
+          if (error) {
+            if (error.message && error.message.includes('in_restock')) {
+              console.warn('Supabase missing in_restock column. Saving new restock item locally.');
+              newItem.id = 'local_' + Date.now();
+              cachedItems.unshift(newItem);
+              saveLocalItems();
+              renderRestockList();
+              toast('New item added locally! Run the ALTER TABLE script in Supabase to sync in cloud.', 'ok');
+              closeEditModal();
+              return;
+            }
+            throw error;
+          }
+          toast('New restock item created in Supabase.', 'ok');
+          await fetchItems();
+        } else {
+          newItem.id = 'local_' + Date.now();
+          cachedItems.unshift(newItem);
+          saveLocalItems();
+          renderRestockList();
+          toast('New restock item created locally.', 'ok');
+        }
+        closeEditModal();
+      } catch (err) {
+        toast('Save failed: ' + err.message, 'err');
+      }
+    }
+  }
+
+  /* ── Export CSV for Restocking / Purchase Orders ─────────── */
+  function exportRestockCSV() {
+    const allRestock = cachedItems.filter(i => Boolean(i.in_restock));
+    if (allRestock.length === 0) {
+      toast('Restocking list is currently empty. Nothing to export.', 'err');
+      return;
+    }
+
+    const headers = [
+      'Part Name',
+      'System',
+      'Subsystem',
+      'Current Inventory Stock',
+      'Restock Target Qty',
+      'Restock Status',
+      'Vendor Name',
+      'Vendor Phone / Contact',
+      'Vendor Location / Address',
+      'Vendor Email',
+      'Procurement / Quote Notes',
+      'Created By',
+      'Last Updated'
+    ];
+
+    function csvEscape(val) {
+      if (val === null || val === undefined) return '""';
+      let str = String(val);
+      if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
+        str = '"' + str.replace(/"/g, '""') + '"';
+      } else {
+        str = '"' + str + '"';
+      }
+      return str;
+    }
+
+    const rows = [headers.map(csvEscape).join(',')];
+
+    allRestock.forEach(item => {
+      const row = [
+        csvEscape(item.name || ''),
+        csvEscape(item.system || ''),
+        csvEscape(item.subsystem || ''),
+        csvEscape(item.quantity || 0),
+        csvEscape(item.restock_qty || 1),
+        csvEscape(item.restock_status || 'Pending'),
+        csvEscape(item.vendor_name || ''),
+        csvEscape(item.vendor_phone || ''),
+        csvEscape(item.vendor_location || ''),
+        csvEscape(item.vendor_email || ''),
+        csvEscape(item.vendor_notes || ''),
+        csvEscape(item.created_by || item.createdBy || ''),
+        csvEscape(item.updated_at ? new Date(item.updated_at).toLocaleString() : '')
+      ];
+      rows.push(row.join(','));
+    });
+
+    const csvContent = '\uFEFF' + rows.join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    const dateStr = new Date().toISOString().split('T')[0];
+    a.download = `Ojas_Restocking_Orders_${dateStr}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast(`Exported ${allRestock.length} restocking items to CSV!`, 'ok');
+  }
+
+  /* ── Toast ──────────────────────────────────────────────── */
+  let _toastTimer;
+  function toast(msg, type = '') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className   = `toast show ${type}`;
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => { el.className = 'toast'; }, 3200);
+  }
+
+  function x(s) {
+    return String(s || '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── Init ───────────────────────────────────────────────── */
+  startListeners();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documentation Vault — Team Ojas Racing</title>
+  <script src="config.js"></script>
+  <link rel="stylesheet" href="shared.css" />
+
+  <style>
+    /* ── Hero ───────────────────────────────────────────────── */
+    .page-hero {
+      text-align: center;
+      padding: clamp(1.4rem, 3.2vw, 2.2rem) clamp(1rem, 3.5vw, 2.5rem) 1.2rem;
+    }
+
+    .page-hero-tag {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.54rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      color: #3b74aa;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-hero h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.25rem, 3.2vw, 1.85rem);
+      background: linear-gradient(100deg, #5294d4 0%, #7db9f0 40%, #c49d3b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.4rem;
+    }
+
+    .page-hero p {
+      font-size: clamp(0.82rem, 1.8vw, 0.9rem);
+      color: #5d677d;
+      max-width: 620px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* ── Info Hint Pill ────────────────────────────────────── */
+    .drive-hint-bar {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto 1rem;
+      padding: 0 clamp(1rem, 3.5vw, 2.5rem);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .drive-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.74rem;
+      color: #64748b;
+      background: #080b12;
+      border: 1px solid #1a2233;
+      padding: 0.4rem 0.85rem;
+      border-radius: 7px;
+    }
+
+    .drive-pill strong {
+      color: #7db9f0;
+      font-weight: 600;
+    }
+
+    .drive-pill svg {
+      color: #4282c0;
+      flex-shrink: 0;
+    }
+
+    .btn-drive-open {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #5294d4;
+      background: rgba(40, 84, 130, 0.12);
+      border: 1px solid rgba(66, 130, 192, 0.3);
+      padding: 0.45rem 0.85rem;
+      border-radius: 7px;
+      text-decoration: none;
+      transition: all 0.18s ease;
+    }
+
+    .btn-drive-open:hover {
+      background: rgba(40, 84, 130, 0.22);
+      border-color: #5294d4;
+      color: #93c5fd;
+    }
+
+    .btn-theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #cbd5e1;
+      background: #090c13;
+      border: 1px solid #1f2738;
+      padding: 0.45rem 0.85rem;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .btn-theme-toggle:hover {
+      border-color: #3b74aa;
+      color: #7db9f0;
+      background: rgba(40, 84, 130, 0.14);
+    }
+
+    /* ── Main Iframe Container ─────────────────────────────── */
+    .vault-container {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto 3rem;
+      padding: 0 clamp(1rem, 3.5vw, 2.5rem);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .iframe-wrapper {
+      position: relative;
+      width: 100%;
+      height: 80vh;
+      min-height: 560px;
+      background: #ffffff;
+      border: 1px solid #1a202d;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5);
+    }
+
+    .iframe-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #285482 25%, #5294d4 50%, #285482 75%, transparent);
+      z-index: 2;
+    }
+
+    /* Invert Google Drive's default white background & dark text so that:
+       - Background becomes a dark matte slate matching the site.
+       - Folder & document title text becomes bright, crisp, high-contrast white.
+       - Icons retain natural blue/green colors via hue-rotate. */
+    .vault-iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+      background-color: #ffffff;
+      filter: invert(0.9) hue-rotate(180deg) contrast(1.15) brightness(1.05);
+      transition: filter 0.22s ease;
+    }
+
+    /* Clean light mode if user toggles to standard light theme */
+    .vault-iframe.light-mode {
+      filter: none;
+    }
+
+    /* ── Header nav links ──────────────────────────────────── */
+    .header-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .nav-link-item {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 7px;
+      font-size: 0.68rem;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: all 0.18s ease;
+    }
+
+    .nav-link-item.inventory {
+      background: #0b0e15;
+      border: 1px solid #1c2333;
+      color: #a08840;
+    }
+
+    .nav-link-item.restock {
+      background: rgba(224,131,56,0.08);
+      border: 1px solid rgba(224,131,56,0.25);
+      color: #e08338;
+    }
+
+    .nav-link-item:hover {
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 680px) {
+      .header-nav-links { display: none; }
+      .iframe-wrapper { height: 75vh; min-height: 480px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────── -->
+<header>
+  <a class="header-logo" href="dashboard.html">
+    <img src="logo.jpg" alt="Team Ojas Racing" />
+    <div class="logo-text-stack">
+      <span class="eyebrow">Team</span>
+      <span class="wordmark">Ojas Racing</span>
+    </div>
+  </a>
+
+  <div class="nav-right">
+    <div class="header-nav-links">
+      <a href="inventory.html" class="nav-link-item inventory">
+        <span>🔧</span> Inventory
+      </a>
+      <a href="restocking.html" class="nav-link-item restock">
+        <span>📦</span> Restocking
+      </a>
+    </div>
+
+    <div class="user-pill">
+      <div class="user-pill-dot"></div>
+      <span id="js-nav-user">User</span>
+    </div>
+
+    <button class="btn-logout" onclick="logout()">Sign Out</button>
+  </div>
+</header>
+
+<!-- ── HERO ────────────────────────────────────────────── -->
+<div class="page-hero">
+  <span class="page-hero-tag">Module 02</span>
+  <h2>Documentation Vault</h2>
+  <p>Engineering designs, CAD packages, team manuals, and competition rulebooks embedded directly from Google Drive.</p>
+</div>
+
+<!-- ── DRIVE HELPER STRIP ──────────────────────────────── -->
+<div class="drive-hint-bar">
+  <div class="drive-pill">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+    </svg>
+    <span>Embedded Folder: <strong>Team Ojas Documentation Drive</strong></span>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+    <!-- Theme Toggle Pill for Drive View -->
+    <button class="btn-theme-toggle" id="btn-theme-toggle" onclick="toggleDriveTheme()" title="Switch between high-contrast Dark theme and original Light theme">
+      <span id="theme-icon">🌙</span> <span id="theme-text">Dark View</span>
+    </button>
+
+    <a class="btn-drive-open" id="js-drive-external-link" href="https://drive.google.com/drive/folders/11hVe6t2sm3mSfh-I73zVwvapYMvX_tpp" target="_blank" rel="noopener noreferrer">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+        <polyline points="15 3 21 3 21 9"></polyline>
+        <line x1="10" y1="14" x2="21" y2="3"></line>
+      </svg>
+      Open in Google Drive
+    </a>
+  </div>
+</div>
+
+<!-- ── MAIN CONTENT (IFRAME) ────────────────────────────── -->
+<main class="vault-container">
+  <div class="iframe-wrapper">
+    <iframe
+      id="vault-iframe"
+      class="vault-iframe"
+      src="https://drive.google.com/embeddedfolderview?id=11hVe6t2sm3mSfh-I73zVwvapYMvX_tpp#list"
+      title="Team Ojas Racing Documentation Vault"
+      allow="autoplay"
+      loading="lazy"
+    ></iframe>
+  </div>
+</main>
+
+<!-- ── FOOTER ───────────────────────────────────────────── -->
+<footer>
+  <div class="footer-left">&copy; <span id="js-year"></span> Team Ojas Racing &mdash; Documentation Vault</div>
+  <div class="footer-right">v1.0</div>
+</footer>
+
+<script>
+  /* ── Auth Session Protection ────────────────────────────── */
+  const loggedUser  = sessionStorage.getItem('logged_in_user');
+  const loginTimeMs = parseInt(sessionStorage.getItem('login_time') || '0', 10);
+
+  if (!loggedUser) {
+    window.location.href = 'index.html';
+  }
+
+  const timeout = typeof SITE_CONFIG !== 'undefined' ? SITE_CONFIG.sessionTimeoutMinutes : 60;
+  if (timeout > 0 && loginTimeMs) {
+    if ((Date.now() - loginTimeMs) / 60000 > timeout) {
+      sessionStorage.clear();
+      window.location.href = 'index.html';
+    }
+  }
+
+  document.getElementById('js-nav-user').textContent = loggedUser || 'User';
+  document.getElementById('js-year').textContent     = new Date().getFullYear();
+
+  function logout() {
+    sessionStorage.clear();
+    window.location.href = 'index.html';
+  }
+
+  /* ── Drive Viewer Theme Toggle (Dark / Light) ───────────── */
+  function setDriveTheme(mode) {
+    const iframe = document.getElementById('vault-iframe');
+    const icon   = document.getElementById('theme-icon');
+    const text   = document.getElementById('theme-text');
+    if (!iframe) return;
+
+    if (mode === 'light') {
+      iframe.classList.add('light-mode');
+      if (icon) icon.textContent = '☀️';
+      if (text) text.textContent = 'Light View';
+      localStorage.setItem('drive_theme_pref', 'light');
+    } else {
+      iframe.classList.remove('light-mode');
+      if (icon) icon.textContent = '🌙';
+      if (text) text.textContent = 'Dark View';
+      localStorage.setItem('drive_theme_pref', 'dark');
+    }
+  }
+
+  function toggleDriveTheme() {
+    const iframe = document.getElementById('vault-iframe');
+    if (!iframe) return;
+    const isLight = iframe.classList.contains('light-mode');
+    setDriveTheme(isLight ? 'dark' : 'light');
+  }
+
+  // Default to Dark View (inverts black text into bright white on dark matte)
+  const savedTheme = localStorage.getItem('drive_theme_pref') || 'dark';
+  setDriveTheme(savedTheme);
+</script>
+
+</body>
+</html>

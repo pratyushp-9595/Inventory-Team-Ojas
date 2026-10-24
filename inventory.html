@@ -229,6 +229,7 @@
     .s-free   { background: rgba(72, 187, 120, 0.1); color: #52c781; border: 1px solid rgba(72, 187, 120, 0.22); }
     .s-inuse  { background: rgba(196, 157, 59, 0.1); color: #d8b456; border: 1px solid rgba(196, 157, 59, 0.22); }
     .s-out    { background: rgba(220, 38, 38, 0.1); color: #e57373; border: 1px solid rgba(220, 38, 38, 0.24); }
+    .s-restock{ background: rgba(224, 131, 56, 0.12); color: #e08338; border: 1px solid rgba(224, 131, 56, 0.3); }
 
     .item-qty {
       font-size: 0.74rem;
@@ -843,6 +844,8 @@
     </div>
   </a>
   <div class="nav-right">
+    <a href="docs.html" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem; padding:0.42rem 0.85rem; border-radius:7px; background:rgba(40,84,130,0.12); border:1px solid rgba(66,130,192,0.3); color:#5294d4; font-size:0.7rem; font-family:'Orbitron',sans-serif; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; transition:all 0.18s ease;"><span>📁</span> Docs Vault</a>
+    <a href="restocking.html" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem; padding:0.42rem 0.85rem; border-radius:7px; background:rgba(224,131,56,0.08); border:1px solid rgba(224,131,56,0.25); color:#e08338; font-size:0.7rem; font-family:'Orbitron',sans-serif; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; transition:all 0.18s ease;"><span>📦</span> Restocking</a>
     <div class="user-pill">
       <div class="user-pill-dot"></div>
       <span id="js-nav-user">User</span>
@@ -902,6 +905,7 @@
       <option value="free">Free to Use</option>
       <option value="in-use">In Use</option>
       <option value="out">Out of Stock</option>
+      <option value="restock">📦 Restock Queue</option>
     </select>
 
     <!-- Search -->
@@ -1044,6 +1048,74 @@
       <div class="fg full">
         <label>Notes</label>
         <textarea id="f-notes" placeholder="Additional notes, observations, references…"></textarea>
+      </div>
+
+      <!-- ── Restocking Tracker Section ── -->
+      <div class="fg full" style="background:#090c13; border:1px solid #1c2333; border-radius:10px; padding:1.1rem; margin-top:0.4rem;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+          <div>
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span style="font-family:'Orbitron',sans-serif; font-size:0.7rem; font-weight:700; color:#e08338; letter-spacing:0.12em; text-transform:uppercase;">📦 Restocking Tracker</span>
+              <span id="restock-active-pill" style="display:none; font-size:0.56rem; font-family:'Orbitron',sans-serif; background:rgba(224,131,56,0.15); border:1px solid rgba(224,131,56,0.35); color:#e08338; padding:0.2rem 0.55rem; border-radius:4px; font-weight:700; letter-spacing:0.08em;">IN RESTOCK QUEUE</span>
+            </div>
+            <div style="font-size:0.76rem; color:#636d85; margin-top:0.3rem; line-height:1.4;">
+              Track this item on the dedicated Restocking page to coordinate quotes, vendors, and reorders.
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <button type="button" id="btn-toggle-restock" onclick="toggleRestockForCurrentItem()" style="padding:0.55rem 1rem; background:rgba(224,131,56,0.12); border:1px solid rgba(224,131,56,0.35); border-radius:7px; color:#e08338; font-family:'Orbitron',sans-serif; font-size:0.65rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; transition:all 0.18s ease;">
+              + Add to Restocking
+            </button>
+            <input type="checkbox" id="f-in-restock" style="display:none;" />
+          </div>
+        </div>
+
+        <!-- Vendor & Procurement Fields -->
+        <div id="restock-form-details" style="display:none; margin-top:1rem; padding-top:1rem; border-top:1px dashed #1c2333;">
+          <div class="field-row">
+            <div class="fg">
+              <label>Target Restock Qty</label>
+              <input type="number" id="f-restock-qty" min="1" max="1000" placeholder="e.g. 5" />
+            </div>
+            <div class="fg">
+              <label>Restock Status</label>
+              <select id="f-restock-status">
+                <option value="Pending">Pending</option>
+                <option value="Quote Requested">Quote Requested</option>
+                <option value="Order Placed">Order Placed</option>
+                <option value="In Transit">In Transit</option>
+                <option value="Received">Received / Completed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-row" style="margin-top:0.75rem;">
+            <div class="fg">
+              <label>Vendor Name</label>
+              <input type="text" id="f-vendor-name" placeholder="e.g. Brembo India / ABC Engineering" />
+            </div>
+            <div class="fg">
+              <label>Vendor Phone / Contact</label>
+              <input type="text" id="f-vendor-phone" placeholder="e.g. +91 98765 43210" />
+            </div>
+          </div>
+
+          <div class="field-row" style="margin-top:0.75rem;">
+            <div class="fg">
+              <label>Vendor Location / City</label>
+              <input type="text" id="f-vendor-location" placeholder="e.g. Bhosari MIDC, Pune" />
+            </div>
+            <div class="fg">
+              <label>Vendor Email / Link</label>
+              <input type="text" id="f-vendor-email" placeholder="e.g. sales@vendor.com" />
+            </div>
+          </div>
+
+          <div class="fg full" style="margin-top:0.75rem;">
+            <label>Vendor & Restock Notes</label>
+            <textarea id="f-vendor-notes" style="min-height:60px;" placeholder="Quotation price, part reference number, lead time, purchase order notes…"></textarea>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -1307,13 +1379,30 @@
         .order('created_at', { ascending: false });
       if (error) throw error;
       if (data) {
-        cachedItems = data.map(item => ({
-          ...item,
-          imageUrl: item.image_url || item.imageUrl || '',
-          createdAt: item.created_at || item.createdAt || '',
-          createdBy: item.created_by || item.createdBy || '',
-          updatedAt: item.updated_at || item.updatedAt || ''
-        }));
+        let localMap = {};
+        try {
+          const locals = JSON.parse(localStorage.getItem('ojas_items') || '[]');
+          locals.forEach(i => { if (i && i.id) localMap[i.id] = i; });
+        } catch(e) {}
+
+        cachedItems = data.map(item => {
+          const loc = localMap[item.id] || {};
+          return {
+            ...item,
+            imageUrl: item.image_url || item.imageUrl || '',
+            in_restock: typeof item.in_restock !== 'undefined' && item.in_restock !== null ? Boolean(item.in_restock) : Boolean(loc.in_restock),
+            restock_qty: item.restock_qty || loc.restock_qty || 1,
+            restock_status: item.restock_status || loc.restock_status || 'Pending',
+            vendor_name: item.vendor_name || loc.vendor_name || '',
+            vendor_phone: item.vendor_phone || loc.vendor_phone || '',
+            vendor_location: item.vendor_location || loc.vendor_location || '',
+            vendor_email: item.vendor_email || loc.vendor_email || '',
+            vendor_notes: item.vendor_notes || loc.vendor_notes || '',
+            createdAt: item.created_at || item.createdAt || '',
+            createdBy: item.created_by || item.createdBy || '',
+            updatedAt: item.updated_at || item.updatedAt || ''
+          };
+        });
         renderInventory();
       }
     } catch (err) {
@@ -1625,6 +1714,104 @@
     onFilterSystemChange(false);
   }
 
+  /* ── Restock UI Helpers ────────────────────────────────── */
+  function setRestockUIState(inRestock, item = null) {
+    const chk       = document.getElementById('f-in-restock');
+    const pill      = document.getElementById('restock-active-pill');
+    const btnToggle = document.getElementById('btn-toggle-restock');
+    const details   = document.getElementById('restock-form-details');
+
+    if (chk) chk.checked = Boolean(inRestock);
+
+    if (inRestock) {
+      if (pill) pill.style.display = 'inline-block';
+      if (btnToggle) {
+        btnToggle.textContent = '✕ Remove from Restocking';
+        btnToggle.style.color = '#ef4444';
+        btnToggle.style.borderColor = 'rgba(239, 68, 68, 0.45)';
+        btnToggle.style.background = 'rgba(239, 68, 68, 0.12)';
+      }
+      if (details) details.style.display = 'block';
+    } else {
+      if (pill) pill.style.display = 'none';
+      if (btnToggle) {
+        btnToggle.textContent = '+ Add to Restocking';
+        btnToggle.style.color = '#e08338';
+        btnToggle.style.borderColor = 'rgba(224, 131, 56, 0.35)';
+        btnToggle.style.background = 'rgba(224, 131, 56, 0.12)';
+      }
+      if (details) details.style.display = 'none';
+    }
+
+    if (item) {
+      document.getElementById('f-restock-qty').value      = item.restock_qty || item.quantity || 1;
+      document.getElementById('f-restock-status').value   = item.restock_status || 'Pending';
+      document.getElementById('f-vendor-name').value      = item.vendor_name || '';
+      document.getElementById('f-vendor-phone').value     = item.vendor_phone || '';
+      document.getElementById('f-vendor-location').value  = item.vendor_location || '';
+      document.getElementById('f-vendor-email').value     = item.vendor_email || '';
+      document.getElementById('f-vendor-notes').value     = item.vendor_notes || '';
+    }
+  }
+
+  async function toggleRestockForCurrentItem() {
+    const chk = document.getElementById('f-in-restock');
+    const newState = !chk.checked;
+    chk.checked = newState;
+
+    if (currentEditId) {
+      const item = cachedItems.find(i => i.id === currentEditId);
+      if (item) {
+        item.in_restock = newState;
+        const restock_qty      = parseInt(document.getElementById('f-restock-qty').value) || item.restock_qty || 1;
+        const restock_status   = document.getElementById('f-restock-status').value || item.restock_status || 'Pending';
+        const vendor_name      = document.getElementById('f-vendor-name').value.trim();
+        const vendor_phone     = document.getElementById('f-vendor-phone').value.trim();
+        const vendor_location  = document.getElementById('f-vendor-location').value.trim();
+        const vendor_email     = document.getElementById('f-vendor-email').value.trim();
+        const vendor_notes     = document.getElementById('f-vendor-notes').value.trim();
+
+        item.restock_qty      = restock_qty;
+        item.restock_status   = restock_status;
+        item.vendor_name      = vendor_name;
+        item.vendor_phone     = vendor_phone;
+        item.vendor_location  = vendor_location;
+        item.vendor_email     = vendor_email;
+        item.vendor_notes     = vendor_notes;
+
+        if (isSupabaseConfigured && supabaseClient) {
+          try {
+            const { error: toggleErr } = await supabaseClient.from('items').update({
+              in_restock: newState,
+              restock_qty,
+              restock_status,
+              vendor_name,
+              vendor_phone,
+              vendor_location,
+              vendor_email,
+              vendor_notes,
+              updated_at: new Date().toISOString()
+            }).eq('id', currentEditId);
+
+            if (toggleErr) {
+              if (toggleErr.message && toggleErr.message.includes('in_restock')) {
+                toast('Note: Run the ALTER TABLE query in Supabase SQL editor to sync Restocking in cloud.', 'err');
+              } else {
+                throw toggleErr;
+              }
+            }
+          } catch (e) {
+            console.error('Supabase restock toggle warning:', e);
+          }
+        }
+        saveLocalItems();
+        renderInventory();
+      }
+      toast(newState ? 'Item marked for Restocking!' : 'Item removed from Restocking.', 'ok');
+    }
+    setRestockUIState(newState);
+  }
+
   /* ── Submit form ───────────────────────────────────────── */
   async function submitForm() {
     const name    = document.getElementById('f-name').value.trim();
@@ -1636,6 +1823,16 @@
     const subloc  = document.getElementById('f-sublocation').value;
     const cond    = document.getElementById('f-condition').value.trim();
     const notes   = document.getElementById('f-notes').value.trim();
+
+    // Restocking & vendor fields
+    const in_restock       = document.getElementById('f-in-restock').checked;
+    const restock_qty      = parseInt(document.getElementById('f-restock-qty').value) || 1;
+    const restock_status   = document.getElementById('f-restock-status').value || 'Pending';
+    const vendor_name      = document.getElementById('f-vendor-name').value.trim();
+    const vendor_phone     = document.getElementById('f-vendor-phone').value.trim();
+    const vendor_location  = document.getElementById('f-vendor-location').value.trim();
+    const vendor_email     = document.getElementById('f-vendor-email').value.trim();
+    const vendor_notes     = document.getElementById('f-vendor-notes').value.trim();
 
     if (!name)   { toast('Part name is required.', 'err'); document.getElementById('f-name').focus(); return; }
     if (!system) { toast('Please select a system.', 'err'); document.getElementById('f-system').focus(); return; }
@@ -1663,29 +1860,76 @@
             name, system, subsystem: sub, status,
             quantity: qty, location: loc, sublocation: subloc,
             condition: cond, notes, image_url: imageUrl,
+            in_restock, restock_qty, restock_status,
+            vendor_name, vendor_phone, vendor_location,
+            vendor_email, vendor_notes,
             updated_at: nowIso
           };
-          const { error } = await supabaseClient
+          let { error } = await supabaseClient
             .from('items')
             .update(updatePayload)
             .eq('id', currentEditId);
+
+          if (error && error.message && error.message.includes('in_restock')) {
+            console.warn('Database missing in_restock column. Retrying update with core fields.');
+            delete updatePayload.in_restock;
+            delete updatePayload.restock_qty;
+            delete updatePayload.restock_status;
+            delete updatePayload.vendor_name;
+            delete updatePayload.vendor_phone;
+            delete updatePayload.vendor_location;
+            delete updatePayload.vendor_email;
+            delete updatePayload.vendor_notes;
+            const retryRes = await supabaseClient
+              .from('items')
+              .update(updatePayload)
+              .eq('id', currentEditId);
+            error = retryRes.error;
+            if (!error) {
+              toast('Part updated in Supabase! (Run the SQL update to sync Restocking in cloud)', 'ok');
+            }
+          }
+
           if (error) throw error;
-          toast('Part updated in Supabase.', 'ok');
+          if (!error) toast('Part updated in Supabase.', 'ok');
           await fetchItems();
         } else {
           const insertPayload = {
             name, system, subsystem: sub, status,
             quantity: qty, location: loc, sublocation: subloc,
             condition: cond, notes, image_url: imageUrl,
+            in_restock, restock_qty, restock_status,
+            vendor_name, vendor_phone, vendor_location,
+            vendor_email, vendor_notes,
             created_by: loggedUser,
             created_at: nowIso,
             updated_at: nowIso
           };
-          const { error } = await supabaseClient
+          let { error } = await supabaseClient
             .from('items')
             .insert([insertPayload]);
+
+          if (error && error.message && error.message.includes('in_restock')) {
+            console.warn('Database missing in_restock column. Retrying insert with core fields.');
+            delete insertPayload.in_restock;
+            delete insertPayload.restock_qty;
+            delete insertPayload.restock_status;
+            delete insertPayload.vendor_name;
+            delete insertPayload.vendor_phone;
+            delete insertPayload.vendor_location;
+            delete insertPayload.vendor_email;
+            delete insertPayload.vendor_notes;
+            const retryRes = await supabaseClient
+              .from('items')
+              .insert([insertPayload]);
+            error = retryRes.error;
+            if (!error) {
+              toast('Part added to Supabase! (Run the SQL update to sync Restocking in cloud)', 'ok');
+            }
+          }
+
           if (error) throw error;
-          toast('Part added to Supabase inventory.', 'ok');
+          if (!error) toast('Part added to Supabase inventory.', 'ok');
           await fetchItems();
         }
       } else {
@@ -1694,6 +1938,9 @@
           name, system, subsystem: sub, status,
           quantity: qty, location: loc, sublocation: subloc,
           condition: cond, notes, imageUrl, image_url: imageUrl,
+          in_restock, restock_qty, restock_status,
+          vendor_name, vendor_phone, vendor_location,
+          vendor_email, vendor_notes,
           updatedAt: nowIso, updated_at: nowIso
         };
         if (currentEditId) {
@@ -1755,7 +2002,16 @@
   function clearForm() {
     currentEditId = null;
     pendingImgFile = null;
-    ['f-name','f-condition','f-notes'].forEach(id => document.getElementById(id).value = '');
+    ['f-name','f-condition','f-notes','f-vendor-name','f-vendor-phone','f-vendor-location','f-vendor-email','f-vendor-notes'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    const rq = document.getElementById('f-restock-qty');
+    if (rq) rq.value = '';
+    const rs = document.getElementById('f-restock-status');
+    if (rs) rs.selectedIndex = 0;
+    setRestockUIState(false);
+
     ['f-system','f-subsystem','f-location','f-sublocation'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.selectedIndex = 0;
@@ -1793,6 +2049,9 @@
     document.getElementById('f-condition').value = item.condition || '';
     document.getElementById('f-notes').value     = item.notes     || '';
 
+    // Restock & Vendor Details
+    setRestockUIState(Boolean(item.in_restock), item);
+
     const imgDisplay = item.imageUrl || item.image_url;
     if (imgDisplay) {
       const preview = document.getElementById('img-preview');
@@ -1826,13 +2085,19 @@
       if (subF && item.subsystem !== subF) return false;
       if (locF && item.location !== locF) return false;
       if (sublocF && item.sublocation !== sublocF) return false;
-      if (stF  && item.status !== stF) return false;
+      if (stF === 'restock') {
+        if (!item.in_restock) return false;
+      } else if (stF && item.status !== stF) {
+        return false;
+      }
       if (q && !(
-        (item.name        || '').toLowerCase().includes(q) ||
-        (item.notes       || '').toLowerCase().includes(q) ||
-        (item.condition   || '').toLowerCase().includes(q) ||
-        (item.location    || '').toLowerCase().includes(q) ||
-        (item.sublocation || '').toLowerCase().includes(q)
+        (item.name            || '').toLowerCase().includes(q) ||
+        (item.notes           || '').toLowerCase().includes(q) ||
+        (item.condition       || '').toLowerCase().includes(q) ||
+        (item.location        || '').toLowerCase().includes(q) ||
+        (item.sublocation     || '').toLowerCase().includes(q) ||
+        (item.vendor_name     || '').toLowerCase().includes(q) ||
+        (item.vendor_location || '').toLowerCase().includes(q)
       )) return false;
       return true;
     });
@@ -1884,6 +2149,7 @@
             <div class="item-sub-label">${locDisplay}</div>
             <div class="item-footer">
               <span class="s-badge ${sc}">${sl}</span>
+              ${item.in_restock ? `<span class="s-badge s-restock" title="Item tracked in Restocking page">&#128260; Restock</span>` : ''}
               <span class="item-qty">Qty&nbsp;${item.quantity || 1}</span>
             </div>
           </div>
@@ -2228,13 +2494,19 @@
       if (subF && item.subsystem !== subF) return false;
       if (locF && item.location !== locF) return false;
       if (sublocF && item.sublocation !== sublocF) return false;
-      if (stF  && item.status !== stF) return false;
+      if (stF === 'restock') {
+        if (!item.in_restock) return false;
+      } else if (stF && item.status !== stF) {
+        return false;
+      }
       if (q && !(
-        (item.name        || '').toLowerCase().includes(q) ||
-        (item.notes       || '').toLowerCase().includes(q) ||
-        (item.condition   || '').toLowerCase().includes(q) ||
-        (item.location    || '').toLowerCase().includes(q) ||
-        (item.sublocation || '').toLowerCase().includes(q)
+        (item.name            || '').toLowerCase().includes(q) ||
+        (item.notes           || '').toLowerCase().includes(q) ||
+        (item.condition       || '').toLowerCase().includes(q) ||
+        (item.location        || '').toLowerCase().includes(q) ||
+        (item.sublocation     || '').toLowerCase().includes(q) ||
+        (item.vendor_name     || '').toLowerCase().includes(q) ||
+        (item.vendor_location || '').toLowerCase().includes(q)
       )) return false;
       return true;
     });
@@ -2261,6 +2533,14 @@
       'Subsystem',
       'Status',
       'Quantity',
+      'In Restock Queue',
+      'Restock Target Qty',
+      'Restock Status',
+      'Vendor Name',
+      'Vendor Contact',
+      'Vendor Location',
+      'Vendor Email',
+      'Vendor Notes',
       'Location',
       'Sub-location',
       'Condition',
@@ -2300,6 +2580,14 @@
         csvEscape(item.subsystem || ''),
         csvEscape(statusMap[item.status] || item.status || ''),
         csvEscape(item.quantity || 1),
+        csvEscape(item.in_restock ? 'YES' : 'NO'),
+        csvEscape(item.restock_qty || ''),
+        csvEscape(item.restock_status || ''),
+        csvEscape(item.vendor_name || ''),
+        csvEscape(item.vendor_phone || ''),
+        csvEscape(item.vendor_location || ''),
+        csvEscape(item.vendor_email || ''),
+        csvEscape(item.vendor_notes || ''),
         csvEscape(item.location || ''),
         csvEscape(item.sublocation || ''),
         csvEscape(item.condition || ''),

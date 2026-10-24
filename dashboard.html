@@ -118,7 +118,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
       gap: 1.5rem;
-      max-width: 960px;
+      max-width: 1040px;
       width: 100%;
     }
 
@@ -141,6 +141,7 @@
     .nav-block:nth-child(1) { animation-delay: 0.05s; }
     .nav-block:nth-child(2) { animation-delay: 0.12s; }
     .nav-block:nth-child(3) { animation-delay: 0.19s; }
+    .nav-block:nth-child(4) { animation-delay: 0.26s; }
 
     .nav-block:hover {
       border-color: #3b321c;
@@ -169,7 +170,10 @@
       background: linear-gradient(90deg, transparent, #285482 25%, #4282c0 50%, #285482 75%, transparent);
     }
     .nav-block:nth-child(3) .block-rule {
-      background: linear-gradient(90deg, transparent, #252a36 25%, #3d465c 50%, #252a36 75%, transparent);
+      background: linear-gradient(90deg, transparent, #9e5b22 25%, #e08338 50%, #9e5b22 75%, transparent);
+    }
+    .nav-block:nth-child(4) .block-rule {
+      background: linear-gradient(90deg, transparent, #5b379e 25%, #885fd4 50%, #5b379e 75%, transparent);
     }
 
     .block-inner {
@@ -192,12 +196,14 @@
 
     .nav-block:nth-child(1) .block-icon { background: rgba(196, 157, 59, 0.1); border: 1px solid rgba(196, 157, 59, 0.22); }
     .nav-block:nth-child(2) .block-icon { background: rgba(40, 84, 130, 0.14); border: 1px solid rgba(40, 84, 130, 0.25); }
-    .nav-block:nth-child(3) .block-icon { background: rgba(35, 40, 54, 0.3); border: 1px solid #1c2230; }
+    .nav-block:nth-child(3) .block-icon { background: rgba(224, 131, 56, 0.12); border: 1px solid rgba(224, 131, 56, 0.25); }
+    .nav-block:nth-child(4) .block-icon { background: rgba(136, 95, 212, 0.12); border: 1px solid rgba(136, 95, 212, 0.25); }
 
     .block-icon svg { opacity: 0.85; }
     .nav-block:nth-child(1) .block-icon svg { color: #d8b456; }
     .nav-block:nth-child(2) .block-icon svg { color: #62a3e0; }
-    .nav-block:nth-child(3) .block-icon svg { color: #525a70; }
+    .nav-block:nth-child(3) .block-icon svg { color: #e08338; }
+    .nav-block:nth-child(4) .block-icon svg { color: #a78bfa; }
 
     .block-label {
       font-family: 'Orbitron', sans-serif;
@@ -210,7 +216,8 @@
 
     .nav-block:nth-child(1) .block-label { color: #a38234; }
     .nav-block:nth-child(2) .block-label { color: #3b74aa; }
-    .nav-block:nth-child(3) .block-label { color: #424a5e; }
+    .nav-block:nth-child(3) .block-label { color: #c46e29; }
+    .nav-block:nth-child(4) .block-label { color: #8b5cf6; }
 
     .block-title {
       font-size: 1.15rem;
@@ -219,7 +226,8 @@
       letter-spacing: -0.01em;
     }
 
-    .nav-block:nth-child(3) .block-title { color: #525a70; }
+    .nav-block:nth-child(3) .block-title { color: #e5e9f2; }
+    .nav-block:nth-child(4) .block-title { color: #e5e9f2; }
 
     .block-desc {
       font-size: 0.82rem;
@@ -253,7 +261,8 @@
 
     .nav-block:nth-child(1) .block-cta { color: #d8b456; }
     .nav-block:nth-child(2) .block-cta { color: #62a3e0; }
-    .nav-block:nth-child(3) .block-cta { color: #424a5e; }
+    .nav-block:nth-child(3) .block-cta { color: #e08338; }
+    .nav-block:nth-child(4) .block-cta { color: #a78bfa; }
 
     .block-badge {
       font-size: 0.58rem;
@@ -267,7 +276,8 @@
 
     .nav-block:nth-child(1) .block-badge { background: rgba(196, 157, 59, 0.1); color: #c49d3b; border: 1px solid rgba(196, 157, 59, 0.22); }
     .nav-block:nth-child(2) .block-badge { background: rgba(40, 84, 130, 0.12); color: #5294d4; border: 1px solid rgba(40, 84, 130, 0.22); }
-    .nav-block:nth-child(3) .block-badge { background: rgba(30, 35, 48, 0.5); color: #424a5e; border: 1px solid #1a202d; }
+    .nav-block:nth-child(3) .block-badge { background: rgba(224, 131, 56, 0.12); color: #e08338; border: 1px solid rgba(224, 131, 56, 0.25); }
+    .nav-block:nth-child(4) .block-badge { background: rgba(136, 95, 212, 0.12); color: #a78bfa; border: 1px solid rgba(136, 95, 212, 0.25); }
 
   </style>
 </head>
@@ -337,23 +347,23 @@
       </div>
     </a>
 
-    <!-- 2 · Team Members -->
-    <a class="nav-block" href="team.html">
+    <!-- 2 · Documentation Vault -->
+    <a class="nav-block" href="docs.html">
       <div class="block-rule"></div>
       <div class="block-inner">
         <div class="block-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            <line x1="12" y1="11" x2="12" y2="17"/>
+            <line x1="9" y1="14" x2="15" y2="14"/>
           </svg>
         </div>
         <div>
           <div class="block-label">Module 02</div>
-          <div class="block-title">Team Members</div>
+          <div class="block-title">Documentation Vault</div>
         </div>
-        <div class="block-desc">View and manage team roster. Access member profiles, roles, and assignments within the team.</div>
+        <div class="block-desc">Access CAD files, technical reports, competition rulebooks, and engineering binders in Google Drive.</div>
       </div>
       <div class="block-footer">
         <span class="block-cta">Open &rarr;</span>
@@ -361,22 +371,46 @@
       </div>
     </a>
 
-    <!-- 3 · Coming Soon -->
+    <!-- 3 · Restocking Tracker -->
+    <a class="nav-block" href="restocking.html">
+      <div class="block-rule"></div>
+      <div class="block-inner">
+        <div class="block-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="block-label">Module 03</div>
+          <div class="block-title">Restocking Tracker</div>
+        </div>
+        <div class="block-desc">Track parts pending replenishment, manage vendor contacts & location details, order status, and restock logistics.</div>
+      </div>
+      <div class="block-footer">
+        <span class="block-cta">Open &rarr;</span>
+        <span class="block-badge">Active</span>
+      </div>
+    </a>
+
+    <!-- 4 · Ojas Handbook (Coming Soon) -->
     <div class="nav-block disabled">
       <div class="block-rule"></div>
       <div class="block-inner">
         <div class="block-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 16 14"/>
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            <line x1="9" y1="7" x2="15" y2="7"/>
+            <line x1="9" y1="11" x2="13" y2="11"/>
           </svg>
         </div>
         <div>
-          <div class="block-label">Module 03</div>
-          <div class="block-title">Coming Soon</div>
+          <div class="block-label">Module 04</div>
+          <div class="block-title">Ojas Handbook</div>
         </div>
-        <div class="block-desc">This module is currently under development. Check back later for updates.</div>
+        <div class="block-desc">Standard operating procedures, driver briefings, onboarding workflows, and team guidelines. Coming soon.</div>
       </div>
       <div class="block-footer">
         <span class="block-cta">Locked</span>
