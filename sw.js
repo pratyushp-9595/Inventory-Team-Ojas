@@ -2,7 +2,7 @@
 //  SERVICE WORKER — Team Ojas Racing PWA
 // ============================================================
 
-const CACHE_NAME = 'ojas-cache-v2';
+const CACHE_NAME = 'ojas-cache-v3';
 
 // Core assets to pre-cache on service worker installation
 const CORE_ASSETS = [
@@ -21,8 +21,8 @@ const CORE_ASSETS = [
   'handbook.js',
   'logo.jpg',
   'manifest.json',
-  'assets/icon-192.png',
-  'assets/icon-512.png'
+  'icon-192.png',
+  'icon-512.png'
 ];
 
 // ── 1. Install Event: Cache Core Static Files ───────────────
