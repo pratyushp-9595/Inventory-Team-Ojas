@@ -7,6 +7,12 @@
   <script src="config.js"></script>
   <link rel="stylesheet" href="shared.css" />
 
+  <!-- Progressive Web App (PWA) -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#121212" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
   <style>
     /* ── Hero ───────────────────────────────────────────────── */
     .page-hero {
@@ -320,6 +326,22 @@
   // Default to Dark View (inverts black text into bright white on dark matte)
   const savedTheme = localStorage.getItem('drive_theme_pref') || 'dark';
   setDriveTheme(savedTheme);
+</script>
+
+<!-- ── SERVICE WORKER REGISTRATION (PWA) ────────────────── -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker
+        .register('sw.js')
+        .then((reg) => {
+          console.log('[PWA] Service Worker registered with scope:', reg.scope);
+        })
+        .catch((err) => {
+          console.error('[PWA] Service Worker registration failed:', err);
+        });
+    });
+  }
 </script>
 
 </body>
