@@ -2,7 +2,7 @@
 //  SERVICE WORKER — Team Ojas Racing PWA
 // ============================================================
 
-const CACHE_NAME = 'ojas-cache-v1';
+const CACHE_NAME = 'ojas-cache-v2';
 
 // Core assets to pre-cache on service worker installation
 const CORE_ASSETS = [
@@ -20,7 +20,9 @@ const CORE_ASSETS = [
   'supabase-config.js',
   'handbook.js',
   'logo.jpg',
-  'manifest.json'
+  'manifest.json',
+  'assets/icon-192.png',
+  'assets/icon-512.png'
 ];
 
 // ── 1. Install Event: Cache Core Static Files ───────────────
