@@ -3,112 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Coming Soon — Team Ojas Racing</title>
+  <title>Engineering Handbook — Team Ojas Racing</title>
+  
+  <!-- Site Configuration & Shared Stylesheet -->
   <script src="config.js"></script>
   <link rel="stylesheet" href="shared.css" />
-  <style>
-    body {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+  <link rel="stylesheet" href="handbook.css" />
 
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: clamp(3rem, 8vw, 6rem) clamp(1rem, 4vw, 2.5rem);
-    }
-
-    .coming-soon-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      max-width: 680px;
-      width: 100%;
-    }
-
-    .status-pill-minimal {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--color-gold-bright);
-      background: rgba(181, 141, 61, 0.1);
-      border: 1px solid rgba(181, 141, 61, 0.3);
-      padding: 0.35rem 0.85rem;
-      border-radius: var(--radius-sharp);
-      margin-bottom: 1.5rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-    }
-
-    .status-pill-minimal::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--color-gold-bright);
-      box-shadow: 0 0 8px var(--color-gold-bright);
-    }
-
-    .huge-coming-soon {
-      font-family: var(--font-racing);
-      font-size: clamp(3rem, 9vw, 5.5rem);
-      font-weight: 900;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: #ffffff;
-      line-height: 1;
-      margin: 0 0 1.2rem;
-    }
-
-    .huge-coming-soon .gold-word {
-      color: var(--color-gold-bright);
-      text-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
-    }
-
-    .coming-soon-subtitle {
-      font-family: var(--font-tech);
-      font-size: 0.82rem;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--color-text-dim);
-      margin-bottom: 2.5rem;
-    }
-
-    .btn-back-wrap {
-      display: flex;
-      gap: 0.85rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    @media (max-width: 600px) {
-      main {
-        padding: 3rem 1.2rem;
-      }
-      .huge-coming-soon {
-        font-size: clamp(2.2rem, 9vw, 3.5rem);
-      }
-      .btn-back-wrap a {
-        width: 100%;
-        text-align: center;
-        justify-content: center;
-      }
-    }
-  </style>
+  <!-- Supabase JS SDK (v2) & Team Configuration -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
 </head>
 <body>
 
-<!-- ── MOTORSPORT HEADER ───────────────────────────────── -->
+<!-- ── HEADER ──────────────────────────────────────────── -->
 <header>
   <a class="header-logo" href="dashboard.html">
     <img src="logo.jpg" alt="Team Ojas Racing" />
@@ -123,43 +31,198 @@
       <a href="docs.html" class="nav-link-btn">Docs Vault</a>
       <a href="handbook.html" class="nav-link-btn active">Handbook</a>
     </nav>
+
     <div class="user-pill">
       <div class="user-pill-dot"></div>
       <span id="js-nav-user">User</span>
     </div>
+
     <button class="btn-logout" onclick="logout()">Sign Out</button>
   </div>
 </header>
 
-<!-- ── MAIN: COMING SOON AND NOTHING ELSE ──────────────── -->
-<main>
-  <div class="coming-soon-wrapper">
-    <div class="status-pill-minimal">OJAS HANDBOOK</div>
-    <h1 class="huge-coming-soon">
-      COMING <span class="gold-word">SOON</span>
-    </h1>
-    <div class="coming-soon-subtitle">This section is currently under development</div>
-    <div class="btn-back-wrap">
-      <a href="dashboard.html" class="racing-btn-primary">
-        &larr; BACK TO DASHBOARD
-      </a>
-    </div>
+<!-- ── HERO SECTION ────────────────────────────────────── -->
+<div class="racing-hero-wrap" style="padding-bottom: 0.8rem;">
+  <div class="racing-eyebrow">FORMULA STUDENT ELECTRIC &middot; VIT VELLORE</div>
+  <h1 class="racing-title-huge" style="font-size: clamp(1.9rem, 4.5vw, 3rem); margin-bottom: 0.4rem;">
+    ENGINEERING <span class="gold-word" style="display:inline;">HANDBOOK</span>
+  </h1>
+  <p class="racing-subtitle">Department task curriculums, milestone evaluations, technical question banks &amp; official competition rulebook.</p>
+</div>
+
+<!-- ── MAIN TWO-COLUMN CONTENT ─────────────────────────── -->
+<main class="handbook-page-wrap">
+  <div class="handbook-layout-grid">
+
+    <!-- ── LEFT COLUMN: STICKY SIDEBAR ─────────────────── -->
+    <aside class="handbook-sidebar" aria-label="Handbook Navigation">
+      <div class="sidebar-header">
+        <div class="sidebar-title">
+          <span class="sidebar-title-dot"></span>
+          Directory
+        </div>
+        <div class="sidebar-subtitle">Curriculum &amp; Rules</div>
+      </div>
+
+      <!-- Quick Link: Static Rulebook -->
+      <div class="sidebar-nav-group">
+        <div class="sidebar-group-label">Regulations</div>
+        <a class="sidebar-btn" id="sidebar-nav-rulebook" href="#rulebook-section">
+          <span class="btn-label-group">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            <span>Rulebook</span>
+          </span>
+          <span class="sidebar-count-badge">PDF</span>
+        </a>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Department Navigation List -->
+      <div class="sidebar-nav-group">
+        <div class="sidebar-group-label">Departments</div>
+
+        <button class="sidebar-btn active" data-dept="Vehicle Dynamics" type="button">
+          <span class="btn-label-group">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <span>Vehicle Dynamics</span>
+          </span>
+          <span class="sidebar-count-badge" data-dept="Vehicle Dynamics">-/-</span>
+        </button>
+
+        <button class="sidebar-btn" data-dept="Powertrain" type="button">
+          <span class="btn-label-group">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <span>Powertrain</span>
+          </span>
+          <span class="sidebar-count-badge" data-dept="Powertrain">-/-</span>
+        </button>
+
+        <button class="sidebar-btn" data-dept="Aerodynamics" type="button">
+          <span class="btn-label-group">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+            </svg>
+            <span>Aerodynamics</span>
+          </span>
+          <span class="sidebar-count-badge" data-dept="Aerodynamics">-/-</span>
+        </button>
+
+        <button class="sidebar-btn" data-dept="Chassis" type="button">
+          <span class="btn-label-group">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="3" y1="9" x2="21" y2="9"></line>
+              <line x1="9" y1="21" x2="9" y2="9"></line>
+            </svg>
+            <span>Chassis</span>
+          </span>
+          <span class="sidebar-count-badge" data-dept="Chassis">-/-</span>
+        </button>
+
+        <button class="sidebar-btn" data-dept="Electrical" type="button">
+          <span class="btn-label-group">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"></path>
+              <path d="M12 5l7 7-7 7"></path>
+            </svg>
+            <span>Electrical</span>
+          </span>
+          <span class="sidebar-count-badge" data-dept="Electrical">-/-</span>
+        </button>
+
+        <button class="sidebar-btn" data-dept="Extras" type="button">
+          <span class="btn-label-group">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+            </svg>
+            <span>Extras</span>
+          </span>
+          <span class="sidebar-count-badge" data-dept="Extras">-/-</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── RIGHT COLUMN: MAIN CONTENT AREA ─────────────── -->
+    <section class="handbook-content-area" aria-label="Handbook Content">
+
+      <!-- 1. STATIC RULEBOOK SECTION AT THE TOP -->
+      <article class="rulebook-static-card" id="rulebook-section">
+        <div class="rulebook-header-row">
+          <div class="rulebook-meta-group">
+            <div class="rulebook-eyebrow">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              OFFICIAL COMPETITION REFERENCE &middot; SEASON 2025
+            </div>
+            <h2 class="rulebook-title">FORMULA STUDENT ELECTRIC RULEBOOK</h2>
+            <p class="rulebook-desc">
+              Complete technical regulations, EV powertrain safety standards, accumulator containment guidelines, and SES structural compliance templates for Team Ojas engineers.
+            </p>
+          </div>
+
+          <!-- Placeholder Download Button -->
+          <a class="btn-rulebook-download" id="btn-download-rulebook" href="#download" role="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Download Rulebook (PDF)</span>
+          </a>
+        </div>
+      </article>
+
+      <!-- 2. CURRENT DEPARTMENT HEADER / STATS BANNER -->
+      <div class="section-banner" id="handbook-content-anchor">
+        <h2 class="section-banner-title" id="current-dept-title">
+          <span class="gold-accent">Vehicle Dynamics</span> MODULE
+        </h2>
+        <div class="section-stats-pill" id="current-dept-stats">
+          Loading tasks...
+        </div>
+      </div>
+
+      <!-- 3. DYNAMIC TASKS ACCORDION CONTAINER -->
+      <div class="tasks-accordion-list" id="handbook-tasks-container">
+        <!-- Rendered dynamically by handbook.js -->
+        <div class="handbook-skeleton"></div>
+        <div class="handbook-skeleton" style="opacity: 0.7;"></div>
+        <div class="handbook-skeleton" style="opacity: 0.4;"></div>
+      </div>
+
+    </section>
   </div>
 </main>
 
-<!-- ── FOOTER ──────────────────────────────────────────── -->
+<!-- ── FOOTER ───────────────────────────────────────────── -->
 <footer>
-  <div class="footer-left">&copy; <span id="js-year"></span> Team Ojas Racing &mdash; Formula Student Electric &middot; VIT Vellore</div>
-  <div class="footer-right">TOR-24 SYSTEM v2.0</div>
+  <div class="footer-left">&copy; <span id="js-year"></span> Team Ojas Racing &mdash; Engineering Handbook</div>
+  <div class="footer-right">v1.0</div>
 </footer>
 
+<!-- ── AUTH SESSION & FOOTER SCRIPT ─────────────────────── -->
 <script>
+  /* ── Auth Session Protection ────────────────────────────── */
   const loggedUser  = sessionStorage.getItem('logged_in_user');
   const loginTimeMs = parseInt(sessionStorage.getItem('login_time') || '0', 10);
 
-  if (!loggedUser) { window.location.href = 'index.html'; }
+  if (!loggedUser) {
+    window.location.href = 'index.html';
+  }
 
-  const timeout = SITE_CONFIG.sessionTimeoutMinutes;
+  const timeout = typeof SITE_CONFIG !== 'undefined' ? SITE_CONFIG.sessionTimeoutMinutes : 60;
   if (timeout > 0 && loginTimeMs) {
     if ((Date.now() - loginTimeMs) / 60000 > timeout) {
       sessionStorage.clear();
@@ -167,11 +230,21 @@
     }
   }
 
-  document.getElementById('js-nav-user').textContent = loggedUser;
-  document.getElementById('js-year').textContent = new Date().getFullYear();
+  if (document.getElementById('js-nav-user')) {
+    document.getElementById('js-nav-user').textContent = loggedUser || 'User';
+  }
+  if (document.getElementById('js-year')) {
+    document.getElementById('js-year').textContent = new Date().getFullYear();
+  }
 
-  function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
+  function logout() {
+    sessionStorage.clear();
+    window.location.href = 'index.html';
+  }
 </script>
+
+<!-- ── HANDBOOK LOGIC ───────────────────────────────────── -->
+<script src="handbook.js"></script>
 
 </body>
 </html>

@@ -118,3 +118,41 @@ FOR INSERT WITH CHECK (bucket_id = 'item-images');
 DROP POLICY IF EXISTS "Public item images delete" ON storage.objects;
 CREATE POLICY "Public item images delete" ON storage.objects
 FOR DELETE USING (bucket_id = 'item-images');
+
+-- ============================================================
+-- 9. HANDBOOK MODULE — handbook_tasks table & RLS policies
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.handbook_tasks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    department TEXT NOT NULL,
+    task_number INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    questions TEXT NOT NULL,
+    links TEXT,
+    is_unlocked BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_handbook_tasks_dept_order 
+    ON public.handbook_tasks (department, task_number ASC);
+
+ALTER TABLE public.handbook_tasks ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow anonymous read access to handbook_tasks" ON public.handbook_tasks;
+CREATE POLICY "Allow anonymous read access to handbook_tasks" 
+    ON public.handbook_tasks
+    FOR SELECT 
+    TO anon, authenticated
+    USING (true);
+
+DROP POLICY IF EXISTS "Allow public write access to handbook_tasks" ON public.handbook_tasks;
+CREATE POLICY "Allow public write access to handbook_tasks" 
+    ON public.handbook_tasks
+    FOR ALL 
+    TO anon, authenticated
+    USING (true)
+    WITH CHECK (true);
+
+ALTER PUBLICATION supabase_realtime ADD TABLE public.handbook_tasks;
+
