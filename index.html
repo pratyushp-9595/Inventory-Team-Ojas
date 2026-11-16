@@ -468,8 +468,8 @@
     return null;
   }
 
-  // Record login event for Recent Logins Audit Log
-  function recordLoginEvent(username, role) {
+  // Record login event for Global Logins Audit Log
+  async function recordLoginEvent(username, role) {
     const timestamp = new Date().toISOString();
     const entry = {
       id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
@@ -495,14 +495,34 @@
 
     const client = getSupabase();
     if (client) {
+      // 1. Dedicated login_logs attempt (if table exists)
       try {
         client.from('login_logs').insert([{
           username: username,
           role: role,
           status: 'AUTHENTICATED',
           created_at: timestamp
-        }]).then(() => {}).catch(err => console.warn('Supabase login log notice:', err));
+        }]).then(() => {}).catch(() => {});
       } catch (err) {}
+
+      // 2. Global Cloud Sync via Supabase items table (__AUDIT_SYSTEM__)
+      try {
+        const auditPromise = client.from('items').insert([{
+          name: '__AUDIT_LOGIN__',
+          system: '__AUDIT_SYSTEM__',
+          subsystem: username,
+          quantity: 1,
+          status: role,
+          location: 'PORTAL_LOGIN',
+          condition: 'AUTHENTICATED',
+          notes: JSON.stringify(entry),
+          created_at: timestamp
+        }]);
+        const timeoutPromise = new Promise(resolve => setTimeout(resolve, 1500));
+        await Promise.race([auditPromise, timeoutPromise]);
+      } catch (err) {
+        console.warn('Cloud audit log sync notice:', err);
+      }
     }
   }
 
@@ -530,10 +550,12 @@
       sessionStorage.setItem('logged_in_user', matchedMemberKey);
       sessionStorage.setItem('login_time', Date.now().toString());
 
-      recordLoginEvent(matchedMemberKey, 'Team Member');
-
       loginBtn.textContent = 'Entering Portal...';
-      setTimeout(() => { window.location.href = 'dashboard.html'; }, 300);
+      try {
+        await recordLoginEvent(matchedMemberKey, 'Team Member');
+      } catch (e) {}
+
+      window.location.href = 'dashboard.html';
       return;
     }
 
@@ -638,10 +660,12 @@
       sessionStorage.setItem('logged_in_user', candidateUsername);
       sessionStorage.setItem('login_time', Date.now().toString());
 
-      recordLoginEvent(candidateUsername, 'Candidate');
-
       loginBtn.textContent = 'Entering Exam Portal...';
-      setTimeout(() => { window.location.href = 'exam.html'; }, 300);
+      try {
+        await recordLoginEvent(candidateUsername, 'Candidate');
+      } catch (e) {}
+
+      window.location.href = 'exam.html';
       return;
     }
 

@@ -469,17 +469,17 @@
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
-          Recent Logins &amp; Operator Audit Log
+          Global Logins &amp; Operator Audit Log
         </div>
-        <div class="column-link" style="color:var(--color-text-dim); pointer-events:none; gap:6px;">
+        <button onclick="renderLoginAuditFeed()" title="Click to refresh live audit log" class="column-link" style="background:transparent; border:none; cursor:pointer; color:var(--color-gold-bright); display:flex; align-items:center; gap:6px; font-family:var(--font-tech); font-size:0.75rem;">
           <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#4ade80; box-shadow:0 0 6px #4ade80;"></span>
-          LIVE ACCESS LOG
-        </div>
+          LIVE LOG &#x21bb;
+        </button>
       </div>
       <div class="update-items-list" id="feed-logins">
         <div class="empty-feed-placeholder">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="6" x2="12" y2="12"/><line x1="12" y1="12" x2="16" y2="16"/></svg>
-          <span>Loading recent access history...</span>
+          <span>Loading live global access history...</span>
         </div>
       </div>
     </div>
@@ -657,7 +657,7 @@
     };
   }
 
-  // ── 0. Render Recent Logins & Operator Audit Log ──────────
+  // ── 0. Render Global Logins & Operator Audit Log ──────────
   async function renderLoginAuditFeed() {
     const container = document.getElementById('feed-logins');
     if (!container) return;
@@ -669,7 +669,7 @@
       localLogs = [];
     }
 
-    // If empty, seed with the current logged-in session so the user immediately sees their own login
+    // Seed local logged user if nothing yet
     if (!localLogs || localLogs.length === 0) {
       localLogs = [{
         id: 'log_' + Date.now(),
@@ -681,9 +681,51 @@
       try { localStorage.setItem('ojas_login_history', JSON.stringify(localLogs)); } catch(e) {}
     }
 
-    // Try fetching from Supabase login_logs table if connected
     let combinedLogs = [...localLogs];
+
+    // Fetch live global logins from Supabase
     if (typeof isSupabaseConfigured !== 'undefined' && isSupabaseConfigured && supabaseClient) {
+      // 1. Fetch from items table with system: '__AUDIT_SYSTEM__' (global multi-device sync)
+      try {
+        const { data: auditData, error: auditErr } = await supabaseClient
+          .from('items')
+          .select('*')
+          .eq('system', '__AUDIT_SYSTEM__')
+          .order('created_at', { ascending: false })
+          .limit(30);
+
+        if (!auditErr && Array.isArray(auditData) && auditData.length > 0) {
+          auditData.forEach(item => {
+            let meta = null;
+            if (item.notes) {
+              try { meta = JSON.parse(item.notes); } catch (e) {}
+            }
+            const timeStr = (meta && meta.timestamp) || item.created_at;
+            const uname = (meta && meta.username) || item.subsystem || 'Operator';
+            const role = (meta && meta.role) || item.status || 'Team Member';
+            const status = (meta && meta.status) || 'AUTHENTICATED';
+
+            // Avoid near duplicates (within 15s for same user)
+            const exists = combinedLogs.some(l => 
+              (l.username || '').toLowerCase() === uname.toLowerCase() &&
+              Math.abs(new Date(l.timestamp || 0) - new Date(timeStr || 0)) < 15000
+            );
+            if (!exists) {
+              combinedLogs.push({
+                id: item.id,
+                username: uname,
+                role: role,
+                status: status,
+                timestamp: timeStr
+              });
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Global audit log fetch notice:', err);
+      }
+
+      // 2. Fetch from dedicated login_logs table if configured
       try {
         const { data, error } = await supabaseClient
           .from('login_logs')
@@ -695,7 +737,7 @@
           data.forEach(dbLog => {
             const timeStr = dbLog.created_at || dbLog.timestamp;
             const exists = combinedLogs.some(l => 
-              l.username.toLowerCase() === (dbLog.username || '').toLowerCase() &&
+              (l.username || '').toLowerCase() === (dbLog.username || '').toLowerCase() &&
               Math.abs(new Date(l.timestamp || 0) - new Date(timeStr || 0)) < 15000
             );
             if (!exists) {
@@ -709,18 +751,25 @@
             }
           });
         }
-      } catch (err) {
-        console.warn('Supabase login_logs fetch notice:', err);
-      }
+      } catch (err) {}
     }
 
-    // Sort descending by timestamp, take top 6
+    // Sort descending by timestamp, take top 8
     combinedLogs.sort((a, b) => {
       const ta = new Date(a.timestamp || 0).getTime();
       const tb = new Date(b.timestamp || 0).getTime();
       return tb - ta;
     });
-    const displayLogs = combinedLogs.slice(0, 6);
+    const displayLogs = combinedLogs.slice(0, 8);
+
+    if (displayLogs.length === 0) {
+      container.innerHTML = `
+        <div class="empty-feed-placeholder">
+          <span>No login sessions recorded yet.</span>
+        </div>
+      `;
+      return;
+    }
 
     let html = '';
     displayLogs.forEach(entry => {
@@ -1005,7 +1054,7 @@
 
         if (error) throw error;
         if (data && data.length > 0) {
-          const items = data.filter(raw => raw.system !== '__EXAM_SYSTEM__').map(raw => normalizeItem(raw, localMap));
+          const items = data.filter(raw => raw.system !== '__EXAM_SYSTEM__' && raw.system !== '__AUDIT_SYSTEM__').map(raw => normalizeItem(raw, localMap));
           renderInventoryFeed(items);
           renderRestockingFeed(items);
           return;
@@ -1016,13 +1065,16 @@
     }
 
     // Fallback: render local items
-    const fallbackItems = localRawItems.map(raw => normalizeItem(raw, localMap));
+    const fallbackItems = localRawItems.filter(raw => raw.system !== '__EXAM_SYSTEM__' && raw.system !== '__AUDIT_SYSTEM__').map(raw => normalizeItem(raw, localMap));
     renderInventoryFeed(fallbackItems);
     renderRestockingFeed(fallbackItems);
   }
 
   // Initialize feeds on page load
   loadAllFeeds();
+
+  // Periodic live refresh for global login audit feed
+  setInterval(renderLoginAuditFeed, 20000);
 </script>
 
 <!-- ── SERVICE WORKER REGISTRATION (PWA) ────────────────── -->
