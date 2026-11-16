@@ -51,30 +51,59 @@
     const userLower = currentUsername.toLowerCase();
     
     // Check if permission to continue was granted by team member
-    const isResumed = localStorage.getItem(`ojas_resumed_${userLower}`) === 'true';
-    if (isResumed) {
-      console.log(`[Exam] Permission to continue active for ${currentUsername}. Session unlocked.`);
-      return false; // Allowed to continue!
-    }
-
+    let isResumed = localStorage.getItem(`ojas_resumed_${userLower}`) === 'true';
     let hasSubmitted = localStorage.getItem(`ojas_submitted_${userLower}`) === 'true';
 
     const client = getSupabase();
-    if (!hasSubmitted && client && currentUsername !== 'Candidate') {
+    if (client && currentUsername !== 'Candidate') {
       try {
-        const { data } = await client
+        // 1. Dedicated exam_submissions table
+        const { data: dedicatedData } = await client
           .from('exam_submissions')
           .select('id, created_at, status')
-          .ilike('username', currentUsername)
-          .eq('status', 'Submitted');
+          .ilike('username', currentUsername);
 
-        if (data && data.length > 0) {
-          hasSubmitted = true;
-          localStorage.setItem(`ojas_submitted_${userLower}`, 'true');
+        if (dedicatedData && dedicatedData.length > 0) {
+          const rec = dedicatedData[0];
+          if (rec.status === 'Resumed') {
+            isResumed = true;
+            localStorage.setItem(`ojas_resumed_${userLower}`, 'true');
+            localStorage.removeItem(`ojas_submitted_${userLower}`);
+          } else {
+            hasSubmitted = true;
+            localStorage.setItem(`ojas_submitted_${userLower}`, 'true');
+          }
         }
-      } catch (err) {
-        console.warn('Could not verify submission history:', err);
-      }
+      } catch (err) {}
+
+      // 2. Cloud cross-device sync items
+      try {
+        const { data: cloudItems } = await client
+          .from('items')
+          .select('id, status, notes')
+          .eq('system', '__EXAM_SYSTEM__')
+          .eq('subsystem', userLower);
+
+        if (cloudItems && cloudItems.length > 0) {
+          const item = cloudItems[0];
+          if (item.status === 'Resumed') {
+            isResumed = true;
+            localStorage.setItem(`ojas_resumed_${userLower}`, 'true');
+            localStorage.removeItem(`ojas_submitted_${userLower}`);
+          } else {
+            hasSubmitted = true;
+            localStorage.setItem(`ojas_submitted_${userLower}`, 'true');
+            if (item.notes) {
+              try { localStorage.setItem(`ojas_submission_${userLower}`, item.notes); } catch (e) {}
+            }
+          }
+        }
+      } catch (err) {}
+    }
+
+    if (isResumed) {
+      console.log(`[Exam] Permission to continue active for ${currentUsername}. Session unlocked.`);
+      return false; // Allowed to continue
     }
 
     if (hasSubmitted) {
@@ -358,17 +387,51 @@
       console.warn('LocalStorage write error:', err);
     }
 
-    // ── 2. Sync to Supabase Database ──────────────────────────
+    // ── 2. Sync to Supabase Database (Dual-layer for immediate cross-device sync) ──
     if (client) {
       try {
         await client.from('exam_submissions').insert([submissionRecord]);
-        // Also update candidate status if present in candidates table
         await client
           .from('exam_candidates')
           .update({ has_submitted: true })
           .ilike('username', currentUsername);
       } catch (err) {
-        console.warn('Supabase submission log error (saved locally):', err);
+        console.warn('Dedicated exam_submissions insert warning:', err);
+      }
+
+      // Dual-sync to cloud items table so ALL devices immediately receive this submission
+      try {
+        const cloudItemPayload = {
+          name: `__EXAM_SUBMISSION_${currentUsername.toUpperCase()}__`,
+          system: '__EXAM_SYSTEM__',
+          subsystem: currentUsername.toLowerCase(),
+          quantity: 1,
+          status: 'Submitted',
+          location: 'CLOUD_EXAM',
+          condition: fullName,
+          notes: JSON.stringify(submissionRecord),
+          created_by: currentUsername
+        };
+
+        const { data: existing } = await client
+          .from('items')
+          .select('id')
+          .eq('system', '__EXAM_SYSTEM__')
+          .eq('subsystem', currentUsername.toLowerCase());
+
+        if (existing && existing.length > 0) {
+          await client
+            .from('items')
+            .update(cloudItemPayload)
+            .eq('id', existing[0].id);
+        } else {
+          await client
+            .from('items')
+            .insert([cloudItemPayload]);
+        }
+        console.log('Cross-device exam sync successfully pushed to cloud!');
+      } catch (cloudErr) {
+        console.warn('Cross-device fallback sync warning:', cloudErr);
       }
     }
 

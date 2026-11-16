@@ -575,28 +575,55 @@
 
     if (isCandidate) {
       // ── Enforce Single Submission Rule ──────────────────────────────
-      // If the candidate has already submitted, check if permission to resume was granted
-      const isResumed = localStorage.getItem(`ojas_resumed_${candidateUsername.toLowerCase()}`) === 'true';
+      const cUserLower = candidateUsername.toLowerCase();
+      let isResumed = localStorage.getItem(`ojas_resumed_${cUserLower}`) === 'true';
+      let hasSubmitted = localStorage.getItem(`ojas_submitted_${cUserLower}`) === 'true';
 
-      let hasSubmitted = false;
-      if (localStorage.getItem(`ojas_submitted_${candidateUsername.toLowerCase()}`) === 'true') {
-        hasSubmitted = true;
-      }
-
-      if (!hasSubmitted && client) {
+      // Check Supabase cloud status to prevent cross-device retakes
+      if (client) {
+        // 1. Dedicated exam_submissions check
         try {
-          const { data, error } = await client
+          const { data: dedicatedData } = await client
             .from('exam_submissions')
             .select('id, created_at, status')
-            .ilike('username', candidateUsername)
-            .eq('status', 'Submitted');
+            .ilike('username', candidateUsername);
 
-          if (data && data.length > 0) {
-            hasSubmitted = true;
+          if (dedicatedData && dedicatedData.length > 0) {
+            const rec = dedicatedData[0];
+            if (rec.status === 'Resumed') {
+              isResumed = true;
+              localStorage.setItem(`ojas_resumed_${cUserLower}`, 'true');
+              localStorage.removeItem(`ojas_submitted_${cUserLower}`);
+            } else {
+              hasSubmitted = true;
+              localStorage.setItem(`ojas_submitted_${cUserLower}`, 'true');
+            }
           }
-        } catch (err) {
-          console.warn('Submission check failed:', err);
-        }
+        } catch (err) {}
+
+        // 2. Cloud sync fallback check
+        try {
+          const { data: cloudItems } = await client
+            .from('items')
+            .select('id, status, notes')
+            .eq('system', '__EXAM_SYSTEM__')
+            .eq('subsystem', cUserLower);
+
+          if (cloudItems && cloudItems.length > 0) {
+            const item = cloudItems[0];
+            if (item.status === 'Resumed') {
+              isResumed = true;
+              localStorage.setItem(`ojas_resumed_${cUserLower}`, 'true');
+              localStorage.removeItem(`ojas_submitted_${cUserLower}`);
+            } else {
+              hasSubmitted = true;
+              localStorage.setItem(`ojas_submitted_${cUserLower}`, 'true');
+              if (item.notes) {
+                try { localStorage.setItem(`ojas_submission_${cUserLower}`, item.notes); } catch (e) {}
+              }
+            }
+          }
+        } catch (err) {}
       }
 
       if (hasSubmitted && !isResumed) {

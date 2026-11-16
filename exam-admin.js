@@ -268,7 +268,7 @@
           });
         }
 
-        // Also fetch from test_submissions
+        // 2. Also fetch from test_submissions
         const { data: testSubs } = await client
           .from('test_submissions')
           .select('*')
@@ -285,6 +285,52 @@
                 created_at: ts.created_at,
                 status: 'Submitted'
               });
+            }
+          });
+        }
+
+        // 3. Fetch from cloud cross-device sync items
+        const { data: cloudExamItems } = await client
+          .from('items')
+          .select('*')
+          .eq('system', '__EXAM_SYSTEM__');
+
+        if (cloudExamItems && cloudExamItems.length > 0) {
+          cloudExamItems.forEach(item => {
+            let parsed = null;
+            try {
+              parsed = JSON.parse(item.notes);
+            } catch (e) {}
+
+            const u = (parsed && parsed.username) ? parsed.username : (item.subsystem || '');
+            if (u) {
+              const subObj = {
+                id: (parsed && parsed.id) || item.id,
+                username: u,
+                candidate_name: (parsed && parsed.candidate_name) || item.condition || u,
+                answers: (parsed && parsed.answers) || {},
+                time_spent_seconds: (parsed && parsed.time_spent_seconds) || 0,
+                status: item.status || (parsed && parsed.status) || 'Submitted',
+                created_at: (parsed && parsed.created_at) || item.created_at
+              };
+
+              const idx = allSubmissions.findIndex(s => (s.username || '').toLowerCase() === u.toLowerCase());
+              if (idx >= 0) {
+                allSubmissions[idx] = { ...allSubmissions[idx], ...subObj };
+              } else {
+                allSubmissions.push(subObj);
+              }
+
+              // Cache in localStorage on this device
+              try {
+                localStorage.setItem(`ojas_submission_${u.toLowerCase()}`, JSON.stringify(subObj));
+                if (subObj.status === 'Resumed') {
+                  localStorage.setItem(`ojas_resumed_${u.toLowerCase()}`, 'true');
+                  localStorage.removeItem(`ojas_submitted_${u.toLowerCase()}`);
+                } else {
+                  localStorage.setItem(`ojas_submitted_${u.toLowerCase()}`, 'true');
+                }
+              } catch (e) {}
             }
           });
         }
@@ -427,14 +473,22 @@
           .from('exam_candidates')
           .update({ has_submitted: false })
           .ilike('username', username);
+      } catch (err) {}
 
+      try {
         await client
           .from('exam_submissions')
           .update({ status: 'Resumed' })
           .ilike('username', username);
-      } catch (err) {
-        console.warn('Database permission update warning:', err);
-      }
+      } catch (err) {}
+
+      try {
+        await client
+          .from('items')
+          .update({ status: 'Resumed' })
+          .eq('system', '__EXAM_SYSTEM__')
+          .eq('subsystem', uLower);
+      } catch (err) {}
     }
 
     alert(`Permission granted for "${username}"! The candidate can now log in and continue editing their examination from where they left off.`);
@@ -456,14 +510,22 @@
           .from('exam_candidates')
           .update({ has_submitted: true })
           .ilike('username', username);
+      } catch (err) {}
 
+      try {
         await client
           .from('exam_submissions')
           .update({ status: 'Submitted' })
           .ilike('username', username);
-      } catch (err) {
-        console.warn('Database lock update warning:', err);
-      }
+      } catch (err) {}
+
+      try {
+        await client
+          .from('items')
+          .update({ status: 'Submitted' })
+          .eq('system', '__EXAM_SYSTEM__')
+          .eq('subsystem', uLower);
+      } catch (err) {}
     }
 
     alert(`Resume permission revoked for "${username}". Examination is locked.`);

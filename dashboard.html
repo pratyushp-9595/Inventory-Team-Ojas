@@ -1005,7 +1005,7 @@
 
         if (error) throw error;
         if (data && data.length > 0) {
-          const items = data.map(raw => normalizeItem(raw, localMap));
+          const items = data.filter(raw => raw.system !== '__EXAM_SYSTEM__').map(raw => normalizeItem(raw, localMap));
           renderInventoryFeed(items);
           renderRestockingFeed(items);
           return;
