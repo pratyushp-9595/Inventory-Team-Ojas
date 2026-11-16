@@ -2,7 +2,7 @@
 //  SERVICE WORKER — Team Ojas Racing PWA
 // ============================================================
 
-const CACHE_NAME = 'ojas-cache-v3';
+const CACHE_NAME = 'ojas-cache-v9';
 
 // Core assets to pre-cache on service worker installation
 const CORE_ASSETS = [
@@ -14,6 +14,12 @@ const CORE_ASSETS = [
   'handbook.html',
   'restocking.html',
   'team.html',
+  'exam.html',
+  'exam.js',
+  'exam-admin.html',
+  'exam-admin.js',
+  'test.html',
+  'test.js',
   'shared.css',
   'handbook.css',
   'config.js',

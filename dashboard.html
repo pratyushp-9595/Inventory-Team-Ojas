@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard — Team Ojas Racing</title>
+
+  <!-- Security Gateway Guard: Restrict to verified members -->
+  <script>
+    const accessRole = localStorage.getItem('ojas_access');
+    if (accessRole !== 'member') {
+      window.location.replace(accessRole === 'examinee' ? 'exam.html' : 'index.html');
+    }
+  </script>
+
   <script src="config.js"></script>
   <link rel="stylesheet" href="shared.css" />
 
@@ -375,6 +384,7 @@
       <a href="restocking.html" class="nav-link-btn">Restocking</a>
       <a href="docs.html" class="nav-link-btn">Docs Vault</a>
       <a href="handbook.html" class="nav-link-btn">Handbook</a>
+      <a href="exam-admin.html" class="nav-link-btn">Exam Portal</a>
     </nav>
     <div class="user-pill">
       <div class="user-pill-dot"></div>
@@ -422,6 +432,16 @@
         </svg>
         OJAS HANDBOOK
       </a>
+      <a href="exam-admin.html" class="racing-btn-secondary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        EXAMINATION PORTAL
+      </a>
     </div>
   </div>
 </div>
@@ -441,6 +461,28 @@
   </div>
 
   <div class="updates-feed-grid">
+
+    <!-- 0 · RECENT LOGIN & OPERATOR AUDIT LOG -->
+    <div class="update-column-card">
+      <div class="column-header">
+        <div class="column-title">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          Recent Logins &amp; Operator Audit Log
+        </div>
+        <div class="column-link" style="color:var(--color-text-dim); pointer-events:none; gap:6px;">
+          <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#4ade80; box-shadow:0 0 6px #4ade80;"></span>
+          LIVE ACCESS LOG
+        </div>
+      </div>
+      <div class="update-items-list" id="feed-logins">
+        <div class="empty-feed-placeholder">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="6" x2="12" y2="12"/><line x1="12" y1="12" x2="16" y2="16"/></svg>
+          <span>Loading recent access history...</span>
+        </div>
+      </div>
+    </div>
 
     <!-- 1 · RECENT UPDATES OF INVENTORY -->
     <div class="update-column-card">
@@ -563,6 +605,27 @@
     }
   }
 
+  // ── Helper: Format Exact Time ───────────────────────────
+  function formatExactTime(isoString) {
+    if (!isoString) return 'Just now';
+    try {
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return 'Recently';
+      return d.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      }) + ', ' + d.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+    } catch(e) {
+      return 'Recently';
+    }
+  }
+
   // ── Helper: Normalize Item from Supabase or Local Storage ──
   function normalizeItem(raw, localMap) {
     const loc = (localMap && raw.id && localMap[raw.id]) || {};
@@ -592,6 +655,111 @@
       updated_by: raw.updated_by || raw.updatedBy || (parsedMeta && parsedMeta.updated_by) || loc.updated_by || loc.updatedBy || raw.created_by || loc.created_by || 'Team Member',
       updated_at: raw.updated_at || raw.updatedAt || (parsedMeta && parsedMeta.updated_at) || loc.updated_at || loc.updatedAt || raw.created_at || loc.created_at || ''
     };
+  }
+
+  // ── 0. Render Recent Logins & Operator Audit Log ──────────
+  async function renderLoginAuditFeed() {
+    const container = document.getElementById('feed-logins');
+    if (!container) return;
+
+    let localLogs = [];
+    try {
+      localLogs = JSON.parse(localStorage.getItem('ojas_login_history') || '[]');
+    } catch(e) {
+      localLogs = [];
+    }
+
+    // If empty, seed with the current logged-in session so the user immediately sees their own login
+    if (!localLogs || localLogs.length === 0) {
+      localLogs = [{
+        id: 'log_' + Date.now(),
+        username: loggedUser || 'pratyush',
+        role: 'Team Member',
+        status: 'AUTHENTICATED',
+        timestamp: new Date().toISOString()
+      }];
+      try { localStorage.setItem('ojas_login_history', JSON.stringify(localLogs)); } catch(e) {}
+    }
+
+    // Try fetching from Supabase login_logs table if connected
+    let combinedLogs = [...localLogs];
+    if (typeof isSupabaseConfigured !== 'undefined' && isSupabaseConfigured && supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('login_logs')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+          data.forEach(dbLog => {
+            const timeStr = dbLog.created_at || dbLog.timestamp;
+            const exists = combinedLogs.some(l => 
+              l.username.toLowerCase() === (dbLog.username || '').toLowerCase() &&
+              Math.abs(new Date(l.timestamp || 0) - new Date(timeStr || 0)) < 15000
+            );
+            if (!exists) {
+              combinedLogs.push({
+                id: dbLog.id,
+                username: dbLog.username,
+                role: dbLog.role,
+                status: dbLog.status || 'AUTHENTICATED',
+                timestamp: timeStr
+              });
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Supabase login_logs fetch notice:', err);
+      }
+    }
+
+    // Sort descending by timestamp, take top 6
+    combinedLogs.sort((a, b) => {
+      const ta = new Date(a.timestamp || 0).getTime();
+      const tb = new Date(b.timestamp || 0).getTime();
+      return tb - ta;
+    });
+    const displayLogs = combinedLogs.slice(0, 6);
+
+    let html = '';
+    displayLogs.forEach(entry => {
+      const isMember = (entry.role || '').toLowerCase().includes('member');
+      const badgeClass = isMember ? 'status-ok' : 'status-ordered';
+      const roleText = isMember ? 'TEAM MEMBER' : 'CANDIDATE';
+      const userDisplay = escapeHtml(entry.username || 'Operator');
+      const timeAgo = formatRelativeTime(entry.timestamp);
+      const exactTime = formatExactTime(entry.timestamp);
+
+      html += `
+        <div class="feed-item" style="cursor: default;" title="${exactTime}">
+          <div class="feed-item-top">
+            <span class="feed-item-name" style="display:flex; align-items:center; gap:0.4rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color:var(--color-gold-bright); flex-shrink:0;">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <strong>${userDisplay}</strong>
+            </span>
+            <span class="feed-badge ${badgeClass}">${roleText}</span>
+          </div>
+          <div class="feed-details-row">
+            <span class="feed-details-left" style="font-family:var(--font-mono); font-size:0.73rem; color:#8f9cb3;">
+              Session: <strong style="color:#ffffff;">${escapeHtml(entry.status || 'AUTHENTICATED')}</strong>
+            </span>
+            <span class="feed-time-ago">${timeAgo}</span>
+          </div>
+          <div class="feed-audit-row">
+            <span>Signed in at:</span>
+            <span class="updater-name" style="font-family:var(--font-mono); font-size:0.71rem; color:var(--color-text-main);">
+              ${exactTime}
+            </span>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
   }
 
   // ── 1. Render Recent Updates of Inventory ─────────────────
@@ -817,6 +985,7 @@
 
   // ── Fetch & Sync All Feeds ───────────────────────────────
   async function loadAllFeeds() {
+    renderLoginAuditFeed();
     renderDocsFeed();
 
     // Local storage lookup map

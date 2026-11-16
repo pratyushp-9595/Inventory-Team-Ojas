@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Team Members — Team Ojas Racing</title>
+
+  <!-- Security Gateway Guard: Restrict to verified members -->
+  <script>
+    if (localStorage.getItem('ojas_access') !== 'member') {
+      window.location.replace('index.html');
+    }
+  </script>
+
   <script src="config.js"></script>
   <link rel="stylesheet" href="shared.css" />
 

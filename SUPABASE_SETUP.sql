@@ -156,3 +156,99 @@ CREATE POLICY "Allow public write access to handbook_tasks"
 
 ALTER PUBLICATION supabase_realtime ADD TABLE public.handbook_tasks;
 
+-- ============================================================
+-- 10. TEST SUBMISSIONS MODULE — test_submissions table & RLS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.test_submissions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    applicant_name TEXT NOT NULL,
+    answers JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_test_submissions_created_at 
+    ON public.test_submissions (created_at DESC);
+
+ALTER TABLE public.test_submissions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow anonymous test submissions" ON public.test_submissions;
+CREATE POLICY "Allow anonymous test submissions"
+    ON public.test_submissions
+    FOR INSERT
+    TO anon, authenticated
+    WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow read test submissions" ON public.test_submissions;
+CREATE POLICY "Allow read test submissions"
+    ON public.test_submissions
+    FOR SELECT
+    TO anon, authenticated
+    USING (true);
+
+ALTER PUBLICATION supabase_realtime ADD TABLE public.test_submissions;
+
+-- ============================================================
+-- 11. EXAMINATION SYSTEM MODULE — schemas & RLS policies
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.exams (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title TEXT NOT NULL DEFAULT 'Formula Student Electric Engineering Recruitment Exam',
+    description TEXT DEFAULT 'Official Team Ojas Technical Examination',
+    duration_minutes INTEGER NOT NULL DEFAULT 45,
+    is_active BOOLEAN DEFAULT TRUE,
+    questions JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.exam_submissions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    exam_id UUID,
+    username TEXT NOT NULL,
+    candidate_name TEXT NOT NULL,
+    answers JSONB NOT NULL DEFAULT '{}'::jsonb,
+    time_spent_seconds INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'Submitted',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_exam_submissions_unique_user 
+    ON public.exam_submissions (lower(username));
+
+CREATE TABLE IF NOT EXISTS public.exam_candidates (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    full_name TEXT DEFAULT '',
+    has_submitted BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.exams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.exam_submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.exam_candidates ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow read exams" ON public.exams;
+CREATE POLICY "Allow read exams" ON public.exams FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow manage exams" ON public.exams;
+CREATE POLICY "Allow manage exams" ON public.exams FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow read exam submissions" ON public.exam_submissions;
+CREATE POLICY "Allow read exam submissions" ON public.exam_submissions FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow insert exam submissions" ON public.exam_submissions;
+CREATE POLICY "Allow insert exam submissions" ON public.exam_submissions FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow read exam candidates" ON public.exam_candidates;
+CREATE POLICY "Allow read exam candidates" ON public.exam_candidates FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow manage exam candidates" ON public.exam_candidates;
+CREATE POLICY "Allow manage exam candidates" ON public.exam_candidates FOR ALL USING (true) WITH CHECK (true);
+
+ALTER PUBLICATION supabase_realtime ADD TABLE public.exams;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.exam_submissions;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.exam_candidates;
+
+
+

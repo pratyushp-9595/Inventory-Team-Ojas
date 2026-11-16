@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examination Portal — Team Ojas Racing</title>
+
+  <!-- Access Guard: Ensure visitor has valid examinee or member session -->
+  <script>
+    const access = localStorage.getItem('ojas_access');
+    if (access !== 'examinee' && access !== 'member') {
+      window.location.replace('index.html');
+    }
+  </script>
+
+  <!-- Site Config & Design System -->
+  <script src="config.js"></script>
+  <link rel="stylesheet" href="shared.css" />
+
+  <!-- Progressive Web App (PWA) -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#121212" />
+
+  <!-- Supabase JS Client & Project Config -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
+  <style>
+    body {
+      min-height: 100vh;
+      font-family: var(--font-body);
+      color: var(--color-text-main);
+      background-color: var(--color-bg-base);
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(1rem, 4vw, 2.8rem);
+      height: 66px;
+      background: rgba(8, 9, 13, 0.98);
+      border-bottom: 1px solid var(--color-border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    /* Sticky Countdown Timer Bar */
+    .timer-sticky-bar {
+      position: sticky;
+      top: 66px;
+      z-index: 90;
+      background: rgba(12, 14, 20, 0.96);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--color-border-subtle);
+      padding: 0.65rem clamp(1rem, 4vw, 2.8rem);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .timer-pill {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffffff;
+      background: rgba(181, 141, 61, 0.12);
+      border: 1px solid var(--color-gold-bright);
+      padding: 0.35rem 0.85rem;
+      border-radius: var(--radius-sharp);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .timer-pill.warning {
+      color: #ff6b7a;
+      border-color: #ff6b7a;
+      background: rgba(220, 53, 69, 0.15);
+      animation: pulseWarning 1s infinite;
+    }
+
+    @keyframes pulseWarning {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .timer-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--color-gold-bright);
+      box-shadow: 0 0 8px var(--color-gold-bright);
+    }
+
+    .timer-pill.warning .timer-dot {
+      background: #ff6b7a;
+      box-shadow: 0 0 8px #ff6b7a;
+    }
+
+    /* Main Examination Wrapper */
+    .exam-page-wrap {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem clamp(1rem, 4vw, 2.5rem) 5rem;
+      flex: 1;
+    }
+
+    .exam-card {
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      padding: clamp(1.6rem, 4vw, 2.6rem);
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.55);
+      position: relative;
+    }
+
+    .exam-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-gold-dark), var(--color-gold-bright));
+    }
+
+    .q-block {
+      margin-bottom: 2.2rem;
+      padding-bottom: 1.8rem;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .q-block:last-child {
+      border-bottom: none;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0;
+    }
+
+    .q-label {
+      font-family: var(--font-tech);
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--color-gold-bright);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .q-prompt {
+      font-size: 0.96rem;
+      color: #ffffff;
+      line-height: 1.55;
+      margin-bottom: 0.85rem;
+      background: var(--color-bg-panel);
+      padding: 0.85rem 1.1rem;
+      border-left: 3px solid var(--color-gold-primary);
+      border-radius: var(--radius-sharp);
+    }
+
+    textarea {
+      width: 100%;
+      background: #090b10;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      color: #ffffff;
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      padding: 0.9rem 1.1rem;
+      outline: none;
+      box-sizing: border-box;
+      resize: vertical;
+      min-height: 130px;
+      transition: all 0.15s ease;
+    }
+
+    textarea:focus {
+      border-color: var(--color-gold-primary);
+      box-shadow: 0 0 0 2px rgba(181, 141, 61, 0.25);
+      background: #0d1017;
+    }
+
+    /* Submit Button */
+    .btn-submit-exam {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 1rem 1.5rem;
+      background: var(--color-gold-primary);
+      border: 1px solid var(--color-gold-bright);
+      border-radius: var(--radius-sharp);
+      color: #08090c;
+      font-family: var(--font-racing);
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(181, 141, 61, 0.25);
+    }
+
+    .btn-submit-exam:hover:not(:disabled) {
+      background: var(--color-gold-bright);
+      color: #000000;
+      box-shadow: 0 6px 20px rgba(212, 168, 67, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit-exam:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    /* Result Screens */
+    .result-screen {
+      display: none;
+      text-align: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .result-icon-circle {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 1.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .result-icon-circle.success {
+      background: rgba(46, 204, 113, 0.15);
+      border: 2px solid #2ecc71;
+      color: #2ecc71;
+      box-shadow: 0 0 25px rgba(46, 204, 113, 0.35);
+    }
+
+    .result-icon-circle.blocked {
+      background: rgba(231, 76, 60, 0.15);
+      border: 2px solid #e74c3c;
+      color: #e74c3c;
+      box-shadow: 0 0 25px rgba(231, 76, 60, 0.35);
+    }
+
+    .result-title {
+      font-family: var(--font-racing);
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin-bottom: 0.6rem;
+    }
+
+    .result-desc {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      max-width: 580px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+
+    /* Logout / Exit Button */
+    .btn-exam-logout {
+      font-family: var(--font-racing);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #ff6b7a;
+      background: rgba(220, 53, 69, 0.12);
+      border: 1px solid rgba(220, 53, 69, 0.3);
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sharp);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-exam-logout:hover {
+      background: rgba(220, 53, 69, 0.25);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────── -->
+<header>
+  <div style="display:flex; align-items:center; gap: 0.8rem;">
+    <a class="header-logo" href="index.html" style="pointer-events: none;">
+      <img src="logo.jpg" alt="Team Ojas Racing" />
+      <span class="logo-wordmark">TEAM <span class="gold-text">OJAS</span> RACING</span>
+    </a>
+  </div>
+
+  <div style="display:flex; align-items:center; gap: 1rem;">
+    <div class="user-pill">
+      <div class="user-pill-dot"></div>
+      <span id="examinee-user-badge">Candidate</span>
+    </div>
+
+    <!-- Explicit Logout Option (Even Without Submitting) -->
+    <button class="btn-exam-logout" onclick="logoutCandidate()" title="Log out of the examination portal">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Sign Out
+    </button>
+  </div>
+</header>
+
+<!-- ── STICKY COUNTDOWN TIMER STRIP ────────────────────── -->
+<div class="timer-sticky-bar" id="timer-bar">
+  <div style="display: flex; align-items: center; gap: 0.6rem;">
+    <span style="font-family: var(--font-tech); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--color-text-dim);">
+      Active Assessment Session
+    </span>
+  </div>
+
+  <div class="timer-pill" id="timer-display-pill">
+    <span class="timer-dot"></span>
+    <span id="timer-countdown">00:45:00</span>
+  </div>
+</div>
+
+<!-- ── MAIN EXAM CARD ──────────────────────────────────── -->
+<main class="exam-page-wrap">
+  <div class="exam-card">
+
+    <!-- Active Form Wrapper -->
+    <div id="exam-form-wrapper">
+      
+      <!-- Resume Notice Banner (Displayed when team lead unlocked session) -->
+      <div id="resume-notice-banner" style="display:none; background: rgba(181, 141, 61, 0.15); border: 1px solid var(--color-gold-bright); border-radius: var(--radius-sharp); padding: 1rem 1.2rem; margin-bottom: 1.8rem;">
+        <div style="font-family: var(--font-racing); font-size: 1.1rem; color: var(--color-gold-bright); text-transform: uppercase; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+          Permission to Continue Granted
+        </div>
+        <div style="font-size: 0.88rem; color: var(--color-text-main); line-height: 1.5;">
+          Your team lead has unlocked your examination session. Your previously entered responses have been restored below so you can continue from where you left off. Click <strong>Finalize &amp; Submit Examination</strong> when finished.
+        </div>
+      </div>
+
+      <div style="margin-bottom: 2rem; border-bottom: 1px solid var(--color-border-subtle); padding-bottom: 1.2rem;">
+        <h1 class="racing-title-huge" style="font-size: clamp(1.8rem, 4vw, 2.5rem); margin-bottom: 0.3rem;" id="active-exam-title">
+          TECHNICAL <span class="gold-word" style="display:inline;">RECRUITMENT EXAM</span>
+        </h1>
+        <p style="color: var(--color-text-muted); font-size: 0.88rem; line-height: 1.5;" id="active-exam-desc">
+          Complete the technical inquiries below. Answers are logged directly to the team database upon submission.
+        </p>
+      </div>
+
+      <form id="candidate-exam-form" novalidate>
+        <!-- Candidate Full Name Field -->
+        <div style="margin-bottom: 2rem;">
+          <label style="display:block; font-family: var(--font-tech); font-size: 0.74rem; font-weight:700; color: var(--color-gold-bright); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:0.4rem;">
+            Candidate Full Name
+          </label>
+          <input
+            type="text"
+            id="candidate-full-name"
+            placeholder="Enter your full name"
+            required
+            style="width: 100%; background: #090b10; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-sharp); color: #ffffff; padding: 0.85rem 1rem; font-size: 0.95rem; outline: none; box-sizing: border-box;"
+          />
+        </div>
+
+        <!-- Questions rendered dynamically -->
+        <div id="dynamic-questions-container">
+          <!-- Loaded by exam.js -->
+        </div>
+
+        <button type="submit" class="btn-submit-exam" id="btn-submit-exam">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Finalize &amp; Submit Examination
+        </button>
+      </form>
+    </div>
+
+    <!-- Screen 1: Submission Successful -->
+    <div class="result-screen" id="screen-success">
+      <div class="result-icon-circle success">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <h2 class="result-title">Examination Submitted</h2>
+      <p class="result-desc">
+        Thank you, <strong id="success-cand-name" style="color: var(--color-gold-bright);">Candidate</strong>. 
+        Your responses have been successfully recorded in the Team Ojas evaluation database. You may now close this window.
+      </p>
+      <button class="btn-exam-logout" onclick="logoutCandidate()" style="padding: 0.7rem 1.4rem; font-size: 0.95rem;">
+        Sign Out &amp; Exit Portal
+      </button>
+    </div>
+
+    <!-- Screen 2: Blocked Already Submitted -->
+    <div class="result-screen" id="screen-already-submitted">
+      <div class="result-icon-circle blocked">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <h2 class="result-title">Attempt Already Completed</h2>
+      <p class="result-desc">
+        Our records indicate that candidate <strong id="blocked-cand-user" style="color: var(--color-gold-bright);">User</strong> 
+        has already submitted this examination. Retakes and multiple submissions are not permitted.
+      </p>
+      <button class="btn-exam-logout" onclick="logoutCandidate()" style="padding: 0.7rem 1.4rem; font-size: 0.95rem;">
+        Sign Out
+      </button>
+    </div>
+
+  </div>
+</main>
+
+<!-- ── FOOTER ───────────────────────────────────────────── -->
+<footer>
+  <div>&copy; <span id="js-year"></span> Team Ojas Racing &mdash; Candidate Examination Portal</div>
+  <div>Exam v2.0</div>
+</footer>
+
+<script>
+  document.getElementById('js-year').textContent = new Date().getFullYear();
+
+  function logoutCandidate() {
+    if (confirm('Are you sure you want to log out? If you have not submitted, you can log back in later with your credentials to complete your exam.')) {
+      sessionStorage.clear();
+      localStorage.removeItem('ojas_access');
+      window.location.href = 'index.html';
+    }
+  }
+</script>
+
+<script src="exam.js"></script>
+</body>
+</html>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Candidate Assessment — Team Ojas Racing</title>
+
+  <!-- Access Guard: Ensure visitor has valid applicant or member session -->
+  <script>
+    const access = localStorage.getItem('ojas_access');
+    if (access !== 'applicant' && access !== 'member') {
+      window.location.replace('index.html');
+    }
+  </script>
+
+  <!-- Site Config & Design System -->
+  <script src="config.js"></script>
+  <link rel="stylesheet" href="shared.css" />
+
+  <!-- Progressive Web App (PWA) -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#121212" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- Supabase JS Client & Project Config -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
+  <style>
+    body {
+      min-height: 100vh;
+      font-family: var(--font-body);
+      color: var(--color-text-main);
+      background-color: var(--color-bg-base);
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(1rem, 4vw, 2.8rem);
+      height: 66px;
+      background: rgba(8, 9, 13, 0.98);
+      border-bottom: 1px solid var(--color-border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-tag {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--color-gold-bright);
+      text-transform: uppercase;
+      background: var(--color-gold-glow);
+      border: 1px solid rgba(181, 141, 61, 0.3);
+      padding: 0.35rem 0.85rem;
+      border-radius: var(--radius-sharp);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .header-tag-dot {
+      width: 6px;
+      height: 6px;
+      background: #2ecc71;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #2ecc71;
+    }
+
+    /* ── Main Container ────────────────────────────────────────── */
+    .test-page-wrap {
+      width: 100%;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem clamp(1rem, 4vw, 2.5rem) 4rem;
+      flex: 1;
+    }
+
+    .test-card {
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      padding: clamp(1.6rem, 4vw, 2.6rem);
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.55);
+      position: relative;
+    }
+
+    .test-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-gold-dark), var(--color-gold-bright));
+    }
+
+    /* Form Styles */
+    .form-section-title {
+      font-family: var(--font-racing);
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-desc {
+      font-size: 0.86rem;
+      color: var(--color-text-muted);
+      line-height: 1.5;
+      margin-bottom: 2rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .form-group {
+      margin-bottom: 1.8rem;
+    }
+
+    label {
+      display: block;
+      font-family: var(--font-tech);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-gold-bright);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .question-prompt {
+      font-size: 0.92rem;
+      color: var(--color-text-main);
+      line-height: 1.55;
+      margin-bottom: 0.75rem;
+      background: var(--color-bg-panel);
+      padding: 0.75rem 1rem;
+      border-left: 3px solid var(--color-gold-primary);
+      border-radius: var(--radius-sharp);
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      background: #090b10;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      color: #ffffff;
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      padding: 0.85rem 1rem;
+      outline: none;
+      transition: all 0.18s ease;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: var(--color-gold-primary);
+      box-shadow: 0 0 0 2px rgba(181, 141, 61, 0.25);
+      background: #0d1017;
+    }
+
+    /* Error Message */
+    .error-box {
+      display: none;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(220, 53, 69, 0.12);
+      border: 1px solid rgba(220, 53, 69, 0.35);
+      color: #ff6b7a;
+      font-size: 0.84rem;
+      font-family: var(--font-mono);
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius-sharp);
+      margin-bottom: 1.5rem;
+    }
+
+    .error-box.visible {
+      display: flex;
+    }
+
+    /* Submit Button */
+    .btn-submit-test {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.95rem 1.5rem;
+      background: var(--color-gold-primary);
+      border: 1px solid var(--color-gold-bright);
+      border-radius: var(--radius-sharp);
+      color: #08090c;
+      font-family: var(--font-racing);
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(181, 141, 61, 0.25);
+    }
+
+    .btn-submit-test:hover:not(:disabled) {
+      background: var(--color-gold-bright);
+      color: #000000;
+      box-shadow: 0 6px 20px rgba(212, 168, 67, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit-test:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    /* Success Screen */
+    .success-card {
+      display: none;
+      text-align: center;
+      padding: 2.5rem 1rem;
+    }
+
+    .success-icon-wrap {
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 1.5rem;
+      background: rgba(46, 204, 113, 0.12);
+      border: 2px solid #2ecc71;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2ecc71;
+      box-shadow: 0 0 25px rgba(46, 204, 113, 0.3);
+    }
+
+    .success-title {
+      font-family: var(--font-racing);
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin-bottom: 0.6rem;
+    }
+
+    .success-desc {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      max-width: 580px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+
+    .btn-exit {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.4rem;
+      background: var(--color-bg-panel);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-sharp);
+      color: var(--color-text-main);
+      font-family: var(--font-racing);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-exit:hover {
+      border-color: var(--color-gold-primary);
+      color: var(--color-gold-bright);
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem clamp(1rem, 4vw, 2.8rem);
+      border-top: 1px solid var(--color-border-subtle);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-dim);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────── -->
+<header>
+  <a class="header-logo" href="index.html">
+    <img src="logo.jpg" alt="Team Ojas Racing" />
+    <span class="logo-wordmark">TEAM <span class="gold-text">OJAS</span> RACING</span>
+  </a>
+  <div class="header-tag">
+    <span class="header-tag-dot"></span>
+    Candidate Assessment Portal
+  </div>
+</header>
+
+<!-- ── HERO ────────────────────────────────────────────── -->
+<div class="racing-hero-wrap" style="padding-bottom: 0.8rem;">
+  <div class="racing-eyebrow">FORMULA STUDENT ELECTRIC &middot; VIT VELLORE</div>
+  <h1 class="racing-title-huge" style="font-size: clamp(1.9rem, 4.5vw, 3rem); margin-bottom: 0.4rem;">
+    ENGINEERING <span class="gold-word" style="display:inline;">RECRUITMENT TEST</span>
+  </h1>
+  <p class="racing-subtitle">Submit your technical evaluation. All responses are logged directly into the engineering portal for review.</p>
+</div>
+
+<!-- ── MAIN ASSESSMENT FORM ────────────────────────────── -->
+<main class="test-page-wrap">
+  <div class="test-card">
+
+    <!-- Active Form Container -->
+    <div id="test-form-wrapper">
+      <div class="form-section-title">
+        <span>Technical Question Bank</span>
+        <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-gold-bright);">3 Questions</span>
+      </div>
+      <p class="form-desc">
+        Please complete each technical inquiry thoroughly. Show formulas, engineering methodology, and problem-solving rationale where applicable.
+      </p>
+
+      <!-- Error Banner -->
+      <div class="error-box" id="test-error-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="test-error-text">Please fill out all required fields.</span>
+      </div>
+
+      <form id="applicant-test-form" novalidate>
+        
+        <!-- Applicant Name -->
+        <div class="form-group">
+          <label for="applicant-name">Applicant Name</label>
+          <input
+            type="text"
+            id="applicant-name"
+            name="applicant_name"
+            placeholder="e.g. Pratyush Sharma"
+            required
+            autocomplete="name"
+          />
+        </div>
+
+        <!-- Question 1 -->
+        <div class="form-group">
+          <label for="q1">Question 1 &middot; Powertrain &amp; High-Voltage Safety</label>
+          <div class="question-prompt">
+            Explain the core operational principle and safety compliance of an accumulator tractive system pre-charge circuit and active discharge circuit (Rule EV 4.11). What specific electrical hazards are mitigated?
+          </div>
+          <textarea
+            id="q1"
+            name="q1"
+            rows="5"
+            placeholder="Detail the resistor sizing, timing constraints (<5s to <60V), and contactor sequencing..."
+            required
+          ></textarea>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="form-group">
+          <label for="q2">Question 2 &middot; Vehicle Dynamics &amp; Kinematics</label>
+          <div class="question-prompt">
+            How does roll center migration influence dynamic lateral load transfer distribution during cornering? Detail how you would tune front vs. rear anti-roll stiffness to alter steady-state understeer gradient.
+          </div>
+          <textarea
+            id="q2"
+            name="q2"
+            rows="5"
+            placeholder="Discuss geometric vs. elastic load transfer, tire cornering stiffness sensitivity, and yaw response..."
+            required
+          ></textarea>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="form-group">
+          <label for="q3">Question 3 &middot; Systems Integration &amp; Troubleshooting</label>
+          <div class="question-prompt">
+            During track testing, telemetry logs intermittent CAN bus error frames followed by unexpected shutdown under peak regenerative braking. Walk through your step-by-step diagnostic workflow.
+          </div>
+          <textarea
+            id="q3"
+            name="q3"
+            rows="5"
+            placeholder="Outline physical layer checks (termination, differential voltage, EMI shielding), bus load analysis, and inverter fault registers..."
+            required
+          ></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-submit-test" id="btn-submit-assessment">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+          Submit Assessment
+        </button>
+      </form>
+    </div>
+
+    <!-- Success Container (Shown after submission) -->
+    <div class="success-card" id="test-success-card">
+      <div class="success-icon-wrap">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <h2 class="success-title">Assessment Submitted</h2>
+      <p class="success-desc">
+        Thank you, <strong id="success-candidate-name" style="color: var(--color-gold-bright);">Candidate</strong>. 
+        Your technical evaluation has been securely logged into the Team Ojas evaluation database. The subsystem leads will review your methodology.
+      </p>
+      <div>
+        <button type="button" class="btn-exit" onclick="exitSession()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Exit Assessment
+        </button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ── FOOTER ───────────────────────────────────────────── -->
+<footer>
+  <div class="footer-left">&copy; <span id="js-year"></span> Team Ojas Racing &mdash; Technical Recruitment Portal</div>
+  <div class="footer-right">v2.0</div>
+</footer>
+
+<script>
+  document.getElementById('js-year').textContent = new Date().getFullYear();
+
+  function exitSession() {
+    localStorage.removeItem('ojas_access');
+    localStorage.removeItem('ojas_applicant_name');
+    sessionStorage.clear();
+    window.location.href = 'index.html';
+  }
+</script>
+
+<!-- Test Submission Logic Script -->
+<script src="test.js"></script>
+
+</body>
+</html>

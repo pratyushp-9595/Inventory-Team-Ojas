@@ -271,6 +271,25 @@ header {
   background: var(--color-gold-primary);
 }
 
+.racing-eyebrow.centered,
+.text-center .racing-eyebrow,
+.hero .racing-eyebrow {
+  justify-content: center;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.racing-eyebrow.centered::after,
+.text-center .racing-eyebrow::after,
+.hero .racing-eyebrow::after {
+  content: '';
+  display: inline-block;
+  width: 22px;
+  height: 2px;
+  background: var(--color-gold-primary);
+}
+
 .racing-title-huge {
   font-family: var(--font-racing);
   font-weight: 900;
@@ -290,8 +309,16 @@ header {
 .racing-subtitle {
   font-size: clamp(0.85rem, 1.8vw, 1rem);
   color: var(--color-text-muted);
-  max-width: 620px;
+  max-width: 660px;
   line-height: 1.55;
+}
+
+.racing-subtitle.centered,
+.text-center .racing-subtitle,
+.hero .racing-subtitle {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
 }
 
 /* ── MOTORSPORT BUTTONS (SOLID RECTANGULAR BLOCKS) ──────────── */

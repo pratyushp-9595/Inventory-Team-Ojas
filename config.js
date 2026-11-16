@@ -44,6 +44,27 @@ const SITE_CONFIG = {
     // "john":  "John#Pass1",
   },
 
+  // ─── CANDIDATE / EXAMINEE WHITELIST ──────────────────────
+  // Whitelist examinees who take the technical recruitment exam here.
+  // Candidates can ONLY access the Examination Portal (exam.html).
+  // Format: "username": "password"
+  // Usernames are case-insensitive.
+  candidates: {
+    "candidate1": "ojas@candidate1",
+    "candidate2": "ojas@candidate2",
+    "applicant":  "ojas@2026",
+    "testuser":   "test@123",
+    "rahul":"rahul@2026"
+    // Add new examinees manually below:
+    // "rahul2026": "ojas@2026",
+  },
+
+  // ─── DEFAULT EXAM CONFIGURATION ──────────────────────────
+  examConfig: {
+    title: "Formula Student Electric Engineering Recruitment Exam",
+    durationMinutes: 45
+  },
+
   // ─── SESSION ─────────────────────────────────────────────
   // How many minutes before the user is auto-logged out (0 = never)
   sessionTimeoutMinutes: 60,

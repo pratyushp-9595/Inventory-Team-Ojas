@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Engineering Handbook — Team Ojas Racing</title>
+
+  <!-- Security Gateway Guard: Restrict to verified members -->
+  <script>
+    const accessRole = localStorage.getItem('ojas_access');
+    if (accessRole !== 'member') {
+      window.location.replace(accessRole === 'examinee' ? 'exam.html' : 'index.html');
+    }
+  </script>
   
   <!-- Site Configuration & Shared Stylesheet -->
   <script src="config.js"></script>
@@ -36,6 +44,7 @@
       <a href="restocking.html" class="nav-link-btn">Restocking</a>
       <a href="docs.html" class="nav-link-btn">Docs Vault</a>
       <a href="handbook.html" class="nav-link-btn active">Handbook</a>
+      <a href="exam-admin.html" class="nav-link-btn">Exam Portal</a>
     </nav>
 
     <div class="user-pill">
