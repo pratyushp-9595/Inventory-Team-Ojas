@@ -628,6 +628,100 @@
     }).join('');
   };
 
+  // ── 7. Reset All Candidate Answers & Submissions ────────────
+  window.resetAllCandidateSubmissions = async function () {
+    const confirmation = confirm(
+      "⚠️ RESET ALL CANDIDATE ANSWERS?\n\n" +
+      "This action will permanently delete all candidate submissions, wipe all recorded answers from the cloud and local storage, and clear all exam locks across all devices.\n\n" +
+      "All examinees will be reset to 'Pending / Incomplete' and will be allowed to retake the examination from the beginning.\n\n" +
+      "Are you sure you want to proceed?"
+    );
+
+    if (!confirmation) return;
+
+    const btns = document.querySelectorAll('.btn-danger-action');
+    btns.forEach(b => {
+      b.disabled = true;
+      b.textContent = 'Resetting Cloud & Local Answers...';
+    });
+
+    const client = getSupabase();
+
+    // 1. Wipe from Supabase Cloud
+    if (client) {
+      try {
+        // Delete all cloud exam submissions from items
+        await client
+          .from('items')
+          .delete()
+          .eq('system', '__EXAM_SYSTEM__');
+
+        // Delete from exam_submissions if table exists
+        await client
+          .from('exam_submissions')
+          .delete()
+          .neq('username', '__NEVER__');
+
+        // Reset has_submitted in exam_candidates if table exists
+        await client
+          .from('exam_candidates')
+          .update({ has_submitted: false })
+          .neq('username', '__NEVER__');
+
+        console.log('[Reset] All Supabase candidate answers deleted successfully.');
+      } catch (err) {
+        console.warn('Supabase reset warning:', err);
+      }
+    }
+
+    // 2. Wipe LocalStorage on this device
+    try {
+      localStorage.removeItem('ojas_local_submissions');
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (
+          k.startsWith('ojas_submission_') ||
+          k.startsWith('ojas_submitted_') ||
+          k.startsWith('ojas_resumed_') ||
+          k.startsWith('ojas_draft_') ||
+          k.startsWith('ojas_exam_remaining_')
+        )) {
+          keysToRemove.push(k);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+
+      // Clear exam session storage
+      const sessKeys = [];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const k = sessionStorage.key(i);
+        if (k && k.startsWith('ojas_exam_')) sessKeys.push(k);
+      }
+      sessKeys.forEach(k => sessionStorage.removeItem(k));
+    } catch (e) {
+      console.warn('Local storage reset notice:', e);
+    }
+
+    // 3. Reset in-memory cache and re-render both tabs
+    loadedSubmissions = [];
+    const countEl = document.getElementById('submissions-count');
+    if (countEl) countEl.textContent = '0';
+
+    await window.loadSubmissions();
+    await window.loadCandidates();
+
+    btns.forEach(b => {
+      b.disabled = false;
+      b.innerHTML = `
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Reset All Answers
+      `;
+    });
+
+    alert("✅ All candidate answers have been completely reset!\n\nAll candidate records are now back to 'Pending / Incomplete' across all devices. Candidates can now log in and take the exam again.");
+  };
+
   function escapeHtml(str) {
     if (typeof str !== 'string') return String(str || '');
     return str
